@@ -1,0 +1,53 @@
+name: CD Pipeline  # CD 워크플로우 이름
+
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 push 시 실행
+  workflow_run:
+    workflows:
+      - CI Pipeline  # CI 파이프라인 완료 후 실행
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2  # AWS 리전 설정
+
+      - name: Deploy to EC2
+        run: |
+          # SSH 키 설정
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # EC2 서버로 파일 전송
+          scp -o StrictHostKeyChecking=no build/libs/*.jar ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/app.jar
+
+          # EC2 서버에서 애플리케이션 재시작
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+          pkill -f 'java -jar' || true
+          nohup java -jar /home/ec2-user/app.jar > /home/ec2-user/app.log 2>&1 &
+          EOF
+
+# github actions의 artifacts 기능 사용 (built/libs/*.jar)
+# aws 자격 증명 github secrets에 저장
+# secrets 이름은 AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+# SSH key EC2_SSH_KEY
+# /home/ec2-user/.ssh/authorized_keys에 공개 키를 추가.
