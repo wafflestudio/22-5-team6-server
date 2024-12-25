@@ -29,11 +29,10 @@ jobs:
           distribution: 'temurin'
 
       # 민감한 정보(ex. DB url, username, password) 는 따로 github secrets에 저장
-      - name: Create application.properties
-        run: touch ./src/main/resources/application.properties
-
       - name: Set up application.properties
-        run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
+        run: |
+          touch ./src/main/resources/application.properties
+          echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
 
       - name: Build with Gradle
         run: ./gradlew build
