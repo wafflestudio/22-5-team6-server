@@ -10,3 +10,6 @@
 # Exclude Gradle and Build folders
 /.gradle/
 /build/
+
+# Exclude application.properties to protect private info
+/src/main/resources/application.properties
