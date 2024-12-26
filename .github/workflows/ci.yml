@@ -23,6 +23,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Set up application.properties
+        run: |
+          mkdir -p ./src/main/resources
+          touch ./src/main/resources/application.properties
+          echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
+
       - name: Lint Check  # 린트 체크 실행
         run: ./gradlew ktlintCheck
 
