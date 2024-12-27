@@ -41,7 +41,4 @@ jobs:
         run: ./gradlew ktlintCheck
 
       - name: Build with Gradle  # Gradle 빌드 실행
-        run: ./gradlew build -x test
-
-      - name: Run Tests  # 테스트 실행
-        run: ./gradlew test
+        run: ./gradlew build
