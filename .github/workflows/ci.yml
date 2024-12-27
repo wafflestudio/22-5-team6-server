@@ -10,8 +10,22 @@ on:
       - main  # main 브랜치로 PR 생성 시 실행
 
 jobs:
-  build:  # Job 이름
+  build-and-test:  # Job 이름
     runs-on: ubuntu-latest  # 작업 실행 환경
+
+    services:
+      db:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: yourpassword
+          MYSQL_DATABASE: testdb
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root --password=yourpassword"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
     steps:
       - name: Checkout code  # Step 이름
@@ -33,7 +47,21 @@ jobs:
         run: ./gradlew ktlintCheck
 
       - name: Build with Gradle  # Gradle 빌드 실행
-        run: ./gradlew build
+        run: ./gradlew build -x test
+
+      - name: Setup MySQL
+        run: docker compose -f docker-compose.yaml up -d
+
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in {1..10}; do
+            if mysqladmin ping -h 127.0.0.1 -u root --password=yourpassword --silent; then
+              echo "MySQL is ready!"
+              break
+            fi
+            echo "Waiting for MySQL to be ready..."
+            sleep 5
+          done
 
       - name: Run Tests  # 테스트 실행
         run: ./gradlew test
