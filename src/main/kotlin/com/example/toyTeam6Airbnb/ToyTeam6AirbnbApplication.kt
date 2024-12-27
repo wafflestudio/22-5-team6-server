@@ -1,4 +1,4 @@
-package com.example.toy_team6_airbnb
+package com.example.toyTeam6Airbnb
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

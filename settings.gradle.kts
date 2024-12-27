@@ -1,1 +1,1 @@
-rootProject.name = "toy_team6_airbnb"
+rootProject.name = "toyTeam6Airbnb"
