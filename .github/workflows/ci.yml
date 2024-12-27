@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'feat/*'  # feat/* 브랜치에 push 시 실행
+      - 'dev'
   pull_request:
     branches:
       - dev  # dev 브랜치로 PR 생성 시 실행
