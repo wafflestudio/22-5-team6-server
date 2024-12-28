@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: 'jdbc:mysql://127.0.0.1:3306/testdb'
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: user
+    password: somepassword
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+      show-sql: true
+    properties:
+      hibernate:
+        show_sql: false
+  profiles:
+    active: dev
+
+cache:
+  expire-after-write: 1m
+  maximum-size: 100

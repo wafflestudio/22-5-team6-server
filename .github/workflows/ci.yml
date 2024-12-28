@@ -4,18 +4,22 @@ on:
   push:
     branches:
       - 'feat/*'  # feat/* 브랜치에 push 시 실행
+      - 'dev'
   pull_request:
     branches:
       - dev  # dev 브랜치로 PR 생성 시 실행
       - main  # main 브랜치로 PR 생성 시 실행
 
 jobs:
-  build:  # Job 이름
+  build-and-test:  # Job 이름
     runs-on: ubuntu-latest  # 작업 실행 환경
 
     steps:
       - name: Checkout code  # Step 이름
-        uses: actions/checkout@v2  # GitHub Action 사용 (코드 체크아웃)
+        uses: actions/checkout@v4  # GitHub Action 사용 (코드 체크아웃)
+
+      - name: Setup MySQL
+        run: docker compose -f docker-compose.yaml up -d
 
       - name: Set up Eclipse Temurin JDK 17  # Eclipse Temurin JDK 설정
         uses: actions/setup-java@v2
@@ -23,17 +27,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set up application.properties
-        run: |
-          mkdir -p ./src/main/resources
-          touch ./src/main/resources/application.properties
-          echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
-
       - name: Lint Check  # 린트 체크 실행
         run: ./gradlew ktlintCheck
 
       - name: Build with Gradle  # Gradle 빌드 실행
         run: ./gradlew build
-
-      - name: Run Tests  # 테스트 실행
-        run: ./gradlew test
