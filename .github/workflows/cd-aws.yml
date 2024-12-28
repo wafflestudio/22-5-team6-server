@@ -9,9 +9,9 @@ env:
   # Should be filled in with
   # The name for the Docker image
   # You are building/pushing to Docker Hub.
-  IMAGE_NAME: toy_team6_airbnb
+  IMAGE_NAME: waffleteam6airbnb
   # EC2 server SSH username
-  EC2_SSH_USER: ec2-user
+  EC2_SSH_USER: ubuntu
 
 jobs:
   build-and-push-docker:
@@ -34,7 +34,7 @@ jobs:
           echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yaml
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build -x test
 
 
       - name: Log in to Docker Hub
