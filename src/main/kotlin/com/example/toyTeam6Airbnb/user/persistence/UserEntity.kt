@@ -1,23 +1,28 @@
 package com.example.toyTeam6Airbnb.user.persistence
 
-import com.example.toyTeam6Airbnb.profile.controller.Profile
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
-import jakarta.persistence.*
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
 
 @Entity(name = "users")
 class UserEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: String? = null,
-    @Column(name = "username", nullable = false)
+    @Column(nullable = false)
     var username: String,
-    @Column(name = "password", nullable = false)
+    @Column(nullable = false)
     var password: String,
-    @Column(name = "kakao_id", nullable = false)
+    @Column(nullable = false)
     var kakaoId: String,
-    @Column(name = "kakao_nickname", nullable = false)
+    @Column(nullable = false)
     var kakaoNickname: String,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
@@ -27,6 +32,6 @@ class UserEntity(
     val rooms: List<RoomEntity> = mutableListOf(),
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val reviews: List<ReviewEntity> = mutableListOf(),
+    val reviews: List<ReviewEntity> = mutableListOf()
 
-    )
+)
