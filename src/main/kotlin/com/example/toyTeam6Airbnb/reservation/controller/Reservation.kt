@@ -1,4 +1,3 @@
 package com.example.toyTeam6Airbnb.reservation.controller
 
-class Reservation {
-}
+class Reservation
