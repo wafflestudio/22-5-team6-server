@@ -1,3 +1,6 @@
 package com.example.toyTeam6Airbnb.reservation.service
 
-class ReservationServiceImpl
+import org.springframework.stereotype.Service
+
+@Service
+class ReservationServiceImpl : ReservationService

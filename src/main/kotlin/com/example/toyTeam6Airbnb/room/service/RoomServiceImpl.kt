@@ -1,3 +1,7 @@
 package com.example.toyTeam6Airbnb.room.service
 
-class RoomServiceImpl
+import org.springframework.stereotype.Service
+
+
+@Service
+class RoomServiceImpl : RoomService

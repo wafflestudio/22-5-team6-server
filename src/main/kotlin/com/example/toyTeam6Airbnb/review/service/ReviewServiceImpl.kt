@@ -1,3 +1,6 @@
 package com.example.toyTeam6Airbnb.review.service
 
-class ReviewServiceImpl
+import org.springframework.stereotype.Service
+
+@Service
+class ReviewServiceImpl : ReviewService
