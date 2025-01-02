@@ -6,7 +6,6 @@ plugins {
     id("org.cyclonedx.bom") version "1.10.0"
     id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
     kotlin("plugin.jpa") version "1.9.25"
-    id("war")
 }
 
 group = "com.example"
