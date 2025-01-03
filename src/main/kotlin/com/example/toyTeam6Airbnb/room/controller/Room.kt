@@ -33,8 +33,8 @@ data class Room(
                 maxOccupancy = entity.maxOccupancy,
                 facilities = entity.facilities,
                 interaction = entity.interaction,
-                reservationIds = entity.reservations.map { it.id!! },
-                reviewIds = entity.reviews.map { it.id!! },
+                reservationIds = entity.reservations.map { it.id },
+                reviewIds = entity.reviews.map { it.id },
                 createdAt = entity.createdAt,
                 updatedAt = entity.updatedAt
             )
