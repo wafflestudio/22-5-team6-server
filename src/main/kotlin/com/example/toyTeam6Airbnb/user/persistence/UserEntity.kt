@@ -21,14 +21,14 @@ class UserEntity(
     @Column(nullable = false)
     var password: String,
     @Column(nullable = false)
-    var kakaoId: String,
+    var kakaoId: String?,
     @Column(nullable = false)
-    var kakaoNickname: String,
+    var kakaoNickname: String?,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val reservations: List<ReservationEntity> = mutableListOf(),
 
-    @OneToMany(mappedBy = "host", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "hostId", cascade = [CascadeType.ALL], orphanRemoval = true)
     val rooms: List<RoomEntity> = mutableListOf(),
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)

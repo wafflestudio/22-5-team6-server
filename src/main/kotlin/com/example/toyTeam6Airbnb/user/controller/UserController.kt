@@ -1,6 +1,6 @@
 package com.example.toyTeam6Airbnb.user.controller
 
-import com.example.toyTeam6Airbnb.user.service.UserService
+import com.example.toyTeam6Airbnb.user.service.UserServiceImpl
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1")
 @Tag(name = "User Controller", description = "User Controller API")
 class UserController(
-    private val userService: UserService
+    private val userService: UserServiceImpl
 ) {
     @PostMapping("/ping")
     @Operation(summary = "Ping pong", description = "Sample ping pong api for testing")
