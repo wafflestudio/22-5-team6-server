@@ -9,7 +9,7 @@ open class DomainException(
     // HTTP Status Code, 비어있다면 500 이다.
     val httpErrorCode: HttpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR,
     val msg: String,
-    cause: Throwable? = null,
+    cause: Throwable? = null
 ) : RuntimeException(msg, cause) {
     override fun toString(): String {
         return "DomainException(msg='$msg', errorCode=$errorCode, httpErrorCode=$httpErrorCode)"

@@ -2,7 +2,14 @@ package com.example.toyTeam6Airbnb.room.persistence
 
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import java.time.Instant
 
 @Entity
@@ -36,5 +43,5 @@ class RoomEntity(
     @Column(nullable = false)
     var createdAt: Instant,
     @Column(nullable = false)
-    var updatedAt: Instant,
+    var updatedAt: Instant
 )

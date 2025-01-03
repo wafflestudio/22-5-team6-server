@@ -2,7 +2,7 @@ package com.example.toyTeam6Airbnb.user.service
 
 import com.example.toyTeam6Airbnb.user.controller.User
 
-interface UserService{
+interface UserService {
     fun signUp(
         username: String,
         password: String
@@ -14,6 +14,6 @@ interface UserService{
     ): Pair<User, String>
 
     fun authenticate(
-        accessToken: String,
+        accessToken: String
     ): User
 }

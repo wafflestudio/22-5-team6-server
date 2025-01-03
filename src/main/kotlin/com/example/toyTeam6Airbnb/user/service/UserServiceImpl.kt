@@ -1,23 +1,25 @@
 package com.example.toyTeam6Airbnb.user.service
 
-import com.example.toyTeam6Airbnb.user.*
+import com.example.toyTeam6Airbnb.user.AuthenticateException
+import com.example.toyTeam6Airbnb.user.SignInInvalidPasswordException
+import com.example.toyTeam6Airbnb.user.SignInUserNotFoundException
+import com.example.toyTeam6Airbnb.user.SignUpUsernameConflictException
+import com.example.toyTeam6Airbnb.user.UserAccessTokenUtil
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import org.mindrot.jbcrypt.BCrypt
-import org.springframework.stereotype.Service
-import com.example.toyTeam6Airbnb.user.UserAccessTokenUtil
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.stereotype.Service
 
 @Service
 class UserServiceImpl(
-    private val userRepository: UserRepository,
+    private val userRepository: UserRepository
 ) : UserService {
     override fun signUp(
         username: String,
-        password: String,
+        password: String
     ): User {
-
         if (userRepository.existsByUsername(username)) {
             throw SignUpUsernameConflictException()
         }
@@ -33,15 +35,15 @@ class UserServiceImpl(
                     kakaoNickname = null,
                     reservations = emptyList(),
                     rooms = emptyList(),
-                    reviews = emptyList(),
-                ),
+                    reviews = emptyList()
+                )
             )
         return User.fromEntity(user)
     }
 
     override fun signIn(
         username: String,
-        password: String,
+        password: String
     ): Pair<User, String> {
         val targetUser = userRepository.findByUsername(username) ?: throw SignInUserNotFoundException()
         if (!BCrypt.checkpw(password, targetUser.password)) {

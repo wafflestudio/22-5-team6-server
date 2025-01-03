@@ -8,41 +8,41 @@ sealed class UserException(
     errorCode: Int,
     httpStatusCode: HttpStatusCode,
     msg: String,
-    cause: Throwable? = null,
+    cause: Throwable? = null
 ) : DomainException(errorCode, httpStatusCode, msg, cause)
 
 class SignUpUsernameConflictException : UserException(
     errorCode = 0,
     httpStatusCode = HttpStatus.CONFLICT,
-    msg = "Username conflict",
+    msg = "Username conflict"
 )
 
 class SignUpBadUsernameException : UserException(
     errorCode = 0,
     httpStatusCode = HttpStatus.BAD_REQUEST,
-    msg = "Bad username",
+    msg = "Bad username"
 )
 
 class SignUpBadPasswordException : UserException(
     errorCode = 0,
     httpStatusCode = HttpStatus.BAD_REQUEST,
-    msg = "Bad password",
+    msg = "Bad password"
 )
 
 class SignInUserNotFoundException : UserException(
     errorCode = 0,
     httpStatusCode = HttpStatus.UNAUTHORIZED,
-    msg = "User not found",
+    msg = "User not found"
 )
 
 class SignInInvalidPasswordException : UserException(
     errorCode = 0,
     httpStatusCode = HttpStatus.UNAUTHORIZED,
-    msg = "Invalid password",
+    msg = "Invalid password"
 )
 
 class AuthenticateException : UserException(
     errorCode = 0,
     httpStatusCode = HttpStatus.UNAUTHORIZED,
-    msg = "Authenticate failed",
+    msg = "Authenticate failed"
 )

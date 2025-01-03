@@ -5,9 +5,9 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import org.springframework.stereotype.Service
 
 @Service
-class RoomServiceImpl (
+class RoomServiceImpl(
     private val roomRepository: RoomRepository
-): RoomService {
+) : RoomService {
     override fun addRoom(
         name: String,
         description: String,
@@ -34,5 +34,4 @@ class RoomServiceImpl (
     override fun deleteRoom() {
         TODO("Not yet implemented")
     }
-
 }
