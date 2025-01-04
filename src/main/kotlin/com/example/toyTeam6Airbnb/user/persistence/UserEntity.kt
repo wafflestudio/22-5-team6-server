@@ -16,8 +16,8 @@ import jakarta.persistence.OneToMany
 @Entity(name = "users")
 class UserEntity(
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    val id: String? = null,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
 
     @Column(nullable = false)
     var username: String,
@@ -33,7 +33,7 @@ class UserEntity(
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val reservations: List<ReservationEntity> = mutableListOf(),
 
-    @OneToMany(mappedBy = "hostId", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "host", cascade = [CascadeType.ALL], orphanRemoval = true)
     val rooms: List<RoomEntity> = mutableListOf(),
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)

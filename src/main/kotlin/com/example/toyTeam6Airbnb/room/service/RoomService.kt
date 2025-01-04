@@ -1,9 +1,13 @@
 package com.example.toyTeam6Airbnb.room.service
 
 import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.user.controller.User
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 
 interface RoomService {
-    fun addRoom(
+    fun createRoom(
+        host: User,
         name: String,
         description: String,
         type: String,
@@ -12,11 +16,20 @@ interface RoomService {
         maxOccupancy: Int
     ): Room
 
-    fun getRooms()
+    fun getRooms(pageable: Pageable): Page<Room>
 
-    fun getRoomDetails()
+    fun getRoomDetails(roomId: Long): Room
 
-    fun updateRoom()
+    fun updateRoom(
+        host: User,
+        roomId: Long,
+        name: String?,
+        description: String?,
+        type: String?,
+        address: String?,
+        price: Double?,
+        maxOccupancy: Int?
+    ): Room
 
-    fun deleteRoom()
+    fun deleteRoom(roomId: Long)
 }
