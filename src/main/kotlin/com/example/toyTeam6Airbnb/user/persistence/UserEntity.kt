@@ -6,6 +6,8 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -16,14 +18,17 @@ class UserEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: String? = null,
+
     @Column(nullable = false)
     var username: String,
-    @Column(nullable = false)
-    var password: String,
-    @Column(nullable = false)
-    var kakaoId: String?,
-    @Column(nullable = false)
-    var kakaoNickname: String?,
+
+    @Column
+    var password: String? = null,
+
+    @Enumerated(EnumType.STRING)
+    val provider: AuthProvider,
+    @Column
+    var oauthId: String? = null,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val reservations: List<ReservationEntity> = mutableListOf(),
@@ -35,3 +40,7 @@ class UserEntity(
     val reviews: List<ReviewEntity> = mutableListOf()
 
 )
+
+enum class AuthProvider {
+    LOCAL, GOOGLE, KAKAO, NAVER
+}
