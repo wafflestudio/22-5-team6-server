@@ -22,13 +22,13 @@ class UserEntity(
     @Column(nullable = false)
     var username: String,
 
-    @Column
-    var password: String? = null,
+    @Column(nullable = false)
+    var password: String,
 
     @Enumerated(EnumType.STRING)
     val provider: AuthProvider,
     @Column
-    var oauthId: String? = null,
+    var oAuthId: String? = null,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val reservations: List<ReservationEntity> = mutableListOf(),
@@ -42,5 +42,16 @@ class UserEntity(
 )
 
 enum class AuthProvider {
-    LOCAL, GOOGLE, KAKAO, NAVER
+    LOCAL, GOOGLE, KAKAO, NAVER;
+
+    companion object {
+        fun from(provider: String?): AuthProvider {
+            return try {
+                provider?.uppercase()?.let { valueOf(it) }
+                    ?: throw Exception("Provider cannot be null")
+            } catch (e: IllegalArgumentException) {
+                throw Exception("Invalid provider: $provider")
+            }
+        }
+    }
 }

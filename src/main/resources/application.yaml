@@ -14,12 +14,27 @@ spring:
   profiles:
     active: dev
 
+  security:
+    jwt-secret: AAAAAAAAAAAAAAAAAAAAAAAAADSFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ASDF
+            client-secret: ASDF
+            redirect-uri: "{baseUrl}/api/oauth2/callback/{registrationId}"
+
+#cache: # Use if we implement Caffeine caching
+#  expire-after-write: 1m
+#  maximum-size: 100
+
+
 springdoc:
   api-docs:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui
-
-cache:
-  expire-after-write: 1m
-  maximum-size: 100
+    oauth2RedirectUrl: "/api/oauth2/callback/google"
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+  show-login-endpoint: true
