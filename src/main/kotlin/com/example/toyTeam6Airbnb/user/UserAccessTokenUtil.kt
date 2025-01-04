@@ -6,18 +6,18 @@ import java.nio.charset.StandardCharsets
 import java.util.Date
 
 object UserAccessTokenUtil {
-    fun generateAccessToken(username: String): String {
+    fun generateAccessToken(userId: Long): String {
         val now = Date()
         val expiryDate = Date(now.time + JWT_EXPIRATION_TIME)
         return Jwts.builder()
             .signWith(SECRET_KEY)
-            .setSubject(username)
+            .setSubject(userId.toString())
             .setIssuedAt(now)
             .setExpiration(expiryDate)
             .compact()
     }
 
-    fun validateAccessTokenGetUserId(accessToken: String): String? {
+    fun validateAccessTokenGetUserId(accessToken: String): Long? {
         return try {
             val claims =
                 Jwts.parserBuilder()
@@ -28,7 +28,7 @@ object UserAccessTokenUtil {
             if (claims.expiration < Date()) {
                 return null
             }
-            return claims.subject
+            return claims.subject.toLong()
         } catch (e: Exception) {
             null
         }
