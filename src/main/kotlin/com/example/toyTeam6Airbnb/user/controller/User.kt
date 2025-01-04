@@ -1,7 +1,7 @@
 package com.example.toyTeam6Airbnb.user.controller
 
 data class User(
-    val id: String,
+    val id: Long,
     val username: String,
     val kakaoNickname: String?
 ) {

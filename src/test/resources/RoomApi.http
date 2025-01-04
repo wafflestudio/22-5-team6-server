@@ -1,0 +1,34 @@
+### Create Room
+POST http://localhost:8080/api/v1/rooms
+Content-Type: application/json
+
+{
+  "name": "Sample Room",
+  "description": "A nice place to stay",
+  "type": "Apartment",
+  "address": "123 Main St, Anytown, USA",
+  "price": 100.0,
+  "maxOccupancy": 4
+}
+
+### Get Rooms
+GET http://localhost:8080/api/v1/rooms?page=0&size=10
+
+### Get Room Details
+GET http://localhost:8080/api/v1/rooms/1
+
+### Update Room
+PUT http://localhost:8080/api/v1/rooms/1
+Content-Type: application/json
+
+{
+  "name": "Updated Room",
+  "description": "An updated description",
+  "type": "House",
+  "address": "456 Elm St, Anytown, USA",
+  "price": 150.0,
+  "maxOccupancy": 5
+}
+
+### Delete Room
+DELETE http://localhost:8080/api/v1/rooms/1

@@ -1,0 +1,26 @@
+### Pingpong
+POST http://localhost:8080/api/v1/ping
+Content-Type: application/json
+
+{
+}
+
+
+### Create User
+POST http://localhost:8080/api/v1/users
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "password123",
+  "email": "testuser@example.com"
+}
+
+### Authenticate User
+POST http://localhost:8080/api/v1/authenticate
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "password123"
+}
