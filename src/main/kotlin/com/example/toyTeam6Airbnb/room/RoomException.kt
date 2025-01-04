@@ -22,4 +22,3 @@ class RoomPermissionDeniedException : RoomException(
     httpStatusCode = HttpStatus.BAD_REQUEST,
     msg = "Permission denied"
 )
-
