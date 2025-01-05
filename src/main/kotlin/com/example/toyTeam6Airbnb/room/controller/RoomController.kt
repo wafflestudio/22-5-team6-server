@@ -1,13 +1,14 @@
 package com.example.toyTeam6Airbnb.room.controller
 
 import com.example.toyTeam6Airbnb.room.service.RoomService
-import com.example.toyTeam6Airbnb.user.AuthUser
+import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import com.example.toyTeam6Airbnb.user.controller.User
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,10 +27,10 @@ class RoomController(
     @PostMapping("/rooms")
     fun createRoom(
         @RequestBody request: CreateRoomRequest,
-        @AuthUser user: User
+        @AuthenticationPrincipal principalDetails: PrincipalDetails
     ): ResponseEntity<Room> {
         val room = roomService.createRoom(
-            host = user,
+            host = User.fromEntity(principalDetails.getUser()),
             name = request.name,
             description = request.description,
             type = request.type,
@@ -59,12 +60,12 @@ class RoomController(
 
     @PutMapping("/rooms/{roomId}")
     fun updateRoom(
-        @AuthUser user: User,
+        @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long,
         @RequestBody request: UpdateRoomRequest
     ): ResponseEntity<Room> {
         val updatedRoom = roomService.updateRoom(
-            user,
+            User.fromEntity(principalDetails.getUser()),
             roomId,
             request.name,
             request.description,
