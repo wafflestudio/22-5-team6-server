@@ -1,61 +1,34 @@
 package com.example.toyTeam6Airbnb.user.service
 
-import com.example.toyTeam6Airbnb.user.AuthenticateException
-import com.example.toyTeam6Airbnb.user.SignInInvalidPasswordException
-import com.example.toyTeam6Airbnb.user.SignInUserNotFoundException
+import com.example.toyTeam6Airbnb.user.SignUpBadUsernameException
 import com.example.toyTeam6Airbnb.user.SignUpUsernameConflictException
-import com.example.toyTeam6Airbnb.user.UserAccessTokenUtil
 import com.example.toyTeam6Airbnb.user.controller.User
+import com.example.toyTeam6Airbnb.user.persistence.AuthProvider
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
-import org.mindrot.jbcrypt.BCrypt
-import org.springframework.data.repository.findByIdOrNull
+import jakarta.transaction.Transactional
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 @Service
 class UserServiceImpl(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val passwordEncoder: PasswordEncoder
 ) : UserService {
-    override fun signUp(
+    @Transactional
+    override fun register(
         username: String,
         password: String
-    ): User {
-        if (userRepository.existsByUsername(username)) {
-            throw SignUpUsernameConflictException()
+    ): User? {
+        if (username.startsWith("OAUTH")) throw SignUpBadUsernameException()
+        if (userRepository.findByUsername(username) != null) throw SignUpUsernameConflictException()
+        val userEntity = UserEntity(
+            username = username,
+            password = passwordEncoder.encode(password),
+            provider = AuthProvider.LOCAL
+        ).let {
+            userRepository.save(it)
         }
-
-        val encryptedPassword = BCrypt.hashpw(password, BCrypt.gensalt())
-
-        val user =
-            userRepository.save(
-                UserEntity(
-                    username = username,
-                    password = encryptedPassword,
-                    kakaoId = null,
-                    kakaoNickname = null,
-                    reservations = emptyList(),
-                    rooms = emptyList(),
-                    reviews = emptyList()
-                )
-            )
-        return User.fromEntity(user)
-    }
-
-    override fun signIn(
-        username: String,
-        password: String
-    ): Pair<User, String> {
-        val targetUser = userRepository.findByUsername(username) ?: throw SignInUserNotFoundException()
-        if (!BCrypt.checkpw(password, targetUser.password)) {
-            throw SignInInvalidPasswordException()
-        }
-        val accessToken = UserAccessTokenUtil.generateAccessToken(targetUser.id!!)
-        return Pair(User.fromEntity(targetUser), accessToken)
-    }
-
-    override fun authenticate(accessToken: String): User {
-        val userId = UserAccessTokenUtil.validateAccessTokenGetUserId(accessToken) ?: throw AuthenticateException()
-        val user = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
-        return User.fromEntity(user)
+        return User.fromEntity(userEntity)
     }
 }

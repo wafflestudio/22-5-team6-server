@@ -46,3 +46,9 @@ class AuthenticateException : UserException(
     httpStatusCode = HttpStatus.UNAUTHORIZED,
     msg = "Authenticate failed"
 )
+
+class OAuthException : UserException(
+    errorCode = 1007,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "OAuth Exception"
+)
