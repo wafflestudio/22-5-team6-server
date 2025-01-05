@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.security.OAuthFlow
+import io.swagger.v3.oas.models.security.OAuthFlows
+import io.swagger.v3.oas.models.security.Scopes
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.security.SecurityScheme.Type
@@ -25,23 +28,42 @@ class SwaggerConfig : WebMvcConfigurer {
     fun openAPI(): OpenAPI {
         return OpenAPI()
             .addSecurityItem(
-                SecurityRequirement().addList("Bearer Authentication")
+                SecurityRequirement()
+                    .addList("Bearer Authentication")
+                    .addList("Google OAuth2")
             )
             .components(
-                Components().addSecuritySchemes
-                ("Bearer Authentication", createAPIKeyScheme())
+                Components()
+                    .addSecuritySchemes(
+                        "Bearer Authentication",
+                        SecurityScheme()
+                            .type(SecurityScheme.Type.HTTP)
+                            .bearerFormat("JWT")
+                            .scheme("bearer")
+                    )
+                    .addSecuritySchemes(
+                        "Google OAuth2",
+                        SecurityScheme()
+                            .type(SecurityScheme.Type.OAUTH2)
+                            .flows(
+                                OAuthFlows()
+                                    .authorizationCode(
+                                        OAuthFlow()
+                                            .authorizationUrl("https://accounts.google.com/o/oauth2/auth")
+                                            .tokenUrl("https://oauth2.googleapis.com/token")
+                                            .scopes(
+                                                Scopes()
+                                                    .addString("email", "email access")
+                                            )
+                                    )
+                            )
+                    )
             )
             .addServersItem(Server().url("/"))
             .info(
-                Info().title("WEBTOON API")
-                    .description("Webtoon API Spec")
+                Info().title("Airbnb API")
+                    .description("Airbnb API Spec")
                     .version("v1.0.0")
             )
-    }
-
-    fun createAPIKeyScheme(): SecurityScheme? {
-        return SecurityScheme().type(Type.HTTP)
-            .bearerFormat("JWT")
-            .scheme("bearer")
     }
 }

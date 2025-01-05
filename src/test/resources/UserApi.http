@@ -1,0 +1,27 @@
+### Pingpong
+POST http://localhost:8080/api/v1/ping
+Content-Type: application/json
+
+{
+}
+
+
+### Create User
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "password123"
+}
+
+### Authenticate User
+POST http://localhost:8080/api/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+username=testuser&password=password123
+
+
+### 인증 토큰으로 접속
+POST http://localhost:8080/api/v1/ping
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNjAxOTMwMiwiZXhwIjoxNzM2MTA1NzAyfQ.AiF42xPV2DXe5Dn3Tn1ShBuy6miCtZ87NfmwYY8ef71o28d-IhcLdu8SAJbYLRlE4p5qXJ7FqziGwDksNhishg
