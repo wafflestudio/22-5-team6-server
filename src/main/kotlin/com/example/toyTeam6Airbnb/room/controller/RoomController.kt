@@ -3,6 +3,7 @@ package com.example.toyTeam6Airbnb.room.controller
 import com.example.toyTeam6Airbnb.room.service.RoomService
 import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import com.example.toyTeam6Airbnb.user.controller.User
+import com.example.toyTeam6Airbnb.room.validatePageable
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+
 
 @RestController
 @RequestMapping("/api/v1")
@@ -46,7 +48,9 @@ class RoomController(
     fun getRooms(
         pageable: Pageable
     ): ResponseEntity<Page<Room>> {
-        val rooms = roomService.getRooms(pageable)
+        // 정렬 기준 검증 및 기본값 처리
+        val validatedPageable = validatePageable(pageable, listOf("name", "price", "type", "createdAt"))
+        val rooms = roomService.getRooms(validatedPageable)
         return ResponseEntity.ok(rooms)
     }
 
@@ -104,3 +108,4 @@ data class UpdateRoomRequest(
     val price: Double?,
     val maxOccupancy: Int?
 )
+
