@@ -4,6 +4,7 @@ import com.example.toyTeam6Airbnb.reservation.ReservationNotFound
 import com.example.toyTeam6Airbnb.reservation.ReservationPermissionDenied
 import com.example.toyTeam6Airbnb.reservation.ReservationUnavailable
 import com.example.toyTeam6Airbnb.reservation.controller.Reservation
+import com.example.toyTeam6Airbnb.reservation.controller.RoomAvailabilityResponse
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
 import com.example.toyTeam6Airbnb.room.RoomNotFoundException
@@ -16,14 +17,15 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 @Service
 class ReservationServiceImpl(
     private val reservationRepository: ReservationRepository,
     private val userRepository: UserRepository,
-    private val roomRepository: RoomRepository,
-): ReservationService {
+    private val roomRepository: RoomRepository
+) : ReservationService {
 
     @Transactional
     override fun createReservation(
@@ -43,7 +45,7 @@ class ReservationServiceImpl(
             review = null,
             startDate = startDate,
             endDate = endDate,
-            totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate),
+            totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate)
         ).let {
             reservationRepository.save(it)
         }
@@ -120,5 +122,29 @@ class ReservationServiceImpl(
         }
 
         return reservations.map(Reservation::fromEntity)
+    }
+
+    // 특정 방의 해당 월의 예약 가능한 날짜와 예약 불가능한 날짜를 가져오는 API를 위한 서비스 로직
+    @Transactional
+    override fun getAvailabilityByMonth(roomId: Long, yearMonth: YearMonth): RoomAvailabilityResponse {
+        val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
+        val startDate = yearMonth.atDay(1)
+        val endDate = yearMonth.atEndOfMonth()
+
+        val reservations = reservationRepository.findAllByRoom(roomEntity).filter { reservation ->
+            startDate < reservation.endDate && endDate > reservation.startDate
+        }
+
+        val unavailableDates = reservations.flatMap { reservation ->
+            reservation.startDate.datesUntil(reservation.endDate).toList()
+        }.toSet()
+
+        val allDates = startDate.datesUntil(endDate.plusDays(1)).toList()
+        val availableDates = allDates.filterNot { it in unavailableDates }
+
+        return RoomAvailabilityResponse(
+            availableDates = availableDates,
+            unavailableDates = unavailableDates.toList()
+        )
     }
 }

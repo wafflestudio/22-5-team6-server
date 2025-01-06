@@ -7,16 +7,17 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import java.time.YearMonth
 
 @RestController
 @RequestMapping("/api/v1/reservations")
@@ -28,13 +29,13 @@ class ReservationController(
     @PostMapping
     fun createReservation(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
-        @RequestBody request: CreateReservationRequest,
+        @RequestBody request: CreateReservationRequest
     ): ResponseEntity<Reservation> {
         val reservation = reservationService.createReservation(
             User.fromEntity(principalDetails.getUser()),
             request.roomId,
             request.startDate,
-            request.endDate,
+            request.endDate
         )
 
         return ResponseEntity.status(HttpStatus.CREATED).body(reservation)
@@ -114,6 +115,21 @@ class ReservationController(
 
         return ResponseEntity.ok().body(reservations)
     }
+
+    // 특정 room의 특정 month의 available/unavailable date를 가져오는 API
+    @GetMapping("/availability/{roomId}")
+    fun getRoomAvailabilityByMonth(
+        @PathVariable roomId: Long,
+        @RequestParam year: Int,
+        @RequestParam month: Int
+    ): ResponseEntity<RoomAvailabilityResponse> {
+        val roomAvailability = reservationService.getAvailabilityByMonth(
+            roomId,
+            YearMonth.of(year, month)
+        )
+
+        return ResponseEntity.ok().body(roomAvailability)
+    }
 }
 
 class CreateReservationRequest(
@@ -125,4 +141,10 @@ class CreateReservationRequest(
 class UpdateReservationRequest(
     val startDate: LocalDate,
     val endDate: LocalDate
+)
+
+// 특정 방의 예약 가능날짜와 불가능한 날짜 반환 DTO
+data class RoomAvailabilityResponse(
+    val availableDates: List<LocalDate>,
+    val unavailableDates: List<LocalDate>
 )

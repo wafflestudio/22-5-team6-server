@@ -1,10 +1,12 @@
 package com.example.toyTeam6Airbnb.reservation.service
 
 import com.example.toyTeam6Airbnb.reservation.controller.Reservation
+import com.example.toyTeam6Airbnb.reservation.controller.RoomAvailabilityResponse
 import com.example.toyTeam6Airbnb.user.controller.User
 import java.time.LocalDate
+import java.time.YearMonth
 
-interface ReservationService{
+interface ReservationService {
 
     fun createReservation(
         user: User,
@@ -42,4 +44,5 @@ interface ReservationService{
         endDate: LocalDate
     ): List<Reservation>
 
+    fun getAvailabilityByMonth(roomId: Long, yearMonth: YearMonth): RoomAvailabilityResponse
 }
