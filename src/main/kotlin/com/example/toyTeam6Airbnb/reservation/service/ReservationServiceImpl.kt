@@ -53,7 +53,6 @@ class ReservationServiceImpl(
         return Reservation.fromEntity(reservationEntity)
     }
 
-
     fun isAvailable(room: RoomEntity, startDate: LocalDate, endDate: LocalDate, currentReservationId: Long? = null): Boolean {
         // exception 발생도 함께 처리
         if (startDate > endDate) throw ReservationUnavailable()
