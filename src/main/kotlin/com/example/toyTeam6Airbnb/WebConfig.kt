@@ -12,6 +12,8 @@ class WebConfig {
                 registry.addMapping("/**")
                     .allowedOrigins("*") // 허용할 도메인
                     .allowedMethods("GET", "POST", "PUT", "DELETE")
+                    .allowedHeaders("*")
+                    .allowCredentials(true)
             }
         }
     }
