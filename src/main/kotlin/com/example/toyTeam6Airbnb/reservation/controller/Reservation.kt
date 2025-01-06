@@ -11,11 +11,12 @@ data class Reservation(
     val id: Long,
     val user: User,
     val room: Room,
-    val review: Review,
+    val review: Review?,
     val startDate: LocalDate,
     val endDate: LocalDate,
     val totalPrice: Double,
-    val createdAt: Instant
+    val createdAt: Instant,
+    val updatedAt: Instant
 ) {
     companion object {
         fun fromEntity(entity: ReservationEntity): Reservation {
@@ -23,11 +24,12 @@ data class Reservation(
                 id = entity.id!!,
                 user = User.fromEntity(entity.user),
                 room = Room.fromEntity(entity.room),
-                review = Review.fromEntity(entity.review),
+                review = entity.review?.let { Review.fromEntity(it) },
                 startDate = entity.startDate,
                 endDate = entity.endDate,
                 totalPrice = entity.totalPrice,
-                createdAt = entity.createdAt
+                createdAt = entity.createdAt,
+                updatedAt = entity.updatedAt,
             )
         }
     }

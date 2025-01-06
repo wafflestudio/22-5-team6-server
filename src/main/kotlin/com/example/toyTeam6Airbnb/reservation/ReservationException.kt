@@ -14,12 +14,18 @@ sealed class ReservationException(
 
 class ReservationUnavailable : ReservationException(
     errorCode = 1009,
-    httpStatusCode = HttpStatus.BAD_REQUEST,
+    httpStatusCode = HttpStatus.CONFLICT,
     msg = "Reservation is not Available"
 )
 
-class RoomPermissionDeniedException : ReservationException(
+class ReservationNotFound : ReservationException(
     errorCode = 1010,
-    httpStatusCode = HttpStatus.BAD_REQUEST,
-    msg = "Permission denied"
+    httpStatusCode = HttpStatus.NOT_FOUND,
+    msg = "Reservation doesn't exist"
+)
+
+class ReservationPermissionDenied : ReservationException(
+    errorCode = 1011,
+    httpStatusCode = HttpStatus.FORBIDDEN,
+    msg = "Permission Denied"
 )
