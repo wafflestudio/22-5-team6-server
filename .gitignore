@@ -8,6 +8,7 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+/src/main/resources/*.p12
 
 # Exclude Gradle and Build folders
 /.gradle/
