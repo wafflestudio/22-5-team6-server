@@ -85,7 +85,7 @@ class RoomControllerTest {
             "price": 100.0,
             "maxOccupancy": 4
         }
-    """.trimIndent()
+        """.trimIndent()
 
         val result = mockMvc.perform(
             MockMvcRequestBuilders.post("/api/v1/rooms")

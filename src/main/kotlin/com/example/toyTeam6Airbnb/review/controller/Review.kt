@@ -14,7 +14,7 @@ data class Review(
     val content: String,
     val rating: Int,
     val createdAt: Instant,
-    val updatedAt: Instant,
+    val updatedAt: Instant
 ) {
     companion object {
         fun fromEntity(entity: ReviewEntity): Review {
@@ -26,7 +26,7 @@ data class Review(
                 content = entity.content,
                 rating = entity.rating,
                 createdAt = entity.createdAt,
-                updatedAt = entity.updatedAt,
+                updatedAt = entity.updatedAt
             )
         }
     }

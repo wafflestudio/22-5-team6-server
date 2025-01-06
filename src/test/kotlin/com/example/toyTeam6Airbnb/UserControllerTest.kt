@@ -14,15 +14,14 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserControllerTest
-    @Autowired
-    constructor(
-        private val mockMvc: MockMvc,
-        private val mapper: ObjectMapper,
-    ) {
+@Autowired
+constructor(
+    private val mockMvc: MockMvc,
+    private val mapper: ObjectMapper
+) {
 
     @Test
     fun `should register a new user`() {
-
         val result = mockMvc.perform(
             post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -32,7 +31,7 @@ class UserControllerTest
                   "username": "testuser",
                   "password": "1234"
                 }
-                """.trimIndent()
+                    """.trimIndent()
                 )
         )
             .andExpect(status().`is`(200))
@@ -41,11 +40,10 @@ class UserControllerTest
 
     @Test
     fun `should authenticate a user`() {
-
         val result = mockMvc.perform(
             post("/api/auth/login")
                 .content(
-                    "username=newuser&password=password123",
+                    "username=newuser&password=password123"
                 )
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .accept(MediaType.APPLICATION_JSON)

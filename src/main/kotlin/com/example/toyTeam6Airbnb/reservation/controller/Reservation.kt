@@ -29,7 +29,7 @@ data class Reservation(
                 endDate = entity.endDate,
                 totalPrice = entity.totalPrice,
                 createdAt = entity.createdAt,
-                updatedAt = entity.updatedAt,
+                updatedAt = entity.updatedAt
             )
         }
     }

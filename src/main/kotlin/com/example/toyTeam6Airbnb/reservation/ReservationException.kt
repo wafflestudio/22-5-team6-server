@@ -1,7 +1,6 @@
 package com.example.toyTeam6Airbnb.reservation
 
 import com.example.toyTeam6Airbnb.DomainException
-import com.example.toyTeam6Airbnb.reservation.controller.Reservation
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 
