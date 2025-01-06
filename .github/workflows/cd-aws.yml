@@ -84,3 +84,4 @@ jobs:
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
             docker-compose up -d
             docker image prune -f
+            echo "${{ secrets.APPLICATION }}" > application.yaml
