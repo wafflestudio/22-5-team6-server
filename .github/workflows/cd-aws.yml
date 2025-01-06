@@ -32,6 +32,7 @@ jobs:
       - name: Set up application.yaml
         run: |
           echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yaml
+          echo "${{ secrets.P12_BASE64 }}" | base64 --decode > ./src/main/resources/test.p12
 
       - name: Build with Gradle
         run: ./gradlew build -x test
@@ -84,3 +85,4 @@ jobs:
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
             docker-compose up -d
             docker image prune -f
+            echo "${{ secrets.APPLICATION }}" > application.yaml
