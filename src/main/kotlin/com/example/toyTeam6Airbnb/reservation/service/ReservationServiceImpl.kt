@@ -1,5 +1,7 @@
 package com.example.toyTeam6Airbnb.reservation.service
 
+import com.example.toyTeam6Airbnb.reservation.ReservationNotFound
+import com.example.toyTeam6Airbnb.reservation.ReservationPermissionDenied
 import com.example.toyTeam6Airbnb.reservation.ReservationUnavailable
 import com.example.toyTeam6Airbnb.reservation.controller.Reservation
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
@@ -33,7 +35,7 @@ class ReservationServiceImpl(
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
 
-        if(!isAvailable(roomEntity, startDate, endDate)) throw ReservationUnavailable()
+        if (!isAvailable(roomEntity, startDate, endDate)) throw ReservationUnavailable()
 
         val reservationEntity = ReservationEntity(
             user = userEntity,
@@ -57,8 +59,66 @@ class ReservationServiceImpl(
         }
     }
 
-    override fun getAllReservations(): List<Reservation> {
-        return reservationRepository.findAll().map(Reservation::fromEntity)
+    @Transactional
+    override fun deleteReservation(user: User, reservationId: Long) {
+        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
+
+        if (reservationEntity.user != userEntity) throw ReservationPermissionDenied()
+
+        reservationRepository.delete(reservationEntity)
     }
 
+    @Transactional
+    override fun updateReservation(
+        user: User,
+        reservationId: Long,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Reservation {
+        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
+        val roomEntity = reservationEntity.room
+
+        if (reservationEntity.user != userEntity) throw ReservationPermissionDenied()
+
+        if (!isAvailable(roomEntity, startDate, endDate)) throw ReservationUnavailable()
+
+        reservationEntity.startDate = startDate
+        reservationEntity.endDate = endDate
+        reservationEntity.totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate)
+        reservationRepository.save(reservationEntity)
+
+        return Reservation.fromEntity(reservationEntity)
+    }
+
+    @Transactional
+    override fun getReservation(reservationId: Long): Reservation {
+        val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
+
+        return Reservation.fromEntity(reservationEntity)
+    }
+
+    @Transactional
+    override fun getReservationsByUser(user: User): List<Reservation> {
+        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+
+        return reservationRepository.findAllByUser(userEntity).map(Reservation::fromEntity)
+    }
+
+    @Transactional
+    override fun getReservationsByRoom(roomId: Long): List<Reservation> {
+        val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
+
+        return reservationRepository.findAllByRoom(roomEntity).map(Reservation::fromEntity)
+    }
+
+    @Transactional
+    override fun getReservationsByDate(startDate: LocalDate, endDate: LocalDate): List<Reservation> {
+        val reservations = reservationRepository.findAll().filter { reservation ->
+            startDate < reservation.endDate && endDate > reservation.startDate
+        }
+
+        return reservations.map(Reservation::fromEntity)
+    }
 }

@@ -13,6 +13,33 @@ interface ReservationService{
         endDate: LocalDate
     ): Reservation
 
+    fun deleteReservation(
+        user: User,
+        reservationId: Long
+    )
 
+    fun updateReservation(
+        user: User,
+        reservationId: Long,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Reservation
+
+    fun getReservation(
+        reservationId: Long
+    ): Reservation
+
+    fun getReservationsByUser(
+        user: User
+    ): List<Reservation>
+
+    fun getReservationsByRoom(
+        roomId: Long
+    ): List<Reservation>
+
+    fun getReservationsByDate(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<Reservation>
 
 }
