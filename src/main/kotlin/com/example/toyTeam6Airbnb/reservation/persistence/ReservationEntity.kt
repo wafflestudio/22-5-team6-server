@@ -35,10 +35,19 @@ class ReservationEntity(
     var totalPrice: Double,
 
     @Column(nullable = false)
-    var createdAt: Instant = Instant.now()
+    var createdAt: Instant = Instant.now(),
+
+    @Column(nullable = false)
+    var updatedAt: Instant = Instant.now()
 ) {
     @PrePersist
     fun onPrePersist() {
         createdAt = Instant.now()
+        updatedAt = Instant.now()
+    }
+
+    @PreUpdate
+    fun onPreUpdate() {
+        updatedAt = Instant.now()
     }
 }
