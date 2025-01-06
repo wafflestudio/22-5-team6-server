@@ -33,4 +33,15 @@ data class Reservation(
             )
         }
     }
+
+    fun toDTO(): ReservationDTO{
+        return ReservationDTO(
+            id = this.id,
+            userId = this.user.id,
+            roomId = this.room.id,
+            startDate = this.startDate,
+            endDate = this.endDate,
+            )
+    }
 }
+

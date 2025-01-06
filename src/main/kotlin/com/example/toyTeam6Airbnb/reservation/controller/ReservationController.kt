@@ -3,6 +3,7 @@ package com.example.toyTeam6Airbnb.reservation.controller
 import com.example.toyTeam6Airbnb.reservation.service.ReservationService
 import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import com.example.toyTeam6Airbnb.user.controller.User
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -27,10 +28,11 @@ class ReservationController(
 ) {
 
     @PostMapping
+    @Operation(summary = "create Reservation", description = "create Reservation")
     fun createReservation(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: CreateReservationRequest
-    ): ResponseEntity<Reservation> {
+    ): ResponseEntity<ReservationDTO> {
         val reservation = reservationService.createReservation(
             User.fromEntity(principalDetails.getUser()),
             request.roomId,
@@ -38,10 +40,11 @@ class ReservationController(
             request.endDate
         )
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservation)
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservation.toDTO())
     }
 
     @DeleteMapping("/{reservationId}")
+    @Operation(summary = "delete Reservation", description = "delete Reservation")
     fun deleteReservation(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable reservationId: Long
@@ -55,11 +58,12 @@ class ReservationController(
     }
 
     @PutMapping("/{reservationId}")
+    @Operation(summary = "update Reservation", description = "update Reservation")
     fun updateReservation(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable reservationId: Long,
         @RequestBody request: UpdateReservationRequest
-    ): ResponseEntity<Reservation> {
+    ): ResponseEntity<ReservationDTO> {
         val reservation = reservationService.updateReservation(
             User.fromEntity(principalDetails.getUser()),
             reservationId,
@@ -67,27 +71,27 @@ class ReservationController(
             request.endDate
         )
 
-        return ResponseEntity.ok().body(reservation)
+        return ResponseEntity.ok().body(reservation.toDTO())
     }
 
     // 특정 reservation을 가져오는 API
     @GetMapping("/{reservationId}")
     fun getReservation(
         @PathVariable reservationId: Long
-    ): ResponseEntity<Reservation> {
+    ): ResponseEntity<ReservationDTO> {
         val reservation = reservationService.getReservation(reservationId)
 
-        return ResponseEntity.ok(reservation)
+        return ResponseEntity.ok(reservation.toDTO())
     }
 
     // 특정 user의 reservation을 모두 가져오는 API
     @GetMapping
     fun getReservationsByUser(
         @AuthenticationPrincipal principalDetails: PrincipalDetails
-    ): ResponseEntity<List<Reservation>> {
+    ): ResponseEntity<List<ReservationDTO>> {
         val reservations = reservationService.getReservationsByUser(
             User.fromEntity(principalDetails.getUser())
-        )
+        ).map { it.toDTO() }
 
         return ResponseEntity.ok(reservations)
     }
@@ -96,8 +100,8 @@ class ReservationController(
     @GetMapping("/room/{roomId}")
     fun getReservationsByRoom(
         @PathVariable roomId: Long
-    ): ResponseEntity<List<Reservation>> {
-        val reservations = reservationService.getReservationsByRoom(roomId)
+    ): ResponseEntity<List<ReservationDTO>> {
+        val reservations = reservationService.getReservationsByRoom(roomId).map { it.toDTO() }
 
         return ResponseEntity.ok().body(reservations)
     }
@@ -107,17 +111,18 @@ class ReservationController(
     fun getReservationsByDate(
         @RequestParam startDate: String,
         @RequestParam endDate: String
-    ): ResponseEntity<List<Reservation>> {
+    ): ResponseEntity<List<ReservationDTO>> {
         val reservations = reservationService.getReservationsByDate(
             LocalDate.parse(startDate),
             LocalDate.parse(endDate)
-        )
+        ).map { it.toDTO() }
 
         return ResponseEntity.ok().body(reservations)
     }
 
     // 특정 room의 특정 month의 available/unavailable date를 가져오는 API
     @GetMapping("/availability/{roomId}")
+    @Operation(summary = "get Date Available by month", description = "get Date Available by month")
     fun getRoomAvailabilityByMonth(
         @PathVariable roomId: Long,
         @RequestParam year: Int,
@@ -131,6 +136,16 @@ class ReservationController(
         return ResponseEntity.ok().body(roomAvailability)
     }
 }
+
+// Reservation DTO
+// 추후, 가격이나 특정 프로퍼티 추가할 수 있음.
+data class ReservationDTO(
+    val id: Long,
+    val roomId: Long,
+    val userId: Long,
+    val startDate: LocalDate,
+    val endDate: LocalDate
+)
 
 class CreateReservationRequest(
     val roomId: Long,

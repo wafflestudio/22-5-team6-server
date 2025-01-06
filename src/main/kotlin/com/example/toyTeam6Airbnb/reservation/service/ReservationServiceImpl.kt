@@ -53,11 +53,15 @@ class ReservationServiceImpl(
         return Reservation.fromEntity(reservationEntity)
     }
 
-    fun isAvailable(room: RoomEntity, startDate: LocalDate, endDate: LocalDate): Boolean {
+
+    fun isAvailable(room: RoomEntity, startDate: LocalDate, endDate: LocalDate, currentReservationId: Long? = null): Boolean {
+        // exception 발생도 함께 처리
+        if (startDate > endDate) throw ReservationUnavailable()
         val reservations = reservationRepository.findAllByRoom(room)
 
+        // 현재 예약 건을 제외하고, 다른 예약과 겹치는 여부를 확인함.
         return reservations.none { reservation ->
-            startDate < reservation.endDate && endDate > reservation.startDate
+            reservation.id != currentReservationId && startDate < reservation.endDate && endDate > reservation.startDate
         }
     }
 
@@ -84,7 +88,7 @@ class ReservationServiceImpl(
 
         if (reservationEntity.user != userEntity) throw ReservationPermissionDenied()
 
-        if (!isAvailable(roomEntity, startDate, endDate)) throw ReservationUnavailable()
+        if (!isAvailable(roomEntity, startDate, endDate, reservationEntity.id)) throw ReservationUnavailable()
 
         reservationEntity.startDate = startDate
         reservationEntity.endDate = endDate
