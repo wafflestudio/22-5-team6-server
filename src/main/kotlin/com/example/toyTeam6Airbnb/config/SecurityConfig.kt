@@ -2,8 +2,10 @@ package com.example.toyTeam6Airbnb.config
 
 import com.example.toyTeam6Airbnb.user.JwtAuthenticationFilter
 import com.example.toyTeam6Airbnb.user.service.PrincipalDetailsService
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.ProviderManager
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
@@ -13,7 +15,6 @@ import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
@@ -38,6 +39,14 @@ class SecurityConfig(
         provider.setPasswordEncoder(passwordEncoder())
         provider.setUserDetailsService(principalDetailsService)
         return ProviderManager(provider)
+    }
+
+    @Bean
+    fun forwardedHeaderFilter(): FilterRegistrationBean<ForwardedHeaderFilter> {
+        return FilterRegistrationBean<ForwardedHeaderFilter>().apply {
+            filter = ForwardedHeaderFilter()
+            order = Ordered.HIGHEST_PRECEDENCE
+        }
     }
 
     @Bean
@@ -77,7 +86,6 @@ class SecurityConfig(
             sessionManagement {
                 sessionCreationPolicy = SessionCreationPolicy.STATELESS
             }
-            addFilterBefore<OAuth2AuthorizationRequestRedirectFilter>(ForwardedHeaderFilter())
             addFilterBefore<UsernamePasswordAuthenticationFilter>(jwtAuthenticationFilter)
         }
         return http.build()
