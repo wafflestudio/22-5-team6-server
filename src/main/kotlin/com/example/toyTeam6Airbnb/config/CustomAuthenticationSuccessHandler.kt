@@ -19,6 +19,6 @@ class CustomAuthenticationSuccessHandler(
     ) {
         val token = jwtTokenProvider.generateToken(authentication.name)
         response.addHeader("Authorization", "Bearer $token")
-        //response.sendRedirect("/redirect#token=$token")
+        // response.sendRedirect("/redirect#token=$token")
     }
 }
