@@ -44,7 +44,7 @@ class RoomController(
         return ResponseEntity.status(HttpStatus.CREATED).body(room.toDTO())
     }
 
-    @GetMapping("/rooms")
+    @GetMapping("/rooms/main")
     fun getRooms(
         pageable: Pageable
     ): ResponseEntity<Page<RoomDTO>> {
