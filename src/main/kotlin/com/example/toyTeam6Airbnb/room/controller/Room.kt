@@ -31,4 +31,16 @@ data class Room(
             )
         }
     }
+    fun toDTO(): RoomDTO {
+        return RoomDTO(
+            id = this.id,
+            hostId = this.host.id!!,
+            name = this.name,
+            description = this.description,
+            type = this.type,
+            address = this.address,
+            price = this.price,
+            maxOccupancy = this.maxOccupancy
+        )
+    }
 }

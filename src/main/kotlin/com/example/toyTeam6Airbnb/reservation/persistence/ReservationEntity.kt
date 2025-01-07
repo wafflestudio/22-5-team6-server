@@ -13,7 +13,10 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
+import java.time.Instant
 import java.time.LocalDate
 
 @Entity
@@ -21,7 +24,7 @@ import java.time.LocalDate
 class ReservationEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    val id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -32,14 +35,31 @@ class ReservationEntity(
     val room: RoomEntity,
 
     @OneToOne(mappedBy = "reservation", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val review: ReviewEntity,
+    val review: ReviewEntity?,
 
     @Column(nullable = false)
-    val startDate: LocalDate,
+    var startDate: LocalDate,
 
     @Column(nullable = false)
-    val endDate: LocalDate,
+    var endDate: LocalDate,
 
     @Column(nullable = false)
-    val totalPrice: Double
-)
+    var totalPrice: Double,
+
+    @Column(nullable = false)
+    var createdAt: Instant = Instant.now(),
+
+    @Column(nullable = false)
+    var updatedAt: Instant = Instant.now()
+) {
+    @PrePersist
+    fun onPrePersist() {
+        createdAt = Instant.now()
+        updatedAt = Instant.now()
+    }
+
+    @PreUpdate
+    fun onPreUpdate() {
+        updatedAt = Instant.now()
+    }
+}

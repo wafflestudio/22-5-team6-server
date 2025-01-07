@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.room.controller
 
 import com.example.toyTeam6Airbnb.room.service.RoomService
+import com.example.toyTeam6Airbnb.room.validatePageable
 import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import com.example.toyTeam6Airbnb.user.controller.User
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -28,7 +29,7 @@ class RoomController(
     fun createRoom(
         @RequestBody request: CreateRoomRequest,
         @AuthenticationPrincipal principalDetails: PrincipalDetails
-    ): ResponseEntity<Room> {
+    ): ResponseEntity<RoomDTO> {
         val room = roomService.createRoom(
             host = User.fromEntity(principalDetails.getUser()),
             name = request.name,
@@ -39,23 +40,25 @@ class RoomController(
             maxOccupancy = request.maxOccupancy
         )
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(room)
+        return ResponseEntity.status(HttpStatus.CREATED).body(room.toDTO())
     }
 
     @GetMapping("/rooms")
     fun getRooms(
         pageable: Pageable
-    ): ResponseEntity<Page<Room>> {
-        val rooms = roomService.getRooms(pageable)
+    ): ResponseEntity<Page<RoomDTO>> {
+        // 정렬 기준 검증 및 기본값 처리
+        val validatedPageable = validatePageable(pageable, listOf("name", "price", "type", "createdAt"))
+        val rooms = roomService.getRooms(validatedPageable).map { it.toDTO() }
         return ResponseEntity.ok(rooms)
     }
 
     @GetMapping("/rooms/{roomId}")
     fun getRoomDetails(
         @PathVariable roomId: Long
-    ): ResponseEntity<Room> {
+    ): ResponseEntity<RoomDTO> {
         val room = roomService.getRoomDetails(roomId)
-        return ResponseEntity.ok(room)
+        return ResponseEntity.ok(room.toDTO())
     }
 
     @PutMapping("/rooms/{roomId}")
@@ -63,7 +66,7 @@ class RoomController(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long,
         @RequestBody request: UpdateRoomRequest
-    ): ResponseEntity<Room> {
+    ): ResponseEntity<RoomDTO> {
         val updatedRoom = roomService.updateRoom(
             User.fromEntity(principalDetails.getUser()),
             roomId,
@@ -75,7 +78,7 @@ class RoomController(
             request.maxOccupancy
         )
 
-        return ResponseEntity.ok(updatedRoom)
+        return ResponseEntity.ok(updatedRoom.toDTO())
     }
 
     @DeleteMapping("/rooms/{roomId}")
@@ -86,6 +89,17 @@ class RoomController(
         return ResponseEntity.noContent().build()
     }
 }
+
+data class RoomDTO(
+    val id: Long,
+    val hostId: Long,
+    val name: String,
+    val description: String,
+    val type: String,
+    val address: String,
+    val price: Double,
+    val maxOccupancy: Int
+)
 
 data class CreateRoomRequest(
     val name: String,
