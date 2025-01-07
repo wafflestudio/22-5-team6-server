@@ -2,6 +2,7 @@ package com.example.toyTeam6Airbnb.config
 
 import com.example.toyTeam6Airbnb.user.JwtAuthenticationFilter
 import com.example.toyTeam6Airbnb.user.service.PrincipalDetailsService
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
+import org.springframework.stereotype.Component
 import org.springframework.web.filter.ForwardedHeaderFilter
 
 @Configuration
@@ -41,10 +43,25 @@ class SecurityConfig(
         return ProviderManager(provider)
     }
 
+    @Component
+    class CloudFrontForwardedHeaderFilter : ForwardedHeaderFilter() {
+        override fun initFilterBean() {
+            super.initFilterBean()
+        }
+
+        override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+            val proto = request.getHeader("CloudFront-Forwarded-Proto")
+            if (proto != null) {
+                request.setAttribute("X-Forwarded-Proto", proto)
+            }
+            return false
+        }
+    }
+
     @Bean
-    fun forwardedHeaderFilter(): FilterRegistrationBean<ForwardedHeaderFilter> {
-        return FilterRegistrationBean<ForwardedHeaderFilter>().apply {
-            filter = ForwardedHeaderFilter()
+    fun cloudFrontForwardedHeaderFilter(): FilterRegistrationBean<CloudFrontForwardedHeaderFilter> {
+        return FilterRegistrationBean<CloudFrontForwardedHeaderFilter>().apply {
+            filter = CloudFrontForwardedHeaderFilter()
             order = Ordered.HIGHEST_PRECEDENCE
         }
     }
