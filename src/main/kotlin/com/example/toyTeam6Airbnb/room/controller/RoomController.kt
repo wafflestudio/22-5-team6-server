@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.RequestParam
 
 @RestController
 @RequestMapping("/api/v1")
@@ -48,7 +49,7 @@ class RoomController(
         pageable: Pageable
     ): ResponseEntity<Page<RoomDTO>> {
         // 정렬 기준 검증 및 기본값 처리
-        val validatedPageable = validatePageable(pageable, listOf("name", "price", "type", "createdAt"))
+        val validatedPageable = validatePageable(pageable)
         val rooms = roomService.getRooms(validatedPageable).map { it.toDTO() }
         return ResponseEntity.ok(rooms)
     }
@@ -87,6 +88,22 @@ class RoomController(
     ): ResponseEntity<Unit> {
         roomService.deleteRoom(roomId)
         return ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/rooms/search")
+    fun searchRooms(
+        @RequestParam(required = false) name: String?,
+        @RequestParam(required = false) type: String?,
+        @RequestParam(required = false) minPrice: Double?,
+        @RequestParam(required = false) maxPrice: Double?,
+        @RequestParam(required = false) address: String?,
+        @RequestParam(required = false) maxOccupancy: Int?,
+        pageable: Pageable
+    ): ResponseEntity<Page<RoomDTO>> {
+        val validatedPage = validatePageable(pageable)
+        val rooms = roomService.searchRooms(name, type, minPrice, maxPrice, address, maxOccupancy, validatedPage)
+            .map { it.toDTO() }
+        return ResponseEntity.ok(rooms)
     }
 }
 
