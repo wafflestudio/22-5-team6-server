@@ -19,6 +19,6 @@ class RoomNotFoundException : RoomException(
 
 class RoomPermissionDeniedException : RoomException(
     errorCode = 1008,
-    httpStatusCode = HttpStatus.BAD_REQUEST,
+    httpStatusCode = HttpStatus.FORBIDDEN,
     msg = "Permission denied"
 )

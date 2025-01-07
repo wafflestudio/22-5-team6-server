@@ -1,0 +1,62 @@
+### Create a new reservation
+POST http://localhost:8080/api/v1/reservations
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNjAxOTMwMiwiZXhwIjoxNzM2MTA1NzAyfQ.AiF42xPV2DXe5Dn3Tn1ShBuy6miCtZ87NfmwYY8ef71o28d-IhcLdu8SAJbYLRlE4p5qXJ7FqziGwDksNhishg
+
+{
+  "roomId": 2,
+  "startDate": "2024-12-01",
+  "endDate": "2024-12-10"
+}
+
+### Create a new reservation
+POST http://localhost:8080/api/v1/reservations
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNjAxOTMwMiwiZXhwIjoxNzM2MTA1NzAyfQ.AiF42xPV2DXe5Dn3Tn1ShBuy6miCtZ87NfmwYY8ef71o28d-IhcLdu8SAJbYLRlE4p5qXJ7FqziGwDksNhishg
+
+{
+  "roomId": 1,
+  "startDate": "2025-01-05",
+  "endDate": "2025-01-08"
+}
+
+### Create a new reservation
+POST http://localhost:8080/api/v1/reservations
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNjAxOTMwMiwiZXhwIjoxNzM2MTA1NzAyfQ.AiF42xPV2DXe5Dn3Tn1ShBuy6miCtZ87NfmwYY8ef71o28d-IhcLdu8SAJbYLRlE4p5qXJ7FqziGwDksNhishg
+
+{
+  "roomId": 1,
+  "startDate": "2025-02-10",
+  "endDate": "2025-02-13"
+}
+
+### Update a reservation
+PUT http://localhost:8080/api/v1/reservations/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNjAxOTMwMiwiZXhwIjoxNzM2MTA1NzAyfQ.AiF42xPV2DXe5Dn3Tn1ShBuy6miCtZ87NfmwYY8ef71o28d-IhcLdu8SAJbYLRlE4p5qXJ7FqziGwDksNhishg
+
+{
+  "startDate": "2024-12-05",
+  "endDate": "2024-12-15"
+}
+
+### Delete a reservation
+DELETE http://localhost:8080/api/v1/reservations/1
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNjAxOTMwMiwiZXhwIjoxNzM2MTA1NzAyfQ.AiF42xPV2DXe5Dn3Tn1ShBuy6miCtZ87NfmwYY8ef71o28d-IhcLdu8SAJbYLRlE4p5qXJ7FqziGwDksNhishg
+
+### Get a specific reservation
+GET http://localhost:8080/api/v1/reservations/2
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNjAxOTMwMiwiZXhwIjoxNzM2MTA1NzAyfQ.AiF42xPV2DXe5Dn3Tn1ShBuy6miCtZ87NfmwYY8ef71o28d-IhcLdu8SAJbYLRlE4p5qXJ7FqziGwDksNhishg
+
+### Get reservations by user
+GET http://localhost:8080/api/v1/reservations
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNjAxOTMwMiwiZXhwIjoxNzM2MTA1NzAyfQ.AiF42xPV2DXe5Dn3Tn1ShBuy6miCtZ87NfmwYY8ef71o28d-IhcLdu8SAJbYLRlE4p5qXJ7FqziGwDksNhishg
+
+### Get reservations by room
+GET http://localhost:8080/api/v1/reservations/room/1
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNjAxOTMwMiwiZXhwIjoxNzM2MTA1NzAyfQ.AiF42xPV2DXe5Dn3Tn1ShBuy6miCtZ87NfmwYY8ef71o28d-IhcLdu8SAJbYLRlE4p5qXJ7FqziGwDksNhishg
+
+### Get reservations by date range
+GET http://localhost:8080/api/v1/reservations/date?startDate=2025-01-03&endDate=2025-01-10
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNjAxOTMwMiwiZXhwIjoxNzM2MTA1NzAyfQ.AiF42xPV2DXe5Dn3Tn1ShBuy6miCtZ87NfmwYY8ef71o28d-IhcLdu8SAJbYLRlE4p5qXJ7FqziGwDksNhishg

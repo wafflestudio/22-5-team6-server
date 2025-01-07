@@ -20,8 +20,15 @@ class PrincipalOAuth2UserService(
     override fun loadUser(userRequest: OAuth2UserRequest): OAuth2User {
         val oAuth2User = super.loadUser(userRequest)
 
-        val provider = AuthProvider.from(userRequest.clientRegistration.clientId)
-        val oAuthId = oAuth2User.getAttribute<String>("sub") ?: throw OAuthException()
+        val provider = AuthProvider.from(userRequest.clientRegistration.registrationId)
+        val oAuthId = when (provider) {
+            AuthProvider.NAVER -> {
+                val response = oAuth2User.getAttribute<Map<String, Any>>("response")
+                response?.get("id") as? String
+            }
+            AuthProvider.KAKAO -> oAuth2User.getAttribute<Long>("id")?.toString()
+            else -> oAuth2User.getAttribute<String>("sub")
+        } ?: throw OAuthException()
         val username = "OAUTH${provider}_$oAuthId"
 
         val password = passwordEncoder.encode("****")
