@@ -75,6 +75,7 @@ class SecurityConfig(
             sessionManagement {
                 sessionCreationPolicy = SessionCreationPolicy.STATELESS
             }
+            addFilterBefore<OAuth2AuthorizationRequestRedirectFilter>(ForwardedHeaderFilter())
             addFilterBefore<UsernamePasswordAuthenticationFilter>(jwtAuthenticationFilter)
         }
         return http.build()
