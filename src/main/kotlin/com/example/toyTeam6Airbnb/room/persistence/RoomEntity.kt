@@ -15,6 +15,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
+import jakarta.persistence.Embedded
 import java.time.Instant
 
 @Entity
@@ -32,12 +33,14 @@ class RoomEntity(
     var description: String,
     @Column(nullable = false)
     var type: String,
-    @Column(columnDefinition = "TEXT", nullable = false)
-    var address: String,
+    @Embedded
+    var address: Address,
     @Column(nullable = false)
     var price: Double,
     @Column(nullable = false)
     var maxOccupancy: Int,
+    @Column(nullable = false)
+    var rating : Double = 0.0,
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     val reservations: List<ReservationEntity> = mutableListOf(),
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
