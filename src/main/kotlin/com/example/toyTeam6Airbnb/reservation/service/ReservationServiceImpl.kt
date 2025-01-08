@@ -1,6 +1,10 @@
 package com.example.toyTeam6Airbnb.reservation.service
 
-import com.example.toyTeam6Airbnb.reservation.*
+import com.example.toyTeam6Airbnb.reservation.MaxOccupancyExceeded
+import com.example.toyTeam6Airbnb.reservation.ReservationNotFound
+import com.example.toyTeam6Airbnb.reservation.ReservationPermissionDenied
+import com.example.toyTeam6Airbnb.reservation.ReservationUnavailable
+import com.example.toyTeam6Airbnb.reservation.ZeroGuests
 import com.example.toyTeam6Airbnb.reservation.controller.Reservation
 import com.example.toyTeam6Airbnb.reservation.controller.RoomAvailabilityResponse
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
@@ -31,7 +35,7 @@ class ReservationServiceImpl(
         roomId: Long,
         startDate: LocalDate,
         endDate: LocalDate,
-        numberOfGuests : Int
+        numberOfGuests: Int
     ): Reservation {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()

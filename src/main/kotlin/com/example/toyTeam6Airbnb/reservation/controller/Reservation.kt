@@ -12,7 +12,7 @@ data class Reservation(
     val startDate: LocalDate,
     val endDate: LocalDate,
     val totalPrice: Double,
-    val numberofGuests : Int,
+    val numberofGuests: Int,
     val createdAt: Instant,
     val updatedAt: Instant
 ) {
@@ -51,5 +51,5 @@ data class ReservationDTO(
     val userId: Long,
     val startDate: LocalDate,
     val endDate: LocalDate,
-    val numberOfGuests : Int
+    val numberOfGuests: Int
 )

@@ -1,6 +1,5 @@
 package com.example.toyTeam6Airbnb.room.controller
 
-import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import java.time.Instant
 
 data class Room(

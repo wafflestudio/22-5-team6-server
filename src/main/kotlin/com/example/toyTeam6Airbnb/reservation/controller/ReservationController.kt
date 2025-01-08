@@ -143,7 +143,7 @@ class CreateReservationRequest(
     val roomId: Long,
     val startDate: LocalDate,
     val endDate: LocalDate,
-    val numberOfGuests : Int
+    val numberOfGuests: Int
 )
 
 class UpdateReservationRequest(
