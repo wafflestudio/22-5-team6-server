@@ -12,6 +12,7 @@ data class Reservation(
     val startDate: LocalDate,
     val endDate: LocalDate,
     val totalPrice: Double,
+    val numberofGuests : Int,
     val createdAt: Instant,
     val updatedAt: Instant
 ) {
@@ -26,7 +27,8 @@ data class Reservation(
                 endDate = entity.endDate,
                 totalPrice = entity.totalPrice,
                 createdAt = entity.createdAt,
-                updatedAt = entity.updatedAt
+                updatedAt = entity.updatedAt,
+                numberofGuests = entity.numberOfGuests
             )
         }
     }
@@ -37,7 +39,8 @@ data class Reservation(
             userId = this.userId,
             roomId = this.roomId,
             startDate = this.startDate,
-            endDate = this.endDate
+            endDate = this.endDate,
+            numberOfGuests = this.numberofGuests
         )
     }
 }
@@ -47,5 +50,6 @@ data class ReservationDTO(
     val roomId: Long,
     val userId: Long,
     val startDate: LocalDate,
-    val endDate: LocalDate
+    val endDate: LocalDate,
+    val numberOfGuests : Int
 )
