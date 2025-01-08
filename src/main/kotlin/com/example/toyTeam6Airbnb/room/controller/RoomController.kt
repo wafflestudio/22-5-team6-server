@@ -86,9 +86,10 @@ class RoomController(
 
     @DeleteMapping("/rooms/{roomId}")
     fun deleteRoom(
+        @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long
     ): ResponseEntity<Unit> {
-        roomService.deleteRoom(roomId)
+        roomService.deleteRoom(User.fromEntity(principalDetails.getUser()).id, roomId)
         return ResponseEntity.noContent().build()
     }
 

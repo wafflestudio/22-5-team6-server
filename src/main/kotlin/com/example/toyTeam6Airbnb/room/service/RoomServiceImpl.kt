@@ -127,8 +127,12 @@ class RoomServiceImpl(
     }
 
     @Transactional
-    override fun deleteRoom(roomId: Long) {
+    override fun deleteRoom(userId: Long, roomId: Long) {
+        val hostEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
+
+        if (roomEntity.host.id != hostEntity.id) throw RoomPermissionDeniedException()
+
         roomRepository.delete(roomEntity)
     }
 

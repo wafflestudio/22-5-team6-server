@@ -34,7 +34,7 @@ interface RoomService {
         maxOccupancy: Int
     ): Room
 
-    fun deleteRoom(roomId: Long)
+    fun deleteRoom(userId: Long, roomId: Long)
 
     fun searchRooms(
         name: String?,
