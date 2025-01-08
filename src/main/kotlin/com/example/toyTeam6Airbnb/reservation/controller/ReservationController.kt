@@ -37,7 +37,8 @@ class ReservationController(
             User.fromEntity(principalDetails.getUser()),
             request.roomId,
             request.startDate,
-            request.endDate
+            request.endDate,
+            request.numberOfGuests
         )
 
         return ResponseEntity.status(HttpStatus.CREATED).body(reservation.toDTO())
@@ -68,7 +69,8 @@ class ReservationController(
             User.fromEntity(principalDetails.getUser()),
             reservationId,
             request.startDate,
-            request.endDate
+            request.endDate,
+            request.numberOfGuests
         )
 
         return ResponseEntity.ok().body(reservation.toDTO())
@@ -96,29 +98,29 @@ class ReservationController(
         return ResponseEntity.ok(reservations)
     }
 
-    // 특정 room의 reservation을 모두 가져오는 API
-    @GetMapping("/room/{roomId}")
-    fun getReservationsByRoom(
-        @PathVariable roomId: Long
-    ): ResponseEntity<List<ReservationDTO>> {
-        val reservations = reservationService.getReservationsByRoom(roomId).map { it.toDTO() }
+//    // 특정 room의 reservation을 모두 가져오는 API
+//    @GetMapping("/room/{roomId}")
+//    fun getReservationsByRoom(
+//        @PathVariable roomId: Long
+//    ): ResponseEntity<List<ReservationDTO>> {
+//        val reservations = reservationService.getReservationsByRoom(roomId).map { it.toDTO() }
+//
+//        return ResponseEntity.ok().body(reservations)
+//    }
 
-        return ResponseEntity.ok().body(reservations)
-    }
-
-    // 특정 date range의 reservation을 모두 가져오는 API
-    @GetMapping("/date")
-    fun getReservationsByDate(
-        @RequestParam startDate: String,
-        @RequestParam endDate: String
-    ): ResponseEntity<List<ReservationDTO>> {
-        val reservations = reservationService.getReservationsByDate(
-            LocalDate.parse(startDate),
-            LocalDate.parse(endDate)
-        ).map { it.toDTO() }
-
-        return ResponseEntity.ok().body(reservations)
-    }
+//    // 특정 date range의 reservation을 모두 가져오는 API
+//    @GetMapping("/date")
+//    fun getReservationsByDate(
+//        @RequestParam startDate: String,
+//        @RequestParam endDate: String
+//    ): ResponseEntity<List<ReservationDTO>> {
+//        val reservations = reservationService.getReservationsByDate(
+//            LocalDate.parse(startDate),
+//            LocalDate.parse(endDate)
+//        ).map { it.toDTO() }
+//
+//        return ResponseEntity.ok().body(reservations)
+//    }
 
     // 특정 room의 특정 month의 available/unavailable date를 가져오는 API
     @GetMapping("/availability/{roomId}")
@@ -140,12 +142,14 @@ class ReservationController(
 class CreateReservationRequest(
     val roomId: Long,
     val startDate: LocalDate,
-    val endDate: LocalDate
+    val endDate: LocalDate,
+    val numberOfGuests : Int
 )
 
 class UpdateReservationRequest(
     val startDate: LocalDate,
-    val endDate: LocalDate
+    val endDate: LocalDate,
+    val numberOfGuests: Int
 )
 
 // 특정 방의 예약 가능날짜와 불가능한 날짜 반환 DTO

@@ -34,3 +34,9 @@ class MaxOccupancyExceeded : ReservationException(
     httpStatusCode = HttpStatus.CONFLICT,
     msg = "Max Occupancy Exceeded"
 )
+
+class ZeroGuests : ReservationException(
+    errorCode = 4005,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Number of Guests should be more than 0"
+)
