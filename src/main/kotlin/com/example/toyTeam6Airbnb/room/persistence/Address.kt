@@ -2,7 +2,6 @@ package com.example.toyTeam6Airbnb.room.persistence
 
 import jakarta.persistence.Column
 import jakarta.persistence.Embeddable
-import jakarta.validation.constraints.NotBlank
 
 @Embeddable
 data class Address(
