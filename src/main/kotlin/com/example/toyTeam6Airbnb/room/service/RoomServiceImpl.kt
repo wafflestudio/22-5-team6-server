@@ -1,7 +1,6 @@
 package com.example.toyTeam6Airbnb.room.service
 
-import com.example.toyTeam6Airbnb.room.RoomNotFoundException
-import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
+import com.example.toyTeam6Airbnb.room.*
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
 import com.example.toyTeam6Airbnb.room.persistence.Address
@@ -10,12 +9,14 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import jakarta.persistence.criteria.Predicate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import javax.naming.InvalidNameException
 
 @Service
 class RoomServiceImpl(
@@ -28,12 +29,25 @@ class RoomServiceImpl(
         host: User,
         name: String,
         description: String,
-        type: String,
+        type: RoomType,
         address: Address,
         price: Double,
         maxOccupancy: Int
     ): Room {
         val hostEntity = userRepository.findByIdOrNull(host.id) ?: throw AuthenticateException()
+
+        if(name.isBlank()) throw InvalidNameException()
+        if(description.isBlank()) throw InvalidDescriptionException()
+        if(price <= 0) throw InvalidPriceException()
+        if(maxOccupancy <= 0) throw InvalidMaxOccupancyException()
+
+        try {
+            RoomType.valueOf(type.name)
+        } catch (e: IllegalArgumentException) {
+            throw InvalidRoomTypeException()
+        }
+
+        validateAddress(address)
 
         val roomEntity =
             RoomEntity(
@@ -45,7 +59,6 @@ class RoomServiceImpl(
                 price = price,
                 maxOccupancy = maxOccupancy,
                 reservations = emptyList(),
-                rating = 0.0,
                 reviews = emptyList(),
             ).let {
                 roomRepository.save(it)
@@ -69,12 +82,12 @@ class RoomServiceImpl(
     override fun updateRoom(
         host: User,
         roomId: Long,
-        name: String?,
-        description: String?,
-        type: String?,
-        address: Address?,
-        price: Double?,
-        maxOccupancy: Int?
+        name: String,
+        description: String,
+        type: RoomType,
+        address: Address,
+        price: Double,
+        maxOccupancy: Int
     ): Room {
         val hostEntity = userRepository.findByIdOrNull(host.id) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
@@ -83,12 +96,25 @@ class RoomServiceImpl(
             throw RoomPermissionDeniedException()
         }
 
-        name?.let { roomEntity.name = it }
-        description?.let { roomEntity.description = it }
-        type?.let { roomEntity.type = it }
-        address?.let { roomEntity.address = it }
-        price?.let { roomEntity.price = it }
-        maxOccupancy?.let { roomEntity.maxOccupancy = it }
+        if(name.isBlank()) throw InvalidNameException()
+        if(description.isBlank()) throw InvalidDescriptionException()
+        if(price <= 0) throw InvalidPriceException()
+        if(maxOccupancy <= 0) throw InvalidMaxOccupancyException()
+
+        try {
+            RoomType.valueOf(type.name)
+        } catch (e: IllegalArgumentException) {
+            throw InvalidRoomTypeException()
+        }
+
+        validateAddress(address)
+
+        roomEntity.name = name
+        roomEntity.description = description
+        roomEntity.type = type
+        roomEntity.address = address
+        roomEntity.price = price
+        roomEntity.maxOccupancy = maxOccupancy
 
         roomRepository.save(roomEntity)
         return Room.fromEntity(roomEntity)
@@ -103,7 +129,7 @@ class RoomServiceImpl(
     @Transactional
     override fun searchRooms(
         name: String?,
-        type: String?,
+        type: RoomType?,
         minPrice: Double?,
         maxPrice: Double?,
         address: AddressSearchDTO?,
@@ -131,7 +157,7 @@ class RoomServiceImpl(
             }
 
             address?.let {
-                it.country.let { country ->
+                it.country?.let { country ->
                     predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get<Address>("address").get("country")), country.lowercase()))
                 }
                 it.cityOrProvince?.let { cityOrProvince ->
@@ -157,4 +183,14 @@ class RoomServiceImpl(
         }, pageable)
             .map { Room.fromEntity(it) }
     }
+
+    private fun validateAddress(address: Address) {
+        if (address.country.isBlank() ||
+            address.cityOrProvince.isBlank() ||
+            address.districtOrCounty.isBlank() ||
+            address.neighborhoodOrTown.isBlank()) {
+            throw InvalidAddressException()
+        }
+    }
+
 }
