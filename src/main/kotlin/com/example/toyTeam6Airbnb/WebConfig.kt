@@ -13,6 +13,7 @@ class WebConfig {
                     .allowedOrigins("*") // 허용할 도메인
                     .allowedMethods("GET", "POST", "PUT", "DELETE")
                     .allowedHeaders("*")
+                    .exposedHeaders("*")
                     .allowCredentials(true)
             }
         }
