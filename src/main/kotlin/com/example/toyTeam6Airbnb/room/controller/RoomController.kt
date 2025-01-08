@@ -107,17 +107,6 @@ class RoomController(
     }
 }
 
-data class RoomDTO(
-    val id: Long,
-    val hostId: Long,
-    val name: String,
-    val description: String,
-    val type: String,
-    val address: String,
-    val price: Double,
-    val maxOccupancy: Int
-)
-
 data class CreateRoomRequest(
     val name: String,
     val description: String,
