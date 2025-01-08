@@ -12,7 +12,6 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest
@@ -57,9 +56,8 @@ constructor(
         println("Response Body: ${response.contentAsString}")
 
         // 요약 정보
-        println("Response Summary: ${response.toString()}")
+        println("Response Summary: $response")
     }
-
 
     @Test
     @Order(2)
@@ -74,7 +72,6 @@ constructor(
         )
             .andExpect(status().isOk) // expect 200 status
             .andReturn()
-
 
         val response = result.response
 
@@ -91,6 +88,6 @@ constructor(
         println("Response Body: ${response.contentAsString}")
 
         // 요약 정보
-        println("Response Summary: ${response.toString()}")
+        println("Response Summary: $response")
     }
 }
