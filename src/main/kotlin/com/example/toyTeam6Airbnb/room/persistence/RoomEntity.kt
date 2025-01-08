@@ -32,15 +32,13 @@ class RoomEntity(
     @Column(columnDefinition = "TEXT", nullable = false)
     var description: String,
     @Column(nullable = false)
-    var type: String,
+    var type: RoomType,
     @Embedded
     var address: Address,
     @Column(nullable = false)
     var price: Double,
     @Column(nullable = false)
     var maxOccupancy: Int,
-    @Column(nullable = false)
-    var rating : Double = 0.0,
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     val reservations: List<ReservationEntity> = mutableListOf(),
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
