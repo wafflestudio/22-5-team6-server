@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.room.controller
 
 import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.room.service.RoomService
 import com.example.toyTeam6Airbnb.room.validatePageable
 import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
@@ -94,7 +95,7 @@ class RoomController(
     @GetMapping("/rooms/search")
     fun searchRooms(
         @RequestParam(required = false) name: String?,
-        @RequestParam(required = false) type: String?,
+        @RequestParam(required = false) type: RoomType?,
         @RequestParam(required = false) minPrice: Double?,
         @RequestParam(required = false) maxPrice: Double?,
         @RequestParam(required = false) address: AddressSearchDTO?,
@@ -110,7 +111,7 @@ class RoomController(
 }
 
 data class AddressSearchDTO(
-    val country: String,
+    val country: String?,
     val cityOrProvince: String?,
     val districtOrCounty: String?,
     val neighborhoodOrTown: String?
@@ -119,17 +120,17 @@ data class AddressSearchDTO(
 data class CreateRoomRequest(
     val name: String,
     val description: String,
-    val type: String,
+    val type: RoomType,
     val address: Address,
     val price: Double,
     val maxOccupancy: Int
 )
 
 data class UpdateRoomRequest(
-    val name: String?,
-    val description: String?,
-    val type: String?,
-    val address: Address?,
-    val price: Double?,
-    val maxOccupancy: Int?
+    val name: String,
+    val description: String,
+    val type: RoomType,
+    val address: Address,
+    val price: Double,
+    val maxOccupancy: Int
 )
