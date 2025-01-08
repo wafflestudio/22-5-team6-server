@@ -1,11 +1,10 @@
 package com.example.toyTeam6Airbnb.room.controller
 
-import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import java.time.Instant
 
 data class Room(
     val id: Long,
-    val host: UserEntity,
+    val hostId: Long,
     val name: String,
     val description: String,
     val type: String,
@@ -19,7 +18,7 @@ data class Room(
         fun fromEntity(entity: com.example.toyTeam6Airbnb.room.persistence.RoomEntity): Room {
             return Room(
                 id = entity.id!!,
-                host = entity.host,
+                hostId = entity.host.id!!,
                 name = entity.name,
                 description = entity.description,
                 type = entity.type,
@@ -34,7 +33,7 @@ data class Room(
     fun toDTO(): RoomDTO {
         return RoomDTO(
             id = this.id,
-            hostId = this.host.id!!,
+            hostId = this.hostId,
             name = this.name,
             description = this.description,
             type = this.type,
