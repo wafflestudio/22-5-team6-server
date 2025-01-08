@@ -22,19 +22,19 @@ constructor(
 
     @Test
     fun `should register a new user`() {
-        val result = mockMvc.perform(
-            post("/api/auth/login")
+        val requestBody = """
+            {
+                "username": "testuser",
+                "password": "password123"
+            }
+        """.trimIndent()
+
+        mockMvc.perform(
+            post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                {
-                  "username": "testuser",
-                  "password": "1234"
-                }
-                    """.trimIndent()
-                )
+                .content(requestBody)
         )
-            .andExpect(status().`is`(200))
+            .andExpect(status().isOk)
             .andReturn()
     }
 
