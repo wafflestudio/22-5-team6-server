@@ -6,8 +6,8 @@ interface ReviewService {
 
     fun createReview(
         roomId: Long,
-        user : User,
-        reservationId : Long,
+        user: User,
+        reservationId: Long,
         content: String,
         rating: Int
     ): Review
@@ -21,14 +21,14 @@ interface ReviewService {
     ): Review
 
     fun updateReview(
-        user : User,
+        user: User,
         reviewId: Long,
         content: String?,
         rating: Int?
     ): Review
 
     fun deleteReview(
-        user : User,
+        user: User,
         reviewId: Long
     )
 }
