@@ -43,7 +43,6 @@ class ReviewServiceImpl(
             room = roomEntity,
             content = content,
             rating = rating,
-            id = 0L, // or generate an ID if needed
             // 예약에 대해서는 리뷰가 있어야함. 예약 번호도 가져와야할듯.
             reservation = reservationEntity, // or provide a valid reservation
             createdAt = Instant.now(),
