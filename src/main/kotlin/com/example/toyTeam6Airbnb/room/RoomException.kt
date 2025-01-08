@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.room
 
 import com.example.toyTeam6Airbnb.DomainException
+import com.example.toyTeam6Airbnb.room.controller.Room
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 
@@ -21,4 +22,40 @@ class RoomPermissionDeniedException : RoomException(
     errorCode = 2002,
     httpStatusCode = HttpStatus.FORBIDDEN,
     msg = "Permission denied"
+)
+
+class InvalidMaxOccupancyException : RoomException(
+    errorCode = 2003,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid max occupancy"
+)
+
+class InvalidPriceException : RoomException(
+    errorCode = 2004,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid price"
+)
+
+class InvalidAddressException : RoomException(
+    errorCode = 2005,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid rating"
+)
+
+class InvalidNameException : RoomException(
+    errorCode = 2006,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid name"
+)
+
+class InvalidDescriptionException : RoomException(
+    errorCode = 2007,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid description"
+)
+
+class InvalidRoomTypeException : RoomException(
+    errorCode = 2008,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid room type"
 )
