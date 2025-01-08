@@ -49,6 +49,7 @@ class RoomController(
     fun getRooms(
         pageable: Pageable
     ): ResponseEntity<Page<RoomDTO>> {
+        // 정렬 기준 검증 및 기본값 처리
         val validatedPageable = validatePageable(pageable)
         val rooms = roomService.getRooms(validatedPageable).map { it.toDTO() }
         return ResponseEntity.ok(rooms)

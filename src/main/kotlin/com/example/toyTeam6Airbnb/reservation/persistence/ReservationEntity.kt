@@ -34,7 +34,7 @@ class ReservationEntity(
     @JoinColumn(name = "room_id", nullable = false)
     val room: RoomEntity,
 
-    @OneToOne(mappedBy = "reservation", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToOne(mappedBy = "reservation", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     val review: ReviewEntity?,
 
     @Column(nullable = false)
@@ -50,7 +50,11 @@ class ReservationEntity(
     var createdAt: Instant = Instant.now(),
 
     @Column(nullable = false)
-    var updatedAt: Instant = Instant.now()
+    var updatedAt: Instant = Instant.now(),
+
+    @Column(nullable = false)
+    var numberOfGuests: Int
+
 ) {
     @PrePersist
     fun onPrePersist() {
