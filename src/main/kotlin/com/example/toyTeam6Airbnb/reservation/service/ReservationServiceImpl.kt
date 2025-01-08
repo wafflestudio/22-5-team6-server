@@ -134,20 +134,22 @@ class ReservationServiceImpl(
         val startDate = yearMonth.atDay(1)
         val endDate = yearMonth.atEndOfMonth()
 
-        val reservations = reservationRepository.findAllByRoom(roomEntity).filter { reservation ->
-            startDate < reservation.endDate && endDate > reservation.startDate
-        }
+        val reservations = reservationRepository.findAllByRoom(roomEntity)
 
         val unavailableDates = reservations.flatMap { reservation ->
             reservation.startDate.datesUntil(reservation.endDate).toList()
         }.toSet()
 
+        val filteredUnavailableDates = unavailableDates.filter { date ->
+            !date.isBefore(startDate) && !date.isAfter(endDate)
+        }.toSet()
+
         val allDates = startDate.datesUntil(endDate.plusDays(1)).toList()
-        val availableDates = allDates.filterNot { it in unavailableDates }
+        val availableDates = allDates.filterNot { it in filteredUnavailableDates }
 
         return RoomAvailabilityResponse(
             availableDates = availableDates,
-            unavailableDates = unavailableDates.toList()
+            unavailableDates = filteredUnavailableDates.toList()
         )
     }
 }

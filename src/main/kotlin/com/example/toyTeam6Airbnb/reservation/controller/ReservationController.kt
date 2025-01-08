@@ -137,16 +137,6 @@ class ReservationController(
     }
 }
 
-// Reservation DTO
-// 추후, 가격이나 특정 프로퍼티 추가할 수 있음.
-data class ReservationDTO(
-    val id: Long,
-    val roomId: Long,
-    val userId: Long,
-    val startDate: LocalDate,
-    val endDate: LocalDate
-)
-
 class CreateReservationRequest(
     val roomId: Long,
     val startDate: LocalDate,

@@ -32,4 +32,14 @@ interface RoomService {
     ): Room
 
     fun deleteRoom(roomId: Long)
+
+    fun searchRooms(
+        name: String?,
+        type: String?,
+        minPrice: Double?,
+        maxPrice: Double?,
+        address: String?,
+        maxOccupancy: Int?,
+        pageable: Pageable
+    ): Page<Room>
 }

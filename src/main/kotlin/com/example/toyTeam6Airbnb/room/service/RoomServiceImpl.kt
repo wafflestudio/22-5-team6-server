@@ -8,6 +8,7 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import jakarta.persistence.criteria.Predicate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -94,5 +95,47 @@ class RoomServiceImpl(
     override fun deleteRoom(roomId: Long) {
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
         roomRepository.delete(roomEntity)
+    }
+
+    @Transactional
+    override fun searchRooms(
+        name: String?,
+        type: String?,
+        minPrice: Double?,
+        maxPrice: Double?,
+        address: String?,
+        maxOccupancy: Int?,
+        pageable: Pageable
+    ): Page<Room> {
+        return roomRepository.findAll({ root, query, criteriaBuilder ->
+            val predicates = mutableListOf<Predicate>()
+
+            name?.let {
+                predicates.add(criteriaBuilder.like(root.get("name"), "%$it%"))
+            }
+
+            type?.let {
+                predicates.add(criteriaBuilder.equal(root.get<String>("type"), it))
+            }
+
+            minPrice?.let {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("price"), it))
+            }
+
+            maxPrice?.let {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("price"), it))
+            }
+
+            address?.let {
+                predicates.add(criteriaBuilder.like(root.get("address"), "%$it%"))
+            }
+
+            maxOccupancy?.let {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("maxOccupancy"), it))
+            }
+
+            criteriaBuilder.and(*predicates.toTypedArray())
+        }, pageable)
+            .map { Room.fromEntity(it) }
     }
 }

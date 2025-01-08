@@ -30,4 +30,25 @@ data class Review(
             )
         }
     }
+
+    // toDTO() 추가
+    fun toDTO(): ReviewDTO {
+        return ReviewDTO(
+            id = this.id,
+            userId = this.user.id,
+            reservationId = this.reservation.id,
+            roomId = this.room.id,
+            content = this.content,
+            rating = this.rating
+        )
+    }
 }
+
+data class ReviewDTO(
+    val id: Long,
+    val userId: Long,
+    val reservationId: Long,
+    val roomId: Long,
+    val content: String,
+    val rating: Int
+)

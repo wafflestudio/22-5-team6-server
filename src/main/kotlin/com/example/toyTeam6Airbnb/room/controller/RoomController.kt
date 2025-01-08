@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -43,12 +44,12 @@ class RoomController(
         return ResponseEntity.status(HttpStatus.CREATED).body(room.toDTO())
     }
 
-    @GetMapping("/rooms")
+    @GetMapping("/rooms/main")
     fun getRooms(
         pageable: Pageable
     ): ResponseEntity<Page<RoomDTO>> {
         // 정렬 기준 검증 및 기본값 처리
-        val validatedPageable = validatePageable(pageable, listOf("name", "price", "type", "createdAt"))
+        val validatedPageable = validatePageable(pageable)
         val rooms = roomService.getRooms(validatedPageable).map { it.toDTO() }
         return ResponseEntity.ok(rooms)
     }
@@ -88,18 +89,23 @@ class RoomController(
         roomService.deleteRoom(roomId)
         return ResponseEntity.noContent().build()
     }
-}
 
-data class RoomDTO(
-    val id: Long,
-    val hostId: Long,
-    val name: String,
-    val description: String,
-    val type: String,
-    val address: String,
-    val price: Double,
-    val maxOccupancy: Int
-)
+    @GetMapping("/rooms/search")
+    fun searchRooms(
+        @RequestParam(required = false) name: String?,
+        @RequestParam(required = false) type: String?,
+        @RequestParam(required = false) minPrice: Double?,
+        @RequestParam(required = false) maxPrice: Double?,
+        @RequestParam(required = false) address: String?,
+        @RequestParam(required = false) maxOccupancy: Int?,
+        pageable: Pageable
+    ): ResponseEntity<Page<RoomDTO>> {
+        val validatedPage = validatePageable(pageable)
+        val rooms = roomService.searchRooms(name, type, minPrice, maxPrice, address, maxOccupancy, validatedPage)
+            .map { it.toDTO() }
+        return ResponseEntity.ok(rooms)
+    }
+}
 
 data class CreateRoomRequest(
     val name: String,
