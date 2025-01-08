@@ -12,13 +12,13 @@ sealed class ReviewException(
 ) : DomainException(errorCode, httpStatusCode, msg, cause)
 
 class ReviewNotFound : ReviewException(
-    errorCode = 1012,
+    errorCode = 3001,
     httpStatusCode = HttpStatus.CONFLICT,
     msg = "Review doesn't exist"
 )
 
 class ReviewPermissionDenied : ReviewException(
-    errorCode = 1013,
+    errorCode = 3002,
     httpStatusCode = HttpStatus.FORBIDDEN,
     msg = "Permission Denied"
 )
