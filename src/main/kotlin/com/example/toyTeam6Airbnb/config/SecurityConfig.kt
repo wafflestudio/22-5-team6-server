@@ -43,6 +43,7 @@ class SecurityConfig(
         http {
             csrf { disable() }
             authorizeHttpRequests {
+                authorize("/api/v1/rooms/main", permitAll)
                 authorize("/", permitAll)
                 authorize("/error", permitAll)
                 authorize("/api/auth/**", permitAll)
