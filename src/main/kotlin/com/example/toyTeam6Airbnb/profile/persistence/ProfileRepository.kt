@@ -1,3 +1,8 @@
 package com.example.toyTeam6Airbnb.profile.persistence
 
-interface ProfileRepository
+import com.example.toyTeam6Airbnb.user.persistence.UserEntity
+import org.springframework.data.jpa.repository.JpaRepository
+
+interface ProfileRepository : JpaRepository<ProfileEntity, Long> {
+    fun findByUser(user: UserEntity): ProfileEntity?
+}

@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.profile.persistence
 
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -21,6 +22,6 @@ class ProfileEntity(
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     val user: UserEntity,
 
-    val personalInfo: String? = null,
-    val hostedAccommodations: String? = null
+    @Column(nullable = false)
+    var nickname: String
 )
