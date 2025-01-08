@@ -2,7 +2,9 @@ package com.example.toyTeam6Airbnb.room.service
 
 import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
+import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.AuthenticateException
@@ -28,7 +30,7 @@ class RoomServiceImpl(
         name: String,
         description: String,
         type: String,
-        address: String,
+        address: Address,
         price: Double,
         maxOccupancy: Int
     ): Room {
@@ -44,7 +46,8 @@ class RoomServiceImpl(
                 price = price,
                 maxOccupancy = maxOccupancy,
                 reservations = emptyList(),
-                reviews = emptyList()
+                rating = 0.0,
+                reviews = emptyList(),
             ).let {
                 roomRepository.save(it)
             }
@@ -70,7 +73,7 @@ class RoomServiceImpl(
         name: String?,
         description: String?,
         type: String?,
-        address: String?,
+        address: Address?,
         price: Double?,
         maxOccupancy: Int?
     ): Room {
@@ -104,15 +107,16 @@ class RoomServiceImpl(
         type: String?,
         minPrice: Double?,
         maxPrice: Double?,
-        address: String?,
+        address: AddressSearchDTO?,
         maxOccupancy: Int?,
+        rating: Double?,
         pageable: Pageable
     ): Page<Room> {
         return roomRepository.findAll({ root, query, criteriaBuilder ->
             val predicates = mutableListOf<Predicate>()
 
             name?.let {
-                predicates.add(criteriaBuilder.like(root.get("name"), "%$it%"))
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%${it.lowercase()}%"))
             }
 
             type?.let {
@@ -128,11 +132,26 @@ class RoomServiceImpl(
             }
 
             address?.let {
-                predicates.add(criteriaBuilder.like(root.get("address"), "%$it%"))
+                it.country.let { country ->
+                    predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get<Address>("address").get("country")), country.lowercase()))
+                }
+                it.cityOrProvince?.let { cityOrProvince ->
+                    predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get<Address>("address").get("cityOrProvince")), cityOrProvince.lowercase()))
+                }
+                it.districtOrCounty?.let { districtOrCounty ->
+                    predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get<Address>("address").get("districtOrCounty")), districtOrCounty.lowercase()))
+                }
+                it.neighborhoodOrTown?.let { neighborhoodOrTown ->
+                    predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get<Address>("address").get("neighborhoodOrTown")), "%${neighborhoodOrTown.lowercase()}%"))
+                }
             }
 
             maxOccupancy?.let {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("maxOccupancy"), it))
+            }
+
+            rating?.let {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("rating"), it))
             }
 
             criteriaBuilder.and(*predicates.toTypedArray())

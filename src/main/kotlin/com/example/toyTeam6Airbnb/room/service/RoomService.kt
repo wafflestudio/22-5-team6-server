@@ -1,6 +1,8 @@
 package com.example.toyTeam6Airbnb.room.service
 
+import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.user.controller.User
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -11,7 +13,7 @@ interface RoomService {
         name: String,
         description: String,
         type: String,
-        address: String,
+        address: Address,
         price: Double,
         maxOccupancy: Int
     ): Room
@@ -26,7 +28,7 @@ interface RoomService {
         name: String?,
         description: String?,
         type: String?,
-        address: String?,
+        address: Address?,
         price: Double?,
         maxOccupancy: Int?
     ): Room
@@ -38,8 +40,9 @@ interface RoomService {
         type: String?,
         minPrice: Double?,
         maxPrice: Double?,
-        address: String?,
+        address: AddressSearchDTO?,
         maxOccupancy: Int?,
+        rating: Double?,
         pageable: Pageable
     ): Page<Room>
 }
