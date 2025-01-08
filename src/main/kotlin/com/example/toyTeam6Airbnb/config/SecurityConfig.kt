@@ -4,6 +4,7 @@ import com.example.toyTeam6Airbnb.user.JwtAuthenticationFilter
 import com.example.toyTeam6Airbnb.user.service.PrincipalDetailsService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.ProviderManager
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
@@ -43,15 +44,20 @@ class SecurityConfig(
         http {
             csrf { disable() }
             authorizeHttpRequests {
-                authorize("/api/v1/rooms/main", permitAll)
                 authorize("/", permitAll)
                 authorize("/error", permitAll)
-                authorize("/api/auth/**", permitAll)
-                authorize("/api/oauth2/**", permitAll)
                 authorize("/swagger-ui/**", permitAll)
                 authorize("/api-docs/**", permitAll)
                 authorize("/v3/api-docs/**", permitAll)
                 authorize("/swagger-resources/**", permitAll)
+
+                // APIs that do not require authentication
+                authorize("/api/auth/**", permitAll)
+                authorize("/api/oauth2/**", permitAll)
+                authorize(HttpMethod.GET, "/api/v1/rooms/**", permitAll)
+                authorize(HttpMethod.GET, "/api/v1/reservations/availability/**", permitAll)
+                authorize(HttpMethod.GET, "/api/v1/reviews/**", permitAll)
+                authorize("/error", permitAll)
                 authorize(anyRequest, authenticated)
             }
             formLogin {
