@@ -12,7 +12,8 @@ interface ReservationService {
         user: User,
         roomId: Long,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
+        numberOfGuests: Int
     ): Reservation
 
     fun deleteReservation(
@@ -24,7 +25,9 @@ interface ReservationService {
         user: User,
         reservationId: Long,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
+        numberOfGuests: Int
+
     ): Reservation
 
     fun getReservation(
@@ -35,14 +38,14 @@ interface ReservationService {
         user: User
     ): List<Reservation>
 
-    fun getReservationsByRoom(
-        roomId: Long
-    ): List<Reservation>
-
-    fun getReservationsByDate(
-        startDate: LocalDate,
-        endDate: LocalDate
-    ): List<Reservation>
+//    fun getReservationsByRoom(
+//        roomId: Long
+//    ): List<Reservation>
+//
+//    fun getReservationsByDate(
+//        startDate: LocalDate,
+//        endDate: LocalDate
+//    ): List<Reservation>
 
     fun getAvailabilityByMonth(roomId: Long, yearMonth: YearMonth): RoomAvailabilityResponse
 }

@@ -1,8 +1,10 @@
 package com.example.toyTeam6Airbnb.reservation.service
 
+import com.example.toyTeam6Airbnb.reservation.MaxOccupancyExceeded
 import com.example.toyTeam6Airbnb.reservation.ReservationNotFound
 import com.example.toyTeam6Airbnb.reservation.ReservationPermissionDenied
 import com.example.toyTeam6Airbnb.reservation.ReservationUnavailable
+import com.example.toyTeam6Airbnb.reservation.ZeroGuests
 import com.example.toyTeam6Airbnb.reservation.controller.Reservation
 import com.example.toyTeam6Airbnb.reservation.controller.RoomAvailabilityResponse
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
@@ -32,12 +34,19 @@ class ReservationServiceImpl(
         user: User,
         roomId: Long,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
+        numberOfGuests: Int
     ): Reservation {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
 
         if (!isAvailable(roomEntity, startDate, endDate)) throw ReservationUnavailable()
+
+        // 예약 인원수가 초과할 경우 예외 발생
+        if (numberOfGuests > roomEntity.maxOccupancy) throw MaxOccupancyExceeded()
+
+        // 예약 인원이 0명인 경우 예외 발생
+        if (numberOfGuests == 0) throw ZeroGuests()
 
         val reservationEntity = ReservationEntity(
             user = userEntity,
@@ -45,7 +54,8 @@ class ReservationServiceImpl(
             review = null,
             startDate = startDate,
             endDate = endDate,
-            totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate)
+            totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate),
+            numberOfGuests = numberOfGuests
         ).let {
             reservationRepository.save(it)
         }
@@ -79,7 +89,8 @@ class ReservationServiceImpl(
         user: User,
         reservationId: Long,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
+        numberOfGuests: Int
     ): Reservation {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
@@ -89,9 +100,13 @@ class ReservationServiceImpl(
 
         if (!isAvailable(roomEntity, startDate, endDate, reservationEntity.id)) throw ReservationUnavailable()
 
+        if (numberOfGuests > roomEntity.maxOccupancy) throw MaxOccupancyExceeded()
+        if (numberOfGuests == 0) throw ZeroGuests()
+
         reservationEntity.startDate = startDate
         reservationEntity.endDate = endDate
         reservationEntity.totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate)
+        reservationEntity.numberOfGuests = numberOfGuests
         reservationRepository.save(reservationEntity)
 
         return Reservation.fromEntity(reservationEntity)
@@ -111,21 +126,21 @@ class ReservationServiceImpl(
         return reservationRepository.findAllByUser(userEntity).map(Reservation::fromEntity)
     }
 
-    @Transactional
-    override fun getReservationsByRoom(roomId: Long): List<Reservation> {
-        val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
+//    @Transactional
+//    override fun getReservationsByRoom(roomId: Long): List<Reservation> {
+//        val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
+//
+//        return reservationRepository.findAllByRoom(roomEntity).map(Reservation::fromEntity)
+//    }
 
-        return reservationRepository.findAllByRoom(roomEntity).map(Reservation::fromEntity)
-    }
-
-    @Transactional
-    override fun getReservationsByDate(startDate: LocalDate, endDate: LocalDate): List<Reservation> {
-        val reservations = reservationRepository.findAll().filter { reservation ->
-            startDate < reservation.endDate && endDate > reservation.startDate
-        }
-
-        return reservations.map(Reservation::fromEntity)
-    }
+//    @Transactional
+//    override fun getReservationsByDate(startDate: LocalDate, endDate: LocalDate): List<Reservation> {
+//        val reservations = reservationRepository.findAll().filter { reservation ->
+//            startDate < reservation.endDate && endDate > reservation.startDate
+//        }
+//
+//        return reservations.map(Reservation::fromEntity)
+//    }
 
     // 특정 방의 해당 월의 예약 가능한 날짜와 예약 불가능한 날짜를 가져오는 API를 위한 서비스 로직
     @Transactional
