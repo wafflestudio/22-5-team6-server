@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.room.controller
 
+import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import java.time.Instant
 
@@ -9,9 +10,10 @@ data class Room(
     val name: String,
     val description: String,
     val type: String,
-    val address: String,
+    val address: Address,
     val price: Double,
     val maxOccupancy: Int,
+    val rating: Double,
     val createdAt: Instant,
     val updatedAt: Instant
 ) {
@@ -26,11 +28,13 @@ data class Room(
                 address = entity.address,
                 price = entity.price,
                 maxOccupancy = entity.maxOccupancy,
+                rating = entity.rating,
                 createdAt = entity.createdAt,
                 updatedAt = entity.updatedAt
             )
         }
     }
+
     fun toDTO(): RoomDTO {
         return RoomDTO(
             id = this.id,
@@ -40,7 +44,20 @@ data class Room(
             type = this.type,
             address = this.address,
             price = this.price,
-            maxOccupancy = this.maxOccupancy
+            maxOccupancy = this.maxOccupancy,
+            rating = this.rating,
         )
     }
 }
+
+data class RoomDTO (
+    val id: Long,
+    val hostId: Long,
+    val name: String,
+    val description: String,
+    val type: String,
+    val address: Address,
+    val price: Double,
+    val maxOccupancy: Int,
+    val rating: Double
+)

@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.room.controller
 
+import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.service.RoomService
 import com.example.toyTeam6Airbnb.room.validatePageable
 import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
@@ -38,7 +39,7 @@ class RoomController(
             type = request.type,
             address = request.address,
             price = request.price,
-            maxOccupancy = request.maxOccupancy
+            maxOccupancy = request.maxOccupancy,
         )
 
         return ResponseEntity.status(HttpStatus.CREATED).body(room.toDTO())
@@ -48,7 +49,6 @@ class RoomController(
     fun getRooms(
         pageable: Pageable
     ): ResponseEntity<Page<RoomDTO>> {
-        // 정렬 기준 검증 및 기본값 처리
         val validatedPageable = validatePageable(pageable)
         val rooms = roomService.getRooms(validatedPageable).map { it.toDTO() }
         return ResponseEntity.ok(rooms)
@@ -96,33 +96,30 @@ class RoomController(
         @RequestParam(required = false) type: String?,
         @RequestParam(required = false) minPrice: Double?,
         @RequestParam(required = false) maxPrice: Double?,
-        @RequestParam(required = false) address: String?,
+        @RequestParam(required = false) address: AddressSearchDTO?,
         @RequestParam(required = false) maxOccupancy: Int?,
+        @RequestParam(required = false) rating: Double?,
         pageable: Pageable
     ): ResponseEntity<Page<RoomDTO>> {
         val validatedPage = validatePageable(pageable)
-        val rooms = roomService.searchRooms(name, type, minPrice, maxPrice, address, maxOccupancy, validatedPage)
+        val rooms = roomService.searchRooms(name, type, minPrice, maxPrice, address, maxOccupancy, rating, validatedPage)
             .map { it.toDTO() }
         return ResponseEntity.ok(rooms)
     }
 }
 
-data class RoomDTO(
-    val id: Long,
-    val hostId: Long,
-    val name: String,
-    val description: String,
-    val type: String,
-    val address: String,
-    val price: Double,
-    val maxOccupancy: Int
+data class AddressSearchDTO(
+    val country: String,
+    val cityOrProvince: String?,
+    val districtOrCounty: String?,
+    val neighborhoodOrTown: String?
 )
 
 data class CreateRoomRequest(
     val name: String,
     val description: String,
     val type: String,
-    val address: String,
+    val address: Address,
     val price: Double,
     val maxOccupancy: Int
 )
@@ -131,7 +128,7 @@ data class UpdateRoomRequest(
     val name: String?,
     val description: String?,
     val type: String?,
-    val address: String?,
+    val address: Address?,
     val price: Double?,
     val maxOccupancy: Int?
 )
