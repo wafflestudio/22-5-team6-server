@@ -1,5 +1,7 @@
 package com.example.toyTeam6Airbnb.room.controller
 
+import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import java.time.Instant
 
 data class Room(
@@ -7,15 +9,17 @@ data class Room(
     val hostId: Long,
     val name: String,
     val description: String,
-    val type: String,
-    val address: String,
+    val type: RoomType,
+    val address: Address,
     val price: Double,
     val maxOccupancy: Int,
+    val rating: Double,
     val createdAt: Instant,
     val updatedAt: Instant
 ) {
     companion object {
         fun fromEntity(entity: com.example.toyTeam6Airbnb.room.persistence.RoomEntity): Room {
+            val averageRating = entity.reviews.map { it.rating }.average()
             return Room(
                 id = entity.id!!,
                 hostId = entity.host.id!!,
@@ -25,11 +29,13 @@ data class Room(
                 address = entity.address,
                 price = entity.price,
                 maxOccupancy = entity.maxOccupancy,
+                rating = averageRating,
                 createdAt = entity.createdAt,
                 updatedAt = entity.updatedAt
             )
         }
     }
+
     fun toDTO(): RoomDTO {
         return RoomDTO(
             id = this.id,
@@ -39,7 +45,10 @@ data class Room(
             type = this.type,
             address = this.address,
             price = this.price,
-            maxOccupancy = this.maxOccupancy
+            maxOccupancy = this.maxOccupancy,
+            rating = this.rating,
+            createdAt = this.createdAt,
+            updatedAt = this.updatedAt
         )
     }
 }
@@ -49,8 +58,11 @@ data class RoomDTO(
     val hostId: Long,
     val name: String,
     val description: String,
-    val type: String,
-    val address: String,
+    val type: RoomType,
+    val address: Address,
     val price: Double,
-    val maxOccupancy: Int
+    val maxOccupancy: Int,
+    val rating: Double,
+    val createdAt: Instant,
+    val updatedAt: Instant
 )
