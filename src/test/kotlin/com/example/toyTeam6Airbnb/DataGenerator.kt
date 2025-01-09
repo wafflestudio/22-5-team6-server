@@ -88,32 +88,32 @@ class DataGenerator(
         )
     }
 
-    fun generateMultipleReservations(
-        user: UserEntity? = null,
-        room: RoomEntity? = null,
-        numberOfReservations: Int = 2,
-        startDate: LocalDate? = null,
-        endDate: LocalDate? = null
-    ): List<ReservationEntity> {
-        val userEntity = user ?: generateUserAndToken().first
-        val roomEntity = room ?: generateRoom()
-        val reservations = mutableListOf<ReservationEntity>()
-
-        repeat(numberOfReservations) {
-            val reservation = ReservationEntity(
-                user = userEntity,
-                room = roomEntity,
-                review = generateReview(),
-                startDate = startDate ?: LocalDate.now().plusDays((1..100).random().toLong()),
-                endDate = endDate ?: LocalDate.now().plusDays((1..100).random().toLong()),
-                totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate),
-                numberOfGuests = (1..10).random()
-            )
-            reservations.add(reservationRepository.save(reservation))
-        }
-
-        return reservations
-    }
+//    fun generateMultipleReservations(
+//        user: UserEntity? = null,
+//        room: RoomEntity? = null,
+//        numberOfReservations: Int = 2,
+//        startDate: LocalDate? = null,
+//        endDate: LocalDate? = null
+//    ): List<ReservationEntity> {
+//        val userEntity = user ?: generateUserAndToken().first
+//        val roomEntity = room ?: generateRoom()
+//        val reservations = mutableListOf<ReservationEntity>()
+//
+//        repeat(numberOfReservations) {
+//            val reservation = ReservationEntity(
+//                user = userEntity,
+//                room = roomEntity,
+//                review = null,
+//                startDate = startDate ?: LocalDate.now().plusDays((1..100).random().toLong()),
+//                endDate = endDate ?: LocalDate.now().plusDays((1..100).random().toLong()),
+//                totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate),
+//                numberOfGuests = (1..10).random()
+//            )
+//            reservations.add(reservationRepository.save(reservation))
+//        }
+//
+//        return reservations
+//    }
 
     fun generateRoom(
         host: UserEntity? = null,
@@ -144,32 +144,32 @@ class DataGenerator(
         )
     }
 
-    fun generateMultipleRooms(
-        host: UserEntity? = null,
-        numberOfRooms: Int = 3
-    ): List<RoomEntity> {
-        val hostEntity = host ?: generateUserAndToken().first
-        val rooms = mutableListOf<RoomEntity>()
-
-        repeat(numberOfRooms) {
-            val randomType = RoomType.entries.toTypedArray().random()
-            val room = RoomEntity(
-                host = hostEntity,
-                name = "room-${(0..10000).random()}",
-                description = "description-${(0..10000).random()}",
-                type = randomType,
-                address = Address(
-                    sido = "sido-${(0..10000).random()}",
-                    sigungu = "sigungu-${(0..10000).random()}",
-                    street = "street-${(0..10000).random()}",
-                    detail = "detail-${(0..10000).random()}"
-                ),
-                price = (10000..100000).random().toDouble(),
-                maxOccupancy = (1..10).random()
-            )
-            rooms.add(roomRepository.save(room))
-        }
-
-        return rooms
-    }
+//    fun generateMultipleRooms(
+//        host: UserEntity? = null,
+//        numberOfRooms: Int = 3
+//    ): List<RoomEntity> {
+//        val hostEntity = host ?: generateUserAndToken().first
+//        val rooms = mutableListOf<RoomEntity>()
+//
+//        repeat(numberOfRooms) {
+//            val randomType = RoomType.entries.toTypedArray().random()
+//            val room = RoomEntity(
+//                host = hostEntity,
+//                name = "room-${(0..10000).random()}",
+//                description = "description-${(0..10000).random()}",
+//                type = randomType,
+//                address = Address(
+//                    sido = "sido-${(0..10000).random()}",
+//                    sigungu = "sigungu-${(0..10000).random()}",
+//                    street = "street-${(0..10000).random()}",
+//                    detail = "detail-${(0..10000).random()}"
+//                ),
+//                price = (10000..100000).random().toDouble(),
+//                maxOccupancy = (1..10).random()
+//            )
+//            rooms.add(roomRepository.save(room))
+//        }
+//
+//        return rooms
+//    }
 }
