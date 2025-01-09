@@ -1,6 +1,6 @@
 package com.example.toyTeam6Airbnb.room.service
 
-import com.example.toyTeam6Airbnb.reservation.service.ReservationService
+import com.example.toyTeam6Airbnb.room.DuplicateRoomException
 import com.example.toyTeam6Airbnb.room.InvalidAddressException
 import com.example.toyTeam6Airbnb.room.InvalidDescriptionException
 import com.example.toyTeam6Airbnb.room.InvalidMaxOccupancyException
@@ -12,6 +12,7 @@ import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
 import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
@@ -27,8 +28,7 @@ import java.time.LocalDate
 @Service
 class RoomServiceImpl(
     private val roomRepository: RoomRepository,
-    private val userRepository: UserRepository,
-    private val reservationService: ReservationService
+    private val userRepository: UserRepository
 ) : RoomService {
 
     @Transactional
@@ -38,12 +38,17 @@ class RoomServiceImpl(
         description: String,
         type: RoomType,
         address: Address,
+        roomDetails: RoomDetails,
         price: Double,
         maxOccupancy: Int
     ): Room {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
 
-        validateRoomDetails(name, description, type, address, price, maxOccupancy)
+        validateRoomInfo(name, description, type, address, price, maxOccupancy)
+
+        if (roomRepository.existsByNameAndTypeAndAddress(name, type, address)) {
+            throw DuplicateRoomException()
+        }
 
         val roomEntity = RoomEntity(
             host = hostEntity,
@@ -51,6 +56,7 @@ class RoomServiceImpl(
             description = description,
             type = type,
             address = address,
+            roomDetails = roomDetails,
             price = price,
             maxOccupancy = maxOccupancy,
             reservations = emptyList(),
@@ -81,6 +87,7 @@ class RoomServiceImpl(
         description: String,
         type: RoomType,
         address: Address,
+        roomDetails: RoomDetails,
         price: Double,
         maxOccupancy: Int
     ): Room {
@@ -91,7 +98,13 @@ class RoomServiceImpl(
             throw RoomPermissionDeniedException()
         }
 
-        validateRoomDetails(name, description, type, address, price, maxOccupancy)
+        validateRoomInfo(name, description, type, address, price, maxOccupancy)
+
+        if (roomRepository.existsByNameAndTypeAndAddress(name, type, address) &&
+            (roomEntity.name != name || roomEntity.type != type || roomEntity.address != address)
+        ) {
+            throw DuplicateRoomException()
+        }
 
         roomEntity.name = name
         roomEntity.description = description
@@ -145,7 +158,7 @@ class RoomServiceImpl(
         return rooms.map { Room.fromEntity(it) }
     }
 
-    private fun validateRoomDetails(
+    private fun validateRoomInfo(
         name: String,
         description: String,
         type: RoomType,
