@@ -6,6 +6,7 @@ import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
 import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
@@ -88,39 +89,13 @@ class DataGenerator(
         )
     }
 
-//    fun generateMultipleReservations(
-//        user: UserEntity? = null,
-//        room: RoomEntity? = null,
-//        numberOfReservations: Int = 2,
-//        startDate: LocalDate? = null,
-//        endDate: LocalDate? = null
-//    ): List<ReservationEntity> {
-//        val userEntity = user ?: generateUserAndToken().first
-//        val roomEntity = room ?: generateRoom()
-//        val reservations = mutableListOf<ReservationEntity>()
-//
-//        repeat(numberOfReservations) {
-//            val reservation = ReservationEntity(
-//                user = userEntity,
-//                room = roomEntity,
-//                review = null,
-//                startDate = startDate ?: LocalDate.now().plusDays((1..100).random().toLong()),
-//                endDate = endDate ?: LocalDate.now().plusDays((1..100).random().toLong()),
-//                totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate),
-//                numberOfGuests = (1..10).random()
-//            )
-//            reservations.add(reservationRepository.save(reservation))
-//        }
-//
-//        return reservations
-//    }
-
     fun generateRoom(
         host: UserEntity? = null,
         name: String? = null,
         description: String? = null,
         type: RoomType? = null,
         address: Address? = null,
+        roomDetails: RoomDetails? = null,
         price: Double? = null,
         maxOccupancy: Int? = null
     ): RoomEntity {
@@ -138,38 +113,15 @@ class DataGenerator(
                     street = "street-${(0..10000).random()}",
                     detail = "detail-${(0..10000).random()}"
                 ),
+                roomDetails = roomDetails ?: RoomDetails(
+                    wifi = (0..1).random() == 1,
+                    selfCheckin = (0..1).random() == 1,
+                    luggage = (0..1).random() == 1,
+                    TV = (0..1).random() == 1
+                ),
                 price = price ?: (10000..100000).random().toDouble(),
                 maxOccupancy = maxOccupancy ?: (1..10).random()
             )
         )
     }
-
-//    fun generateMultipleRooms(
-//        host: UserEntity? = null,
-//        numberOfRooms: Int = 3
-//    ): List<RoomEntity> {
-//        val hostEntity = host ?: generateUserAndToken().first
-//        val rooms = mutableListOf<RoomEntity>()
-//
-//        repeat(numberOfRooms) {
-//            val randomType = RoomType.entries.toTypedArray().random()
-//            val room = RoomEntity(
-//                host = hostEntity,
-//                name = "room-${(0..10000).random()}",
-//                description = "description-${(0..10000).random()}",
-//                type = randomType,
-//                address = Address(
-//                    sido = "sido-${(0..10000).random()}",
-//                    sigungu = "sigungu-${(0..10000).random()}",
-//                    street = "street-${(0..10000).random()}",
-//                    detail = "detail-${(0..10000).random()}"
-//                ),
-//                price = (10000..100000).random().toDouble(),
-//                maxOccupancy = (1..10).random()
-//            )
-//            rooms.add(roomRepository.save(room))
-//        }
-//
-//        return rooms
-//    }
 }
