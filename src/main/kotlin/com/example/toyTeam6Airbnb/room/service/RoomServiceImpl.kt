@@ -1,6 +1,5 @@
 package com.example.toyTeam6Airbnb.room.service
 
-import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.reservation.service.ReservationService
 import com.example.toyTeam6Airbnb.room.InvalidAddressException
 import com.example.toyTeam6Airbnb.room.InvalidDescriptionException
@@ -18,7 +17,6 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
-import jakarta.persistence.criteria.Predicate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -30,7 +28,7 @@ import java.time.LocalDate
 class RoomServiceImpl(
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
-    private val reservationService: ReservationService,
+    private val reservationService: ReservationService
 ) : RoomService {
 
     @Transactional

@@ -12,5 +12,5 @@ enum class RoomType {
     FARM, // 농장
     KIDS, // 키즈
     ISLAND, // 섬
-    COUNTRY_SIDE, // 시골
+    COUNTRY_SIDE // 시골
 }

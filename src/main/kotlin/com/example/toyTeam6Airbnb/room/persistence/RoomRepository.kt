@@ -1,12 +1,12 @@
 package com.example.toyTeam6Airbnb.room.persistence
 
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
-import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor
-import org.springframework.data.repository.query.Param
-import org.springframework.data.jpa.repository.Query
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import java.time.LocalDate
 
 interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExecutor<RoomEntity> {
@@ -58,6 +58,4 @@ interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExec
         @Param("endDate") endDate: LocalDate?,
         pageable: Pageable
     ): Page<RoomEntity>
-
 }
-
