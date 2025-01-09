@@ -148,11 +148,14 @@ class RoomServiceImpl(
             type = type,
             minPrice = minPrice,
             maxPrice = maxPrice,
-            address = address,
             maxOccupancy = maxOccupancy,
             rating = rating,
             startDate = startDate,
             endDate = endDate,
+            sido = address?.sido,
+            sigungu = address?.sigungu,
+            street = address?.street,
+            detail = address?.detail,
             pageable = pageable
         )
         return rooms.map { Room.fromEntity(it) }

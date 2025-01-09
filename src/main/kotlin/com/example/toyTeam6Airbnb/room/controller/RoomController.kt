@@ -106,13 +106,17 @@ class RoomController(
         @RequestParam(required = false) type: RoomType?,
         @RequestParam(required = false) minPrice: Double?,
         @RequestParam(required = false) maxPrice: Double?,
-        @RequestParam(required = false) address: AddressSearchDTO?,
+        @RequestParam(required = false) sido: String?,
+        @RequestParam(required = false) sigungu: String?,
+        @RequestParam(required = false) street: String?,
+        @RequestParam(required = false) detail: String?,
         @RequestParam(required = false) maxOccupancy: Int?,
         @RequestParam(required = false) rating: Double?,
         @RequestParam(required = false) startDate: LocalDate?,
         @RequestParam(required = false) endDate: LocalDate?,
         pageable: Pageable
     ): ResponseEntity<Page<RoomDTO>> {
+        val address = AddressSearchDTO(sido, sigungu, street, detail)
         val validatedPage = validatePageable(pageable)
         val rooms = roomService.searchRooms(name, type, minPrice, maxPrice, address, maxOccupancy, rating, startDate, endDate, validatedPage)
             .map { it.toDTO() }
@@ -121,10 +125,10 @@ class RoomController(
 }
 
 data class AddressSearchDTO(
-    val sido: String?,
-    val sigungu: String?,
-    val street: String?,
-    val detail: String?
+    val sido: String? = null,
+    val sigungu: String? = null,
+    val street: String? = null,
+    val detail: String? = null
 )
 
 data class CreateRoomRequest(
