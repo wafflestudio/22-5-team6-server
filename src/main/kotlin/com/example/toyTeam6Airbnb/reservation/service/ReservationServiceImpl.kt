@@ -65,7 +65,7 @@ class ReservationServiceImpl(
 
     fun isAvailable(room: RoomEntity, startDate: LocalDate, endDate: LocalDate, currentReservationId: Long? = null): Boolean {
         // exception 발생도 함께 처리
-        if (startDate > endDate) throw ReservationUnavailable()
+        if (startDate >= endDate) throw ReservationUnavailable()
         val reservations = reservationRepository.findAllByRoom(room)
 
         // 현재 예약 건을 제외하고, 다른 예약과 겹치는 여부를 확인함.

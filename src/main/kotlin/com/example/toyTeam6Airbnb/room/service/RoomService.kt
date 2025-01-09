@@ -4,13 +4,13 @@ import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
 import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
-import com.example.toyTeam6Airbnb.user.controller.User
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import java.time.LocalDate
 
 interface RoomService {
     fun createRoom(
-        host: User,
+        hostId: Long,
         name: String,
         description: String,
         type: RoomType,
@@ -24,7 +24,7 @@ interface RoomService {
     fun getRoomDetails(roomId: Long): Room
 
     fun updateRoom(
-        host: User,
+        hostId: Long,
         roomId: Long,
         name: String,
         description: String,
@@ -34,7 +34,10 @@ interface RoomService {
         maxOccupancy: Int
     ): Room
 
-    fun deleteRoom(userId: Long, roomId: Long)
+    fun deleteRoom(
+        userId: Long,
+        roomId: Long
+    )
 
     fun searchRooms(
         name: String?,
@@ -44,6 +47,8 @@ interface RoomService {
         address: AddressSearchDTO?,
         maxOccupancy: Int?,
         rating: Double?,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
         pageable: Pageable
     ): Page<Room>
 }
