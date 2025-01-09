@@ -51,7 +51,8 @@ class SecurityConfig(
             "Origin",
             "X-Requested-With",
             "Content-Type",
-            "Authorization"
+            "Authorization",
+            "Location"
         )
         configuration.allowCredentials = true
         configuration.maxAge = 3600L
