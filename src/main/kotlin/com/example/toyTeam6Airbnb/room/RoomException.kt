@@ -12,13 +12,13 @@ sealed class RoomException(
 ) : DomainException(errorCode, httpStatusCode, msg, cause)
 
 class RoomNotFoundException : RoomException(
-    errorCode = 1007,
+    errorCode = 2001,
     httpStatusCode = HttpStatus.NOT_FOUND,
     msg = "Room does not exist"
 )
 
 class RoomPermissionDeniedException : RoomException(
-    errorCode = 1008,
+    errorCode = 2002,
     httpStatusCode = HttpStatus.FORBIDDEN,
     msg = "Permission denied"
 )

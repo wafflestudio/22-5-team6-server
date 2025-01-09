@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1")
@@ -106,17 +106,6 @@ class RoomController(
         return ResponseEntity.ok(rooms)
     }
 }
-
-data class RoomDTO(
-    val id: Long,
-    val hostId: Long,
-    val name: String,
-    val description: String,
-    val type: String,
-    val address: String,
-    val price: Double,
-    val maxOccupancy: Int
-)
 
 data class CreateRoomRequest(
     val name: String,
