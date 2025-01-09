@@ -21,7 +21,7 @@ class UserServiceImpl(
         password: String
     ): User? {
         if (username.startsWith("OAUTH")) throw SignUpBadUsernameException()
-        if (userRepository.findByUsername(username) != null) throw SignUpUsernameConflictException()
+        if (userRepository.existsByUsername(username)) throw SignUpUsernameConflictException()
         val userEntity = UserEntity(
             username = username,
             password = passwordEncoder.encode(password),

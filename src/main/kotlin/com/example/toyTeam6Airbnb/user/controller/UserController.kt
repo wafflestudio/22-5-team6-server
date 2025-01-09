@@ -30,14 +30,14 @@ class UserController(
 
     @PostMapping("/auth/register")
     fun register(
-        @RequestBody request: registerRequest
+        @RequestBody request: RegisterRequest
     ): ResponseEntity<Unit> {
         userService.register(username = request.username, password = request.password)
         return ResponseEntity.ok().build()
     }
 }
 
-data class registerRequest(
+data class RegisterRequest(
     val username: String,
     val password: String
 )
