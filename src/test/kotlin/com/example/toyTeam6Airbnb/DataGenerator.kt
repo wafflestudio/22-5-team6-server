@@ -100,7 +100,7 @@ class DataGenerator(
                 host = hostEntity,
                 name = name ?: "room-${(0..10000).random()}",
                 description = description ?: "description-${(0..10000).random()}",
-                type = type ?: "",
+                type = type ?: "APARTMENT",
                 address = address ?: "",
                 price = price ?: (10000..100000).random().toDouble(),
                 maxOccupancy = maxOccupancy ?: (1..10).random()
