@@ -1,5 +1,7 @@
 package com.example.toyTeam6Airbnb.room.controller
 
+import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.room.service.RoomService
 import com.example.toyTeam6Airbnb.room.validatePageable
 import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
@@ -84,43 +86,52 @@ class RoomController(
 
     @DeleteMapping("/rooms/{roomId}")
     fun deleteRoom(
+        @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long
     ): ResponseEntity<Unit> {
-        roomService.deleteRoom(roomId)
+        roomService.deleteRoom(User.fromEntity(principalDetails.getUser()).id, roomId)
         return ResponseEntity.noContent().build()
     }
 
     @GetMapping("/rooms/search")
     fun searchRooms(
         @RequestParam(required = false) name: String?,
-        @RequestParam(required = false) type: String?,
+        @RequestParam(required = false) type: RoomType?,
         @RequestParam(required = false) minPrice: Double?,
         @RequestParam(required = false) maxPrice: Double?,
-        @RequestParam(required = false) address: String?,
+        @RequestParam(required = false) address: AddressSearchDTO?,
         @RequestParam(required = false) maxOccupancy: Int?,
+        @RequestParam(required = false) rating: Double?,
         pageable: Pageable
     ): ResponseEntity<Page<RoomDTO>> {
         val validatedPage = validatePageable(pageable)
-        val rooms = roomService.searchRooms(name, type, minPrice, maxPrice, address, maxOccupancy, validatedPage)
+        val rooms = roomService.searchRooms(name, type, minPrice, maxPrice, address, maxOccupancy, rating, validatedPage)
             .map { it.toDTO() }
         return ResponseEntity.ok(rooms)
     }
 }
 
+data class AddressSearchDTO(
+    val country: String?,
+    val cityOrProvince: String?,
+    val districtOrCounty: String?,
+    val neighborhoodOrTown: String?
+)
+
 data class CreateRoomRequest(
     val name: String,
     val description: String,
-    val type: String,
-    val address: String,
+    val type: RoomType,
+    val address: Address,
     val price: Double,
     val maxOccupancy: Int
 )
 
 data class UpdateRoomRequest(
-    val name: String?,
-    val description: String?,
-    val type: String?,
-    val address: String?,
-    val price: Double?,
-    val maxOccupancy: Int?
+    val name: String,
+    val description: String,
+    val type: RoomType,
+    val address: Address,
+    val price: Double,
+    val maxOccupancy: Int
 )

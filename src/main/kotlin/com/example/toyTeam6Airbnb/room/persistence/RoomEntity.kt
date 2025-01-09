@@ -4,6 +4,7 @@ import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import jakarta.persistence.Column
+import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -31,9 +32,9 @@ class RoomEntity(
     @Column(columnDefinition = "TEXT", nullable = false)
     var description: String,
     @Column(nullable = false)
-    var type: String,
-    @Column(columnDefinition = "TEXT", nullable = false)
-    var address: String,
+    var type: RoomType,
+    @Embedded
+    var address: Address,
     @Column(nullable = false)
     var price: Double,
     @Column(nullable = false)
