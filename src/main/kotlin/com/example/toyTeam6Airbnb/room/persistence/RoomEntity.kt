@@ -35,6 +35,8 @@ class RoomEntity(
     var type: RoomType,
     @Embedded
     var address: Address,
+    @Embedded
+    var roomDetails: RoomDetails,
     @Column(nullable = false)
     var price: Double,
     @Column(nullable = false)

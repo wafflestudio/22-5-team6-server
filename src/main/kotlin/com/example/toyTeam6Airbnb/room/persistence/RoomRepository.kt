@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param
 import java.time.LocalDate
 
 interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExecutor<RoomEntity> {
+    fun existsByNameAndTypeAndAddress(name: String, type: RoomType, address: Address): Boolean
 
     @Query(
         """
