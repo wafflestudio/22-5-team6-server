@@ -45,7 +45,10 @@ class SecurityConfig(
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("http://localhost:5173") // Vite
+        configuration.allowedOrigins = listOf(
+            "http://localhost:5173",
+            "https://d1m69dle8ss110.cloudfront.net",
+            "https://d2gjarpl85ijp5.cloudfront.net") // Vite
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
         configuration.allowedHeaders = listOf(
             "Origin",
@@ -54,6 +57,7 @@ class SecurityConfig(
             "Authorization",
             "Location"
         )
+        configuration.exposedHeaders = listOf("Authorization", "Location")
         configuration.allowCredentials = true
         configuration.maxAge = 3600L
 
