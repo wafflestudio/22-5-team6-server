@@ -32,14 +32,25 @@ class RoomControllerTest {
         val (user, token) = dataGenerator.generateUserAndToken()
 
         val requestBody = """
-            {
-                "name": "Sample Room",
-                "description": "A nice place to stay",
-                "type": "Apartment",
-                "address": "123 Main St, Anytown, USA",
-                "price": 100.0,
-                "maxOccupancy": 4
-            }
+        {
+            "name": "Sample Room",
+            "description": "A nice place to stay",
+            "type": "APARTMENT",
+            "address": {
+                "sido": "Seoul",
+                "sigungu": "Gangnam",
+                "street": "Gangnam Daero",
+                "detail": "12345"
+            },
+            "roomDetails": {
+                "wifi": true,
+                "selfCheckin": true,
+                "luggage": true,
+                "TV": true
+            },
+            "price": 10000,
+            "maxOccupancy": 4
+        }
         """.trimIndent()
 
         val result = mockMvc.perform(
@@ -63,14 +74,26 @@ class RoomControllerTest {
         // create a room with mockmvc
         val requestBody = """
             {
-                "name": "Sample Room",
+                "name": "Sample Room_2",
                 "description": "A nice place to stay",
-                "type": "Apartment",
-                "address": "123 Main St, Anytown, USA",
-                "price": 100.0,
+                "type": "VILLA",
+                "address": {
+                    "sido": "Seoul",
+                    "sigungu": "Gangnam",
+                    "street": "Gangnam Daero",
+                    "detail": "34567"
+                },
+                "roomDetails": {
+                    "wifi": true,
+                    "selfCheckin": true,
+                    "luggage": true,
+                    "TV": true
+                },
+                "price": 100000,
                 "maxOccupancy": 4
             }
         """.trimIndent()
+
         val create_result = mockMvc.perform(
             MockMvcRequestBuilders.post("/api/v1/rooms")
                 .header("Authorization", "Bearer $token")
@@ -87,7 +110,7 @@ class RoomControllerTest {
 
         // room should be accessible without authentication
         val result = mockMvc.perform(
-            MockMvcRequestBuilders.get("/api/v1/rooms/$roomId")
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/$roomId")
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
@@ -166,9 +189,20 @@ class RoomControllerTest {
             {
                 "name": "Sample Room",
                 "description": "A nice place to stay",
-                "type": "Apartment",
-                "address": "123 Main St, Anytown, USA",
-                "price": 100.0,
+                "type": "APARTMENT",
+                "address": {
+                    "sido": "Seoul",
+                    "sigungu": "Gangnam",
+                    "street": "Gangnam Daero",
+                    "detail": "12345"
+                },
+                "roomDetails": {
+                    "wifi": true,
+                    "selfCheckin": true,
+                    "luggage": true,
+                    "TV": true
+                },
+                "price": 10000,
                 "maxOccupancy": 4
             }
         """.trimIndent()
@@ -190,12 +224,23 @@ class RoomControllerTest {
 
         val updateRequestBody = """
             {
-                "name": "Updated Room",
-                "description": "A nicer place to stay",
-                "type": "House",
-                "address": "456 Main St, Anytown, USA",
-                "price": 200.0,
-                "maxOccupancy": 6
+                "name": "Sample Room2",
+                "description": "Samlpe Description",
+                "type": "VILLA",
+                "address": {
+                    "sido": "Seoul",
+                    "sigungu": "Gangnam",
+                    "street": "Gangnam Daero",
+                    "detail": "12345"
+                },
+                "roomDetails": {
+                    "wifi": true,
+                    "selfCheckin": true,
+                    "luggage": true,
+                    "TV": true
+                },
+                "price": 10000,
+                "maxOccupancy": 4
             }
         """.trimIndent()
 
@@ -232,9 +277,20 @@ class RoomControllerTest {
             {
                 "name": "Sample Room",
                 "description": "A nice place to stay",
-                "type": "Apartment",
-                "address": "123 Main St, Anytown, USA",
-                "price": 100.0,
+                "type": "APARTMENT",
+                "address": {
+                    "sido": "Seoul",
+                    "sigungu": "Gangnam",
+                    "street": "Gangnam Daero",
+                    "detail": "12345"
+                },
+                "roomDetails": {
+                    "wifi": true,
+                    "selfCheckin": true,
+                    "luggage": true,
+                    "TV": true
+                },
+                "price": 10000,
                 "maxOccupancy": 4
             }
         """.trimIndent()
@@ -277,12 +333,38 @@ class RoomControllerTest {
 
         // verify 404 not found
         val getAfterDelete = mockMvc.perform(
-            MockMvcRequestBuilders.get("/api/v1/rooms/$roomId")
-                .header("Authorization", "Bearer $token")
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/$roomId")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isNotFound)
             .andReturn()
+    }
+
+    @Test
+    fun `should search rooms by name`() {
+        val room1 = dataGenerator.generateRoom(name = "Room1")
+        val room2 = dataGenerator.generateRoom(name = "Room2")
+        val room3 = dataGenerator.generateRoom(name = "Room3")
+        val room4 = dataGenerator.generateRoom(name = "Room4")
+        val room5 = dataGenerator.generateRoom(name = "Room5")
+
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/search?name=Room1")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        // check result length
+        Assertions.assertEquals(getContentLength(result), 1)
+
+        // check if all rooms are in the result
+        Assertions.assertEquals(getNthContentId(result, 0), room1.id)
+
+        // Add assertions to verify the response content if needed
+        println(result)
     }
 
     @BeforeEach
