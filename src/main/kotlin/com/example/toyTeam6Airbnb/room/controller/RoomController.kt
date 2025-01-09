@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.room.controller
 
 import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.room.service.RoomService
 import com.example.toyTeam6Airbnb.room.validatePageable
@@ -33,18 +34,19 @@ class RoomController(
     fun createRoom(
         @RequestBody request: CreateRoomRequest,
         @AuthenticationPrincipal principalDetails: PrincipalDetails
-    ): ResponseEntity<RoomDTO> {
+    ): ResponseEntity<RoomDetailsDTO> {
         val room = roomService.createRoom(
             hostId = User.fromEntity(principalDetails.getUser()).id,
             name = request.name,
             description = request.description,
             type = request.type,
             address = request.address,
+            roomDetails = request.roomDetails,
             price = request.price,
             maxOccupancy = request.maxOccupancy
         )
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(room.toDTO())
+        return ResponseEntity.status(HttpStatus.CREATED).body(room.toDetailsDTO())
     }
 
     @GetMapping("/rooms/main")
@@ -60,9 +62,9 @@ class RoomController(
     @GetMapping("/rooms/main/{roomId}")
     fun getRoomDetails(
         @PathVariable roomId: Long
-    ): ResponseEntity<RoomDTO> {
+    ): ResponseEntity<RoomDetailsDTO> {
         val room = roomService.getRoomDetails(roomId)
-        return ResponseEntity.ok(room.toDTO())
+        return ResponseEntity.ok(room.toDetailsDTO())
     }
 
     @PutMapping("/rooms/{roomId}")
@@ -70,7 +72,7 @@ class RoomController(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long,
         @RequestBody request: UpdateRoomRequest
-    ): ResponseEntity<RoomDTO> {
+    ): ResponseEntity<RoomDetailsDTO> {
         val updatedRoom = roomService.updateRoom(
             User.fromEntity(principalDetails.getUser()).id,
             roomId,
@@ -78,11 +80,12 @@ class RoomController(
             request.description,
             request.type,
             request.address,
+            request.roomDetails,
             request.price,
             request.maxOccupancy
         )
 
-        return ResponseEntity.ok(updatedRoom.toDTO())
+        return ResponseEntity.ok(updatedRoom.toDetailsDTO())
     }
 
     @DeleteMapping("/rooms/{roomId}")
@@ -129,6 +132,7 @@ data class CreateRoomRequest(
     val description: String,
     val type: RoomType,
     val address: Address,
+    val roomDetails: RoomDetails,
     val price: Double,
     val maxOccupancy: Int
 )
@@ -138,6 +142,7 @@ data class UpdateRoomRequest(
     val description: String,
     val type: RoomType,
     val address: Address,
+    val roomDetails: RoomDetails,
     val price: Double,
     val maxOccupancy: Int
 )
