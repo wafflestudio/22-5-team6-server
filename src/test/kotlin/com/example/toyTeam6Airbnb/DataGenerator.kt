@@ -79,7 +79,7 @@ class DataGenerator(
             ReservationEntity(
                 user = userEntity,
                 room = roomEntity,
-                review = generateReview(),
+                review = null,
                 startDate = startDate ?: LocalDate.now().plusDays((1..100).random().toLong()),
                 endDate = endDate ?: startDate!!.plusDays((1..10).random().toLong()),
                 totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate),
