@@ -14,6 +14,8 @@ interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExec
     fun existsByNameAndTypeAndAddress(name: String, type: RoomType, address: Address): Boolean
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    // query for find by id with lock
+    @Query("SELECT r FROM RoomEntity r WHERE r.id = :id")
     fun findByIdOrNullForUpdate(id: Long): RoomEntity?
 
     @Query(
