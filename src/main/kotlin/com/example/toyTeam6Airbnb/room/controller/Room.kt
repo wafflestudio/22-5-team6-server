@@ -16,6 +16,7 @@ data class Room(
     val price: Double,
     val maxOccupancy: Int,
     val rating: Double,
+    val isSuperhost: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant
 ) {
@@ -35,6 +36,7 @@ data class Room(
                 price = entity.price,
                 maxOccupancy = entity.maxOccupancy,
                 rating = averageRating,
+                isSuperhost = entity.host.isSuperhost(),
                 createdAt = entity.createdAt,
                 updatedAt = entity.updatedAt
             )
@@ -67,6 +69,7 @@ data class Room(
             price = this.price,
             maxOccupancy = this.maxOccupancy,
             rating = this.rating,
+            isSuperhost = this.isSuperhost,
             createdAt = this.createdAt,
             updatedAt = this.updatedAt
         )
@@ -96,6 +99,7 @@ data class RoomDetailsDTO(
     val price: Double,
     val maxOccupancy: Int,
     val rating: Double,
+    val isSuperhost: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant
 )
