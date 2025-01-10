@@ -11,14 +11,20 @@ sealed class ReviewException(
     cause: Throwable? = null
 ) : DomainException(errorCode, httpStatusCode, msg, cause)
 
-class ReviewNotFound : ReviewException(
+class ReviewNotFoundException : ReviewException(
     errorCode = 3001,
     httpStatusCode = HttpStatus.CONFLICT,
     msg = "Review doesn't exist"
 )
 
-class ReviewPermissionDenied : ReviewException(
+class ReviewPermissionDeniedException : ReviewException(
     errorCode = 3002,
     httpStatusCode = HttpStatus.FORBIDDEN,
     msg = "Permission Denied"
+)
+
+class DuplicateReviewException : ReviewException(
+    errorCode = 3003,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Review Already Exists"
 )
