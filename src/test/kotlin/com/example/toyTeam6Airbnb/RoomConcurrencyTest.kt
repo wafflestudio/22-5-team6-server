@@ -129,7 +129,7 @@ class RoomConcurrencyTest {
         "price": 75000.0,
         "maxOccupancy": 4
     }
-    """.trimIndent()
+        """.trimIndent()
 
         executor.submit {
             try {
