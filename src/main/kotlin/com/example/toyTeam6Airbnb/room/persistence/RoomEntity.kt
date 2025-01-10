@@ -45,8 +45,8 @@ class RoomEntity(
     var address: Address,
     @Embedded
     var roomDetails: RoomDetails,
-    @Column(nullable = false)
-    var price: Double,
+    @Embedded
+    var price: Price,
     @Column(nullable = false)
     var maxOccupancy: Int,
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)

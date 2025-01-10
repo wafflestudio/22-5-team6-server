@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.room.controller
 
 import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import java.time.Instant
@@ -13,9 +14,10 @@ data class Room(
     val type: RoomType,
     val address: Address,
     val roomDetails: RoomDetails,
-    val price: Double,
+    val price: Price,
     val maxOccupancy: Int,
     val rating: Double,
+    val reviewCount: Int,
     val isSuperhost: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant
@@ -36,6 +38,7 @@ data class Room(
                 price = entity.price,
                 maxOccupancy = entity.maxOccupancy,
                 rating = averageRating,
+                reviewCount = entity.reviews.size,
                 isSuperhost = entity.host.isSuperhost(),
                 createdAt = entity.createdAt,
                 updatedAt = entity.updatedAt
@@ -69,6 +72,7 @@ data class Room(
             price = this.price,
             maxOccupancy = this.maxOccupancy,
             rating = this.rating,
+            reviewCount = this.reviewCount,
             isSuperhost = this.isSuperhost,
             createdAt = this.createdAt,
             updatedAt = this.updatedAt
@@ -83,7 +87,7 @@ data class RoomDTO(
     val description: String,
     val type: RoomType,
     val address: Address,
-    val price: Double,
+    val price: Price,
     val maxOccupancy: Int,
     val rating: Double
 )
@@ -96,9 +100,10 @@ data class RoomDetailsDTO(
     val type: RoomType,
     val address: Address,
     val roomDetails: RoomDetails,
-    val price: Double,
+    val price: Price,
     val maxOccupancy: Int,
     val rating: Double,
+    val reviewCount: Int,
     val isSuperhost: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant

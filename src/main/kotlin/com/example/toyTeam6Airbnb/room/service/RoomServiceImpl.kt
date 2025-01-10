@@ -12,6 +12,7 @@ import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
 import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
@@ -40,16 +41,14 @@ class RoomServiceImpl(
         type: RoomType,
         address: Address,
         roomDetails: RoomDetails,
-        price: Double,
+        price: Price,
         maxOccupancy: Int
     ): Room {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
 
         validateRoomInfo(name, description, type, address, price, maxOccupancy)
 
-        if (roomRepository.existsByNameAndTypeAndAddress(name, type, address)) {
-            throw DuplicateRoomException()
-        }
+        if (roomRepository.existsByAddress(address)) throw DuplicateRoomException()
 
         try {
             val roomEntity = RoomEntity(
@@ -93,20 +92,18 @@ class RoomServiceImpl(
         type: RoomType,
         address: Address,
         roomDetails: RoomDetails,
-        price: Double,
+        price: Price,
         maxOccupancy: Int
     ): Room {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
-        if (roomEntity.host.id != hostEntity.id) {
-            throw RoomPermissionDeniedException()
-        }
+        if (roomEntity.host.id != hostEntity.id) throw RoomPermissionDeniedException()
 
         validateRoomInfo(name, description, type, address, price, maxOccupancy)
 
-        if (roomRepository.existsByNameAndTypeAndAddress(name, type, address) &&
-            (roomEntity.name != name || roomEntity.type != type || roomEntity.address != address)
+        if (roomRepository.existsByAddress(address) &&
+            (roomEntity.address != address)
         ) {
             throw DuplicateRoomException()
         }
@@ -171,12 +168,12 @@ class RoomServiceImpl(
         description: String,
         type: RoomType,
         address: Address,
-        price: Double,
+        price: Price,
         maxOccupancy: Int
     ) {
         if (name.isBlank()) throw InvalidNameException()
         if (description.isBlank()) throw InvalidDescriptionException()
-        if (price <= 0) throw InvalidPriceException()
+        validatePrice(price)
         if (maxOccupancy <= 0) throw InvalidMaxOccupancyException()
 
         try {
@@ -186,6 +183,16 @@ class RoomServiceImpl(
         }
 
         validateAddress(address)
+    }
+
+    private fun validatePrice(price: Price) {
+        if (price.perNight <= 0 ||
+            price.cleaningFee < 0 ||
+            price.charge < 0 ||
+            price.updateTotal() <= 0
+        ) {
+            throw InvalidPriceException()
+        }
     }
 
     private fun validateAddress(address: Address) {
