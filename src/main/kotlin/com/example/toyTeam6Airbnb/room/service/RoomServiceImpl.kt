@@ -12,11 +12,11 @@ import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
 import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
-import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import org.springframework.dao.DataIntegrityViolationException
@@ -185,12 +185,12 @@ class RoomServiceImpl(
         validateAddress(address)
     }
 
-    private fun validatePrice(price: Price){
+    private fun validatePrice(price: Price) {
         if (price.perNight <= 0 ||
             price.cleaningFee < 0 ||
             price.charge < 0 ||
             price.updateTotal() <= 0
-            ){
+        ) {
             throw InvalidPriceException()
         }
     }

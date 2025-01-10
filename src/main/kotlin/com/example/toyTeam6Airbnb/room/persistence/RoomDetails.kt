@@ -24,5 +24,5 @@ data class RoomDetails(
     val bathroom: Int,
 
     @Column(name = "bed", nullable = false)
-    val bed: Int,
+    val bed: Int
 )

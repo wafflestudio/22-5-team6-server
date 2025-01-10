@@ -17,7 +17,7 @@ data class Price(
     @Column(name = "total", nullable = false)
     var total: Double = perNight + cleaningFee + charge
 ) {
-    fun updateTotal() : Double{
+    fun updateTotal(): Double {
         total = perNight + cleaningFee + charge
         return total
     }
