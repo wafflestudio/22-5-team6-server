@@ -233,5 +233,4 @@ class ReservationIntegrationTest {
         val reservations = reservationRepository.findAll()
         assertEquals(2, reservations.size)
     }
-
 }
