@@ -5,14 +5,16 @@ import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 data class Profile(
     val id: Long,
     val userId: Long,
-    val nickname: String
+    val nickname: String,
+    val isSuperhost: Boolean
 ) {
     companion object {
         fun fromEntity(profileEntity: ProfileEntity): Profile {
             return Profile(
                 id = profileEntity.id,
                 userId = profileEntity.user.id!!,
-                nickname = profileEntity.nickname
+                nickname = profileEntity.nickname,
+                isSuperhost = profileEntity.isSuperhost
             )
         }
     }

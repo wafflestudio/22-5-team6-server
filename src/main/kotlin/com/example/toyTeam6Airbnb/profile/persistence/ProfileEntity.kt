@@ -23,5 +23,8 @@ class ProfileEntity(
     val user: UserEntity,
 
     @Column(nullable = false)
-    var nickname: String
+    var nickname: String,
+
+    @Column(nullable = false)
+    var isSuperhost: Boolean = false
 )

@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.user.persistence
 
+import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
@@ -8,10 +9,12 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
 
 @Entity(name = "users")
 class UserEntity(
@@ -37,9 +40,16 @@ class UserEntity(
     val rooms: List<RoomEntity> = mutableListOf(),
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val reviews: List<ReviewEntity> = mutableListOf()
+    val reviews: List<ReviewEntity> = mutableListOf(),
 
-)
+    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    val profile: ProfileEntity? = null
+
+) {
+    fun isSuperhost(): Boolean {
+        return profile?.isSuperhost == true
+    }
+}
 
 enum class AuthProvider {
     LOCAL, GOOGLE, KAKAO, NAVER;

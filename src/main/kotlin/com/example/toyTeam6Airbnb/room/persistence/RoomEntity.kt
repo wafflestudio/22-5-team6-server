@@ -24,8 +24,7 @@ import java.time.Instant
     name = "rooms",
     uniqueConstraints = [
         UniqueConstraint(
-            name = "room",
-            columnNames = ["n", "t", "sid", "sig", "str", "det"]
+            columnNames = ["detail"]
         )
     ]
 )
@@ -36,11 +35,11 @@ class RoomEntity(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host", nullable = false)
     var host: UserEntity,
-    @Column(name = "n", nullable = false)
+    @Column(nullable = false)
     var name: String,
     @Column(columnDefinition = "TEXT", nullable = false)
     var description: String,
-    @Column(name = "t", nullable = false)
+    @Column(nullable = false)
     var type: RoomType,
     @Embedded
     var address: Address,
