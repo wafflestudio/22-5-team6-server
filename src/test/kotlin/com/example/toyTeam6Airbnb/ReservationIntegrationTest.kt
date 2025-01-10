@@ -255,7 +255,7 @@ class ReservationIntegrationTest {
             "endDate": "$endDate1",
             "numberOfGuests": 1
         }
-    """.trimIndent()
+        """.trimIndent()
 
         val requestBody2 = """
         {
@@ -264,7 +264,7 @@ class ReservationIntegrationTest {
             "endDate": "$endDate2",
             "numberOfGuests": 1
         }
-    """.trimIndent()
+        """.trimIndent()
 
         executor.submit {
             try {
