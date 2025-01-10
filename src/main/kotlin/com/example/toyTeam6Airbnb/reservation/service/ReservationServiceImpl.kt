@@ -60,7 +60,7 @@ class ReservationServiceImpl(
             review = null,
             startDate = startDate,
             endDate = endDate,
-            totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate),
+            totalPrice = roomEntity.price.total * ChronoUnit.DAYS.between(startDate, endDate),
             numberOfGuests = numberOfGuests
         ).let {
             reservationRepository.save(it)
@@ -114,7 +114,7 @@ class ReservationServiceImpl(
 
         reservationEntity.startDate = startDate
         reservationEntity.endDate = endDate
-        reservationEntity.totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate)
+        reservationEntity.totalPrice = roomEntity.price.total * ChronoUnit.DAYS.between(startDate, endDate)
         reservationEntity.numberOfGuests = numberOfGuests
         reservationRepository.save(reservationEntity)
 
