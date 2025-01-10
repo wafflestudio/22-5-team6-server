@@ -475,7 +475,6 @@ class RoomControllerTest {
         println(result2)
     }
 
-
     @BeforeEach
     fun setUp() {
         dataGenerator.clearAll()
