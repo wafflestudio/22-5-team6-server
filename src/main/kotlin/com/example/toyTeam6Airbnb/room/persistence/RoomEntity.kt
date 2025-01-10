@@ -20,7 +20,14 @@ import jakarta.persistence.UniqueConstraint
 import java.time.Instant
 
 @Entity
-@Table(name = "rooms", uniqueConstraints = [UniqueConstraint(columnNames = ["name", "type", "address_sido", "address_sigungu", "address_street", "address_detail"])])
+@Table(
+    name = "rooms",
+    uniqueConstraints = [
+        UniqueConstraint(
+            columnNames = ["name", "type", "address_sido", "address_sigungu", "address_street", "address_detail"]
+        )
+    ]
+)
 class RoomEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -36,6 +36,7 @@ class ReviewServiceImpl(
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
+        if (reservationEntity.user.id != user.id) throw ReviewPermissionDenied()
 
         val reviewEntity = ReviewEntity(
             user = userEntity,
@@ -56,7 +57,7 @@ class ReviewServiceImpl(
 
     @Transactional
     override fun getReviews(roomId: Long): List<Review> {
-        val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
+        roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
 
         val reviewEntities = reviewRepository.findAllByRoomId(roomId)
 
@@ -72,8 +73,9 @@ class ReviewServiceImpl(
 
     @Transactional
     override fun updateReview(user: User, reviewId: Long, content: String?, rating: Int?): Review {
-        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
         val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFound()
+        if (reviewEntity.user.id != user.id) throw ReviewPermissionDenied()
 
         reviewEntity.content = content ?: reviewEntity.content
         reviewEntity.rating = rating ?: reviewEntity.rating

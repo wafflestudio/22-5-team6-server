@@ -15,8 +15,11 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import jakarta.persistence.EntityManager
+import jakarta.persistence.LockModeType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
@@ -26,10 +29,11 @@ import java.time.temporal.ChronoUnit
 class ReservationServiceImpl(
     private val reservationRepository: ReservationRepository,
     private val userRepository: UserRepository,
-    private val roomRepository: RoomRepository
+    private val roomRepository: RoomRepository,
+    private val entityManager: EntityManager
 ) : ReservationService {
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     override fun createReservation(
         user: User,
         roomId: Long,
@@ -38,7 +42,9 @@ class ReservationServiceImpl(
         numberOfGuests: Int
     ): Reservation {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
-        val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
+        // lock room entity to prevent the room from being deleted while creating a reservation
+        // also, prevent other transactions from creating a reservation for the same room at the same time
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
         if (!isAvailable(roomEntity, startDate, endDate)) throw ReservationUnavailable()
 
@@ -59,7 +65,7 @@ class ReservationServiceImpl(
         ).let {
             reservationRepository.save(it)
         }
-
+        println("${roomEntity.id}")
         return Reservation.fromEntity(reservationEntity)
     }
 
@@ -69,22 +75,23 @@ class ReservationServiceImpl(
         val reservations = reservationRepository.findAllByRoom(room)
 
         // 현재 예약 건을 제외하고, 다른 예약과 겹치는 여부를 확인함.
+        // startDate < 기존 예약의 startDate && endDate > 기존 예약의 endDate, 즉 기존 예약을 포괄하는 경우도 제외하도록 조건수정
         return reservations.none { reservation ->
-            reservation.id != currentReservationId && startDate < reservation.endDate && endDate > reservation.startDate
+            reservation.id != currentReservationId && (startDate < reservation.endDate && endDate > reservation.startDate)
         }
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     override fun deleteReservation(user: User, reservationId: Long) {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
-        val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
+        val reservationEntity = reservationRepository.findByIdOrNullForUpdate(reservationId) ?: throw ReservationNotFound()
 
         if (reservationEntity.user != userEntity) throw ReservationPermissionDenied()
 
         reservationRepository.delete(reservationEntity)
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     override fun updateReservation(
         user: User,
         reservationId: Long,
@@ -93,8 +100,10 @@ class ReservationServiceImpl(
         numberOfGuests: Int
     ): Reservation {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
-        val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
+        val reservationEntity = reservationRepository.findByIdOrNullForUpdate(reservationId) ?: throw ReservationNotFound()
         val roomEntity = reservationEntity.room
+        // lock room entity to prevent concurrent reservation updates
+        entityManager.lock(roomEntity, LockModeType.PESSIMISTIC_WRITE)
 
         if (reservationEntity.user != userEntity) throw ReservationPermissionDenied()
 
