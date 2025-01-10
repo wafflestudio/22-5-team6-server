@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param
 import java.time.LocalDate
 
 interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExecutor<RoomEntity> {
-    fun existsByNameAndTypeAndAddress(name: String, type: RoomType, address: Address): Boolean
+    fun existsByAddress(address: Address): Boolean
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     // query for find by id with lock
@@ -26,8 +26,8 @@ interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExec
         WHERE 
             (:name IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :name, '%')))
             AND (:type IS NULL OR r.type = :type)
-            AND (:minPrice IS NULL OR r.price >= :minPrice)
-            AND (:maxPrice IS NULL OR r.price <= :maxPrice)
+            AND (:minPrice IS NULL OR r.price.total >= :minPrice)
+            AND (:maxPrice IS NULL OR r.price.total <= :maxPrice)
             AND (:maxOccupancy IS NULL OR r.maxOccupancy >= :maxOccupancy)
             AND (
                 (:startDate IS NULL OR :endDate IS NULL) OR
