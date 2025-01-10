@@ -92,7 +92,7 @@ class RoomServiceImpl(
         maxOccupancy: Int
     ): Room {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
-        val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
         if (roomEntity.host.id != hostEntity.id) {
             throw RoomPermissionDeniedException()
@@ -123,7 +123,7 @@ class RoomServiceImpl(
         roomId: Long
     ) {
         val hostEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
-        val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
         if (roomEntity.host.id != hostEntity.id) throw RoomPermissionDeniedException()
 

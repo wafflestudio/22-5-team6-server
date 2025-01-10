@@ -1,15 +1,22 @@
 package com.example.toyTeam6Airbnb.room.persistence
 
+import jakarta.persistence.LockModeType
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import java.time.LocalDate
 
 interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExecutor<RoomEntity> {
     fun existsByNameAndTypeAndAddress(name: String, type: RoomType, address: Address): Boolean
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    // query for find by id with lock
+    @Query("SELECT r FROM RoomEntity r WHERE r.id = :id")
+    fun findByIdOrNullForUpdate(id: Long): RoomEntity?
 
     @Query(
         """
