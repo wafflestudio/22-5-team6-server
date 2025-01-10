@@ -16,10 +16,11 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import java.time.Instant
 
 @Entity
-@Table(name = "rooms")
+@Table(name = "rooms", uniqueConstraints = [UniqueConstraint(columnNames = ["name", "type", "address_sido", "address_sigungu", "address_street", "address_detail"])])
 class RoomEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,11 +28,11 @@ class RoomEntity(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host", nullable = false)
     var host: UserEntity,
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     var name: String,
     @Column(columnDefinition = "TEXT", nullable = false)
     var description: String,
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     var type: RoomType,
     @Embedded
     var address: Address,

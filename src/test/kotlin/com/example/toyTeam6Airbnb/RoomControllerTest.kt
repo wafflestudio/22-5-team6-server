@@ -2,6 +2,7 @@ package com.example.toyTeam6Airbnb
 
 import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
+import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Assertions
@@ -331,6 +332,36 @@ class RoomControllerTest {
 
     @Test
     fun `should search rooms by name`() {
+        val room1 = dataGenerator.generateRoom(name = "Room1")
+        val room2 = dataGenerator.generateRoom(name = "Room2")
+        val room3 = dataGenerator.generateRoom(name = "Room3")
+        val room4 = dataGenerator.generateRoom(name = "Room4")
+        val room5 = dataGenerator.generateRoom(name = "Room5")
+
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
+                .param("name", "Room1")
+                .param("page", "0")
+                .param("size", "10")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        // check result length
+        Assertions.assertEquals(getContentLength(result), 1)
+
+        // check if all rooms are in the result
+        Assertions.assertEquals(getNthContentId(result, 0), room1.id)
+
+        // Add assertions to verify the response content if needed
+        println(result)
+    }
+
+    @Test
+    fun `should search rooms by address`() {
         val address = Address("Seoul", "ad", "ad", "ad")
         val room1 = dataGenerator.generateRoom(name = "Room1")
         val room2 = dataGenerator.generateRoom(name = "Room2")
@@ -340,7 +371,6 @@ class RoomControllerTest {
 
         val result = mockMvc.perform(
             MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
-                // .param("name", "Room3")
                 .param("sido", "Seoul")
                 .param("page", "0")
                 .param("size", "10")
@@ -360,6 +390,91 @@ class RoomControllerTest {
         // Add assertions to verify the response content if needed
         println(result)
     }
+
+    @Test
+    fun `should search rooms by multiple conditions`() {
+        val address1 = Address(sido = "sido1", sigungu = "sigungu1", street = "street1", detail = "detail1")
+        val room1 = dataGenerator.generateRoom(name = "Room1", type = RoomType.APARTMENT, address = address1)
+
+        val address2 = Address(sido = "sido1", sigungu = "sigungu1", street = "street2", detail = "detail2")
+        val room2 = dataGenerator.generateRoom(name = "Room2", type = RoomType.VILLA, address = address2)
+
+        val address3 = Address(sido = "sido1", sigungu = "sigungu1", street = "street2", detail = "detail3")
+        val room3 = dataGenerator.generateRoom(name = "Room3", type = RoomType.HOTEL, address = address3)
+
+        val address4 = Address(sido = "sido2", sigungu = "sigungu2", street = "street1", detail = "detail4")
+        val room4 = dataGenerator.generateRoom(name = "Room4", type = RoomType.APARTMENT, address = address4)
+
+        val address5 = Address(sido = "sido2", sigungu = "sigungu2", street = "street2", detail = "detail5")
+        val room5 = dataGenerator.generateRoom(name = "Room5", type = RoomType.VILLA, address = address5)
+
+        val address6 = Address(sido = "sido2", sigungu = "sigungu2", street = "street3", detail = "detail6")
+        val room6 = dataGenerator.generateRoom(name = "Room6", type = RoomType.HOTEL, address = address6)
+
+        val address7 = Address(sido = "sido3", sigungu = "sigungu3", street = "street1", detail = "detail7")
+        val room7 = dataGenerator.generateRoom(name = "Room7", type = RoomType.APARTMENT, address = address7)
+
+        val address8 = Address(sido = "sido3", sigungu = "sigungu3", street = "street2", detail = "detail8")
+        val room8 = dataGenerator.generateRoom(name = "Room8", type = RoomType.VILLA, address = address8)
+
+        val address9 = Address(sido = "sido3", sigungu = "sigungu3", street = "street3", detail = "detail9")
+        val room9 = dataGenerator.generateRoom(name = "Room9", type = RoomType.HOTEL, address = address9)
+
+        val address10 = Address(sido = "sido4", sigungu = "sigungu4", street = "street1", detail = "detail10")
+        val room10 = dataGenerator.generateRoom(name = "Room10", type = RoomType.APARTMENT, address = address10)
+
+        val address11 = Address(sido = "sido4", sigungu = "sigungu4", street = "street2", detail = "detail11")
+        val room11 = dataGenerator.generateRoom(name = "Room11", type = RoomType.VILLA, address = address11)
+
+        val address12 = Address(sido = "sido4", sigungu = "sigungu4", street = "street3", detail = "detail12")
+        val room12 = dataGenerator.generateRoom(name = "Room12", type = RoomType.HOTEL, address = address12)
+
+        val result1 = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
+                .param("type", RoomType.APARTMENT.name)
+                .param("sigungu", "sigungu1")
+                .param("page", "0")
+                .param("size", "10")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        // check result length
+        Assertions.assertEquals(getContentLength(result1), 1)
+
+        // check if all rooms are in the result
+        Assertions.assertEquals(getNthContentId(result1, 0), room1.id)
+
+        // Add assertions to verify the response content if needed
+        println(result1)
+
+        val result2 = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
+                .param("sigungu", "sigungu1")
+                .param("street", "street2")
+                .param("page", "0")
+                .param("size", "10")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        // check result length
+        Assertions.assertEquals(getContentLength(result2), 2)
+
+        // check if all rooms are in the result
+        Assertions.assertEquals(getNthContentId(result2, 0), room2.id)
+        Assertions.assertEquals(getNthContentId(result2, 1), room3.id)
+
+        // Add assertions to verify the response content if needed
+        println(result2)
+    }
+
 
     @BeforeEach
     fun setUp() {
