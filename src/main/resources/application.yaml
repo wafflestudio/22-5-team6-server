@@ -7,10 +7,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-      show-sql: true
     properties:
       hibernate:
-        show_sql: false
+        show_sql: true
+        format_sql: true
   profiles:
     active: dev
 

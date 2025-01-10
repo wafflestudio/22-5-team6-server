@@ -16,10 +16,18 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import java.time.Instant
 
 @Entity
-@Table(name = "rooms")
+@Table(
+    name = "rooms",
+    uniqueConstraints = [
+        UniqueConstraint(
+            columnNames = ["detail"]
+        )
+    ]
+)
 class RoomEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,8 +45,8 @@ class RoomEntity(
     var address: Address,
     @Embedded
     var roomDetails: RoomDetails,
-    @Column(nullable = false)
-    var price: Double,
+    @Embedded
+    var price: Price,
     @Column(nullable = false)
     var maxOccupancy: Int,
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)

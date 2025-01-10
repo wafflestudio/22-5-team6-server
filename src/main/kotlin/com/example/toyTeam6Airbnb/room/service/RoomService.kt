@@ -3,6 +3,7 @@ package com.example.toyTeam6Airbnb.room.service
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
 import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import org.springframework.data.domain.Page
@@ -17,7 +18,7 @@ interface RoomService {
         type: RoomType,
         address: Address,
         roomDetails: RoomDetails,
-        price: Double,
+        price: Price,
         maxOccupancy: Int
     ): Room
 
@@ -33,7 +34,7 @@ interface RoomService {
         type: RoomType,
         address: Address,
         roomDetails: RoomDetails,
-        price: Double,
+        price: Price,
         maxOccupancy: Int
     ): Room
 
