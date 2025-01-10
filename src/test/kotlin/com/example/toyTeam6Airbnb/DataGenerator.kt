@@ -5,14 +5,18 @@ import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
+import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
+import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.user.JwtTokenProvider
 import com.example.toyTeam6Airbnb.user.persistence.AuthProvider
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @Component
 class DataGenerator(
@@ -76,11 +80,11 @@ class DataGenerator(
             ReservationEntity(
                 user = userEntity,
                 room = roomEntity,
-                startDate = startDate ?: LocalDate.now(),
-                endDate = endDate ?: LocalDate.now().plusDays(1),
-                totalPrice = totalPrice ?: (10000..100000).random().toDouble(),
-                numberOfGuests = numberOfGuests ?: (1..10).random(),
-                review = null
+                review = null,
+                startDate = startDate ?: LocalDate.now().plusDays((1..100).random().toLong()),
+                endDate = endDate ?: startDate!!.plusDays((1..10).random().toLong()),
+                totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate),
+                numberOfGuests = numberOfGuests ?: (1..10).random()
             )
         )
     }
@@ -89,19 +93,32 @@ class DataGenerator(
         host: UserEntity? = null,
         name: String? = null,
         description: String? = null,
-        type: String? = null,
-        address: String? = null,
+        type: RoomType? = null,
+        address: Address? = null,
+        roomDetails: RoomDetails? = null,
         price: Double? = null,
         maxOccupancy: Int? = null
     ): RoomEntity {
         val hostEntity = host ?: generateUserAndToken().first
+        val randomType = RoomType.entries.toTypedArray().random()
         return roomRepository.save(
             RoomEntity(
                 host = hostEntity,
                 name = name ?: "room-${(0..10000).random()}",
                 description = description ?: "description-${(0..10000).random()}",
-                type = type ?: "",
-                address = address ?: "",
+                type = type ?: randomType,
+                address = address ?: Address(
+                    sido = "sido-${(0..10000).random()}",
+                    sigungu = "sigungu-${(0..10000).random()}",
+                    street = "street-${(0..10000).random()}",
+                    detail = "detail-${(0..10000).random()}"
+                ),
+                roomDetails = roomDetails ?: RoomDetails(
+                    wifi = (0..1).random() == 1,
+                    selfCheckin = (0..1).random() == 1,
+                    luggage = (0..1).random() == 1,
+                    TV = (0..1).random() == 1
+                ),
                 price = price ?: (10000..100000).random().toDouble(),
                 maxOccupancy = maxOccupancy ?: (1..10).random()
             )

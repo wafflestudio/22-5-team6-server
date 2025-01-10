@@ -83,7 +83,7 @@ class SecurityConfig(
                 // APIs that do not require authentication
                 authorize("/api/auth/**", permitAll)
                 authorize("/api/oauth2/**", permitAll)
-                authorize(HttpMethod.GET, "/api/v1/rooms/**", permitAll)
+                authorize(HttpMethod.GET, "/api/v1/rooms/main/**", permitAll)
                 authorize(HttpMethod.GET, "/api/v1/reservations/availability/**", permitAll)
                 authorize(HttpMethod.GET, "/api/v1/reviews/**", permitAll)
                 authorize("/error", permitAll)

@@ -22,3 +22,45 @@ class RoomPermissionDeniedException : RoomException(
     httpStatusCode = HttpStatus.FORBIDDEN,
     msg = "Permission denied"
 )
+
+class InvalidMaxOccupancyException : RoomException(
+    errorCode = 2003,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid max occupancy"
+)
+
+class InvalidPriceException : RoomException(
+    errorCode = 2004,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid price"
+)
+
+class InvalidAddressException : RoomException(
+    errorCode = 2005,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid rating"
+)
+
+class InvalidNameException : RoomException(
+    errorCode = 2006,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid name"
+)
+
+class InvalidDescriptionException : RoomException(
+    errorCode = 2007,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid description"
+)
+
+class InvalidRoomTypeException : RoomException(
+    errorCode = 2008,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid room type"
+)
+
+class DuplicateRoomException : RoomException(
+    errorCode = 2009,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Room already exists"
+)
