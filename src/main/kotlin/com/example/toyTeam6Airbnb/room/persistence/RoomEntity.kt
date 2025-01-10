@@ -16,10 +16,16 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import java.time.Instant
 
 @Entity
-@Table(name = "rooms")
+@Table(name = "rooms",
+    uniqueConstraints = [
+        UniqueConstraint(
+            columnNames = ["name", "type", "address"]
+        )
+    ])
 class RoomEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
