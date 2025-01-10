@@ -71,7 +71,7 @@ class ReservationServiceImpl(
         // 현재 예약 건을 제외하고, 다른 예약과 겹치는 여부를 확인함.
         // startDate < 기존 예약의 startDate && endDate > 기존 예약의 endDate, 즉 기존 예약을 포괄하는 경우도 제외하도록 조건수정
         return reservations.none { reservation ->
-            reservation.id != currentReservationId && (startDate < reservation.endDate && endDate > reservation.startDate || startDate <= reservation.startDate && endDate >= reservation.endDate)
+            reservation.id != currentReservationId && (startDate < reservation.endDate && endDate > reservation.startDate)
         }
     }
 
