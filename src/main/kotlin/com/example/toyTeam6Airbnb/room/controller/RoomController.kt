@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.room.controller
 
 import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.room.service.RoomService
@@ -137,7 +138,7 @@ data class CreateRoomRequest(
     val type: RoomType,
     val address: Address,
     val roomDetails: RoomDetails,
-    val price: Double,
+    val price: Price,
     val maxOccupancy: Int
 )
 
@@ -147,6 +148,6 @@ data class UpdateRoomRequest(
     val type: RoomType,
     val address: Address,
     val roomDetails: RoomDetails,
-    val price: Double,
+    val price: Price,
     val maxOccupancy: Int
 )
