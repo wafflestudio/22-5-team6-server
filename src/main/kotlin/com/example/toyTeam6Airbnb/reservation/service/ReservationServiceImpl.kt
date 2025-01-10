@@ -19,6 +19,7 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.LockModeType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
@@ -32,7 +33,7 @@ class ReservationServiceImpl(
     private val entityManager: EntityManager
 ) : ReservationService {
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     override fun createReservation(
         user: User,
         roomId: Long,
@@ -64,7 +65,7 @@ class ReservationServiceImpl(
         ).let {
             reservationRepository.save(it)
         }
-
+        println("${roomEntity.id}")
         return Reservation.fromEntity(reservationEntity)
     }
 
@@ -80,7 +81,7 @@ class ReservationServiceImpl(
         }
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     override fun deleteReservation(user: User, reservationId: Long) {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
         val reservationEntity = reservationRepository.findByIdOrNullForUpdate(reservationId) ?: throw ReservationNotFound()
@@ -90,7 +91,7 @@ class ReservationServiceImpl(
         reservationRepository.delete(reservationEntity)
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     override fun updateReservation(
         user: User,
         reservationId: Long,

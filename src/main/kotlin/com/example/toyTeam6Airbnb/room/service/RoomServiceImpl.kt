@@ -18,6 +18,7 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -50,22 +51,26 @@ class RoomServiceImpl(
             throw DuplicateRoomException()
         }
 
-        val roomEntity = RoomEntity(
-            host = hostEntity,
-            name = name,
-            description = description,
-            type = type,
-            address = address,
-            roomDetails = roomDetails,
-            price = price,
-            maxOccupancy = maxOccupancy,
-            reservations = emptyList(),
-            reviews = emptyList()
-        ).let {
-            roomRepository.save(it)
-        }
+        try {
+            val roomEntity = RoomEntity(
+                host = hostEntity,
+                name = name,
+                description = description,
+                type = type,
+                address = address,
+                roomDetails = roomDetails,
+                price = price,
+                maxOccupancy = maxOccupancy,
+                reservations = emptyList(),
+                reviews = emptyList()
+            ).let {
+                roomRepository.save(it)
+            }
 
-        return Room.fromEntity(roomEntity)
+            return Room.fromEntity(roomEntity)
+        } catch (e: DataIntegrityViolationException) {
+            throw DuplicateRoomException()
+        }
     }
 
     @Transactional
