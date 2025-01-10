@@ -15,6 +15,8 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import jakarta.persistence.EntityManager
+import jakarta.persistence.LockModeType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -26,7 +28,8 @@ import java.time.temporal.ChronoUnit
 class ReservationServiceImpl(
     private val reservationRepository: ReservationRepository,
     private val userRepository: UserRepository,
-    private val roomRepository: RoomRepository
+    private val roomRepository: RoomRepository,
+    private val entityManager: EntityManager
 ) : ReservationService {
 
     @Transactional
@@ -38,7 +41,9 @@ class ReservationServiceImpl(
         numberOfGuests: Int
     ): Reservation {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
-        val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
+        // lock room entity to prevent the room from being deleted while creating a reservation
+        // also, prevent other transactions from creating a reservation for the same room at the same time
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
         if (!isAvailable(roomEntity, startDate, endDate)) throw ReservationUnavailable()
 
@@ -78,7 +83,7 @@ class ReservationServiceImpl(
     @Transactional
     override fun deleteReservation(user: User, reservationId: Long) {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
-        val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
+        val reservationEntity = reservationRepository.findByIdOrNullForUpdate(reservationId) ?: throw ReservationNotFound()
 
         if (reservationEntity.user != userEntity) throw ReservationPermissionDenied()
 
@@ -94,8 +99,10 @@ class ReservationServiceImpl(
         numberOfGuests: Int
     ): Reservation {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
-        val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
+        val reservationEntity = reservationRepository.findByIdOrNullForUpdate(reservationId) ?: throw ReservationNotFound()
         val roomEntity = reservationEntity.room
+        // lock room entity to prevent concurrent reservation updates
+        entityManager.lock(roomEntity, LockModeType.PESSIMISTIC_WRITE)
 
         if (reservationEntity.user != userEntity) throw ReservationPermissionDenied()
 
