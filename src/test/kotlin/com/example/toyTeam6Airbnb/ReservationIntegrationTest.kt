@@ -3,6 +3,7 @@ package com.example.toyTeam6Airbnb
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.time.LocalDate
 import java.util.concurrent.CountDownLatch
@@ -35,6 +37,8 @@ class ReservationIntegrationTest {
 
     @Autowired
     private lateinit var dataGenerator: DataGenerator
+
+    private val logger = KotlinLogging.logger {}
 
     @BeforeEach
     fun setUp() {
@@ -69,10 +73,9 @@ class ReservationIntegrationTest {
                         .content(requestBody)
                         .header("Authorization", "Bearer $token")
                 )
+                    .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
                     .andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
-
-                println("First Request Response: ${result.response.contentAsString}")
             } finally {
                 latch.countDown()
             }
@@ -86,10 +89,9 @@ class ReservationIntegrationTest {
                         .content(requestBody)
                         .header("Authorization", "Bearer $token")
                 )
+                    .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
                     .andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
-
-                println("Second Request Response: ${result.response.contentAsString}")
             } finally {
                 latch.countDown()
             }
@@ -130,10 +132,9 @@ class ReservationIntegrationTest {
                         .content(requestBody)
                         .header("Authorization", "Bearer $token1")
                 )
+                    .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
                     .andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
-
-                println("User 1 Response: ${result.response.contentAsString}")
             } finally {
                 latch.countDown()
             }
@@ -147,10 +148,9 @@ class ReservationIntegrationTest {
                         .content(requestBody)
                         .header("Authorization", "Bearer $token2")
                 )
+                    .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
                     .andExpect(MockMvcResultMatchers.status().isBadRequest)
                     .andReturn()
-
-                println("User 2 Response: ${result.response.contentAsString}")
             } finally {
                 latch.countDown()
             }
@@ -202,10 +202,9 @@ class ReservationIntegrationTest {
                         .content(requestBody1)
                         .header("Authorization", "Bearer $token1")
                 )
+                    .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
                     .andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
-
-                println("User 1 Response: ${result.response.contentAsString}")
             } finally {
                 latch.countDown()
             }
@@ -219,10 +218,9 @@ class ReservationIntegrationTest {
                         .content(requestBody2)
                         .header("Authorization", "Bearer $token2")
                 )
+                    .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
                     .andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
-
-                println("User 2 Response: ${result.response.contentAsString}")
             } finally {
                 latch.countDown()
             }
