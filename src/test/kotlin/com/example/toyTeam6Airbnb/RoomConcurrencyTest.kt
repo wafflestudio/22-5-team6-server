@@ -166,6 +166,6 @@ class RoomConcurrencyTest {
         latch.await()
 
         val rooms = roomRepository.findAll()
-        assertEquals(2, rooms.size)
+        assertEquals(1, rooms.size)
     }
 }

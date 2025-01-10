@@ -5,15 +5,15 @@ import jakarta.persistence.Embeddable
 
 @Embeddable
 data class Address(
-    @Column(name = "sido", nullable = false, length = 50)
+    @Column(name = "sido", nullable = false)
     val sido: String,
 
-    @Column(name = "sigungu", nullable = false, length = 100)
+    @Column(name = "sigungu", nullable = false)
     val sigungu: String,
 
-    @Column(name = "street", nullable = false, length = 100)
+    @Column(name = "street", nullable = false)
     val street: String,
 
-    @Column(name = "detail", nullable = false, length = 100)
+    @Column(name = "detail", nullable = false)
     val detail: String
 )
