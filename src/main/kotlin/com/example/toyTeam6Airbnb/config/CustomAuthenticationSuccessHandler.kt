@@ -22,15 +22,6 @@ class CustomAuthenticationSuccessHandler(
     ) {
         val token = jwtTokenProvider.generateToken(authentication.name)
 
-        if (profile == "prod") {
-            // 배포 환경에서는 기존 리다이렉트 동작 유지
-            response.sendRedirect("/redirect?token=$token")
-        } else {
-            // 로컬 환경에서는 JSON 응답 반환
-            response.contentType = "application/json"
-            response.characterEncoding = "UTF-8"
-            response.writer.write("{\"success\": true, \"token\": \"$token\"}")
-            response.writer.flush()
-        }
+        response.sendRedirect("/redirect?token=$token")
     }
 }
