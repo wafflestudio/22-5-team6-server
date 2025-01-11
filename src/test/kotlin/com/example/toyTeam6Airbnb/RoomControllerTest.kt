@@ -209,7 +209,7 @@ class RoomControllerTest {
                 "tv": true,
                 "bedroom": 1,
                 "bathroom": 1,
-                "bed": 1,
+                "bed": 1
             },
             "price": {
                 "perNight": 5000,
