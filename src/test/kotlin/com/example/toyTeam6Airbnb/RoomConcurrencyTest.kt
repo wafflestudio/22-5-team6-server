@@ -55,10 +55,18 @@ class RoomConcurrencyTest {
                 "wifi": true,
                 "selfCheckin": false,
                 "luggage": false,
-                "TV": true
+                "TV": true,
+                "bedroom": 1,
+                "bathroom": 1,
+                "bed": 1
             },
-            "price": 75000.0,
-            "maxOccupancy": 4
+            "price": {
+                "perNight": 5000,
+                "cleaningFee": 5000,
+                "charge": 5000,
+                "total": 15000
+            },
+            "maxOccupancy": 1
         }
         """.trimIndent()
 
@@ -102,7 +110,7 @@ class RoomConcurrencyTest {
 
     // requestBody를 위와 같은 형태로 하여 서로 다른 유저가 같은 방을 만드는 동시성 상황에 대한 테스트 케이스 형성
     @Test
-    fun `동일한 요청이 서로 다른 유저로부터 들어오면 방이 각각 만들어져야함`() {
+    fun `동일한 요청이 서로 다른 유저로부터 들어오면 방이 하나만 만들어져야함`() {
         val (user1, token1) = dataGenerator.generateUserAndToken()
         val (user2, token2) = dataGenerator.generateUserAndToken()
 
@@ -110,25 +118,33 @@ class RoomConcurrencyTest {
         val executor = Executors.newFixedThreadPool(2)
 
         val requestBody = """
-    {
-        "name": "Cozy Apartment in Seoul",
-        "description": "A beautiful and cozy apartment located in the heart of Seoul. Perfect for travelers!",
-        "type": "APARTMENT",
-        "address": {
-            "sido": "Seoul",
-            "sigungu": "Jongno-gu",
-            "street": "123 Hanok Street",
-            "detail": "Apartment 5B"
-        },
-        "roomDetails": {
-            "wifi": true,
-            "selfCheckin": false,
-            "luggage": false,
-            "TV": true
-        },
-        "price": 75000.0,
-        "maxOccupancy": 4
-    }
+        {
+            "name": "Cozy Apartment in Seoul",
+            "description": "A beautiful and cozy apartment located in the heart of Seoul. Perfect for travelers!",
+            "type": "APARTMENT",
+            "address": {
+                "sido": "Seoul",
+                "sigungu": "Jongno-gu",
+                "street": "123 Hanok Street",
+                "detail": "Apartment 5B"
+            },
+            "roomDetails": {
+                "wifi": true,
+                "selfCheckin": false,
+                "luggage": false,
+                "TV": true,
+                "bedroom": 1,
+                "bathroom": 1,
+                "bed": 1
+            },
+            "price": {
+                "perNight": 50000,
+                "cleaningFee": 20000,
+                "charge": 5000,
+                "total": 0
+            },
+            "maxOccupancy": 4
+        }
         """.trimIndent()
 
         executor.submit {
@@ -166,6 +182,6 @@ class RoomConcurrencyTest {
         latch.await()
 
         val rooms = roomRepository.findAll()
-        assertEquals(2, rooms.size)
+        assertEquals(1, rooms.size)
     }
 }

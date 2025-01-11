@@ -6,6 +6,7 @@ import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
 import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
@@ -76,14 +77,16 @@ class DataGenerator(
     ): ReservationEntity {
         val userEntity = user ?: generateUserAndToken().first
         val roomEntity = room ?: generateRoom()
+        val start = startDate ?: LocalDate.now().plusDays((1..100).random().toLong())
+        val end = endDate ?: start.plusDays((1..10).random().toLong())
         return reservationRepository.save(
             ReservationEntity(
                 user = userEntity,
                 room = roomEntity,
                 review = null,
-                startDate = startDate ?: LocalDate.now().plusDays((1..100).random().toLong()),
-                endDate = endDate ?: startDate!!.plusDays((1..10).random().toLong()),
-                totalPrice = roomEntity.price * ChronoUnit.DAYS.between(startDate, endDate),
+                startDate = start,
+                endDate = end,
+                totalPrice = totalPrice ?: (roomEntity.price.total * ChronoUnit.DAYS.between(start, end)),
                 numberOfGuests = numberOfGuests ?: (1..10).random()
             )
         )
@@ -96,7 +99,7 @@ class DataGenerator(
         type: RoomType? = null,
         address: Address? = null,
         roomDetails: RoomDetails? = null,
-        price: Double? = null,
+        price: Price? = null,
         maxOccupancy: Int? = null
     ): RoomEntity {
         val hostEntity = host ?: generateUserAndToken().first
@@ -117,9 +120,16 @@ class DataGenerator(
                     wifi = (0..1).random() == 1,
                     selfCheckin = (0..1).random() == 1,
                     luggage = (0..1).random() == 1,
-                    TV = (0..1).random() == 1
+                    TV = (0..1).random() == 1,
+                    bedroom = (1..5).random(),
+                    bathroom = (1..3).random(),
+                    bed = (1..3).random()
                 ),
-                price = price ?: (10000..100000).random().toDouble(),
+                price = price ?: Price(
+                    perNight = (10000..50000).random().toDouble(),
+                    cleaningFee = (5000..10000).random().toDouble(),
+                    charge = (1000..5000).random().toDouble()
+                ),
                 maxOccupancy = maxOccupancy ?: (1..10).random()
             )
         )

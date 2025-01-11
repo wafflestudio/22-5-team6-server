@@ -24,7 +24,7 @@ import java.time.Instant
     name = "rooms",
     uniqueConstraints = [
         UniqueConstraint(
-            columnNames = ["name", "type", "address_sido", "address_sigungu", "address_street", "address_detail"]
+            columnNames = ["detail"]
         )
     ]
 )
@@ -45,8 +45,8 @@ class RoomEntity(
     var address: Address,
     @Embedded
     var roomDetails: RoomDetails,
-    @Column(nullable = false)
-    var price: Double,
+    @Embedded
+    var price: Price,
     @Column(nullable = false)
     var maxOccupancy: Int,
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)

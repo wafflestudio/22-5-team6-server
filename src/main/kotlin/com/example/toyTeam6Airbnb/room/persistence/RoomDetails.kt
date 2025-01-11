@@ -15,5 +15,14 @@ data class RoomDetails(
     val luggage: Boolean,
 
     @Column(name = "TV", nullable = false)
-    val TV: Boolean
+    val TV: Boolean,
+
+    @Column(name = "bedroom", nullable = false)
+    val bedroom: Int,
+
+    @Column(name = "bathroom", nullable = false)
+    val bathroom: Int,
+
+    @Column(name = "bed", nullable = false)
+    val bed: Int
 )
