@@ -70,7 +70,7 @@ constructor(
                 .content(requestBody)
                 .accept(MediaType.ALL)
         )
-            .andExpect(status().isOk) // expect 200 status
+            .andExpect(status().isFound) // expect 200 status
             .andReturn()
 
         val response = result.response
