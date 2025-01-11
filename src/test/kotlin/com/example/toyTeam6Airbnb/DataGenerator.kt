@@ -120,7 +120,7 @@ class DataGenerator(
                     wifi = (0..1).random() == 1,
                     selfCheckin = (0..1).random() == 1,
                     luggage = (0..1).random() == 1,
-                    TV = (0..1).random() == 1,
+                    tv = (0..1).random() == 1,
                     bedroom = (1..5).random(),
                     bathroom = (1..3).random(),
                     bed = (1..3).random()
