@@ -36,22 +36,31 @@ class RoomControllerTest {
         val requestBody = """
         {
             "name": "Sample Room",
-            "description": "A nice place to stay",
+            "description": "A beautiful and cozy apartment located in the heart of Seoul. Perfect for travelers!",
             "type": "APARTMENT",
             "address": {
                 "sido": "Seoul",
-                "sigungu": "Gangnam",
-                "street": "Gangnam Daero",
-                "detail": "12345"
+                "sigungu": "Jongno-gu",
+                "street": "123 Hanok Street",
+                "detail": "Apartment 5B"
             },
             "roomDetails": {
                 "wifi": true,
-                "selfCheckin": true,
-                "luggage": true,
-                "TV": true
+                "selfCheckin": false,
+                "luggage": false,
+                "TV": true,
+                "bedroom": 1,
+                "bathroom": 1,
+                "bed": 1,
+                "tv": true
             },
-            "price": 10000,
-            "maxOccupancy": 4
+            "price": {
+                "perNight": 5000,
+                "cleaningFee": 10000,
+                "charge": 500,
+                "total": 0
+            },
+            "maxOccupancy": 1
         }
         """.trimIndent()
 
@@ -75,25 +84,33 @@ class RoomControllerTest {
 
         // create a room with mockmvc
         val requestBody = """
-            {
-                "name": "Sample Room_2",
-                "description": "A nice place to stay",
-                "type": "VILLA",
-                "address": {
-                    "sido": "Seoul",
-                    "sigungu": "Gangnam",
-                    "street": "Gangnam Daero",
-                    "detail": "34567"
-                },
-                "roomDetails": {
-                    "wifi": true,
-                    "selfCheckin": true,
-                    "luggage": true,
-                    "TV": true
-                },
-                "price": 100000,
-                "maxOccupancy": 4
-            }
+        {
+            "name": "Sample Room_2",
+            "description": "A nice place to stay",
+            "type": "VILLA",
+            "address": {
+                "sido": "Seoul",
+                "sigungu": "Gangnam",
+                "street": "Gangnam Daero",
+                "detail": "34567"
+            },
+            "roomDetails": {
+                "wifi": true,
+                "selfCheckin": false,
+                "luggage": false,
+                "TV": true,
+                "bedroom": 1,
+                "bathroom": 1,
+                "bed": 1
+            },
+            "price": {
+                "perNight": 5000,
+                "cleaningFee": 10000,
+                "charge": 500,
+                "total": 0
+            },
+            "maxOccupancy": 1
+        }
         """.trimIndent()
 
         val create_result = mockMvc.perform(
@@ -176,27 +193,35 @@ class RoomControllerTest {
         val (user2, token2) = dataGenerator.generateUserAndToken()
 
         val requestBody = """
-            {
-                "name": "Sample Room",
-                "description": "A nice place to stay",
-                "type": "APARTMENT",
-                "address": {
-                    "sido": "Seoul",
-                    "sigungu": "Gangnam",
-                    "street": "Gangnam Daero",
-                    "detail": "12345"
-                },
-                "roomDetails": {
-                    "wifi": true,
-                    "selfCheckin": true,
-                    "luggage": true,
-                    "TV": true
-                },
-                "price": 10000,
-                "maxOccupancy": 4
-            }
+        {
+            "name": "Sample Room",
+            "description": "A beautiful and cozy apartment located in the heart of Seoul. Perfect for travelers!",
+            "type": "APARTMENT",
+            "address": {
+                "sido": "Seoul",
+                "sigungu": "Jongno-gu",
+                "street": "123 Hanok Street",
+                "detail": "Apartment 5B"
+            },
+            "roomDetails": {
+                "wifi": true,
+                "selfCheckin": false,
+                "luggage": false,
+                "TV": true,
+                "bedroom": 1,
+                "bathroom": 1,
+                "bed": 1,
+                "tv": true
+            },
+            "price": {
+                "perNight": 5000,
+                "cleaningFee": 10000,
+                "charge": 500,
+                "total": 0
+            },
+            "maxOccupancy": 1
+        }
         """.trimIndent()
-
         val result = mockMvc.perform(
             MockMvcRequestBuilders.post("/api/v1/rooms")
                 .header("Authorization", "Bearer $token")
@@ -214,24 +239,32 @@ class RoomControllerTest {
 
         val updateRequestBody = """
             {
-                "name": "Sample Room2",
-                "description": "Samlpe Description",
-                "type": "VILLA",
-                "address": {
-                    "sido": "Seoul",
-                    "sigungu": "Gangnam",
-                    "street": "Gangnam Daero",
-                    "detail": "12345"
-                },
-                "roomDetails": {
-                    "wifi": true,
-                    "selfCheckin": true,
-                    "luggage": true,
-                    "TV": true
-                },
-                "price": 10000,
-                "maxOccupancy": 4
-            }
+            "name": "Sample Room_2",
+            "description": "A nice place to stay",
+            "type": "VILLA",
+            "address": {
+                "sido": "Seoul",
+                "sigungu": "Gangnam",
+                "street": "Gangnam Daero",
+                "detail": "34567"
+            },
+            "roomDetails": {
+                "wifi": true,
+                "selfCheckin": false,
+                "luggage": false,
+                "TV": true,
+                "bedroom": 1,
+                "bathroom": 1,
+                "bed": 1
+            },
+            "price": {
+                "perNight": 5000,
+                "cleaningFee": 10000,
+                "charge": 500,
+                "total": 0
+            },
+            "maxOccupancy": 1
+        }
         """.trimIndent()
 
         val updateResult = mockMvc.perform(
@@ -264,25 +297,34 @@ class RoomControllerTest {
         val (user2, token2) = dataGenerator.generateUserAndToken()
 
         val requestBody = """
-            {
-                "name": "Sample Room",
-                "description": "A nice place to stay",
-                "type": "APARTMENT",
-                "address": {
-                    "sido": "Seoul",
-                    "sigungu": "Gangnam",
-                    "street": "Gangnam Daero",
-                    "detail": "12345"
-                },
-                "roomDetails": {
-                    "wifi": true,
-                    "selfCheckin": true,
-                    "luggage": true,
-                    "TV": true
-                },
-                "price": 10000,
-                "maxOccupancy": 4
-            }
+        {
+            "name": "Sample Room",
+            "description": "A beautiful and cozy apartment located in the heart of Seoul. Perfect for travelers!",
+            "type": "APARTMENT",
+            "address": {
+                "sido": "Seoul",
+                "sigungu": "Jongno-gu",
+                "street": "123 Hanok Street",
+                "detail": "Apartment 5B"
+            },
+            "roomDetails": {
+                "wifi": true,
+                "selfCheckin": false,
+                "luggage": false,
+                "TV": true,
+                "bedroom": 1,
+                "bathroom": 1,
+                "bed": 1,
+                "tv": true
+            },
+            "price": {
+                "perNight": 5000,
+                "cleaningFee": 10000,
+                "charge": 500,
+                "total": 0
+            },
+            "maxOccupancy": 1
+        }
         """.trimIndent()
 
         val result = mockMvc.perform(
