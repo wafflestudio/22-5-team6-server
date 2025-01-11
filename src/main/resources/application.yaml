@@ -23,6 +23,9 @@ spring:
             client-id: ASDF
             client-secret: ASDF
             redirect-uri: '{baseUrl}/api/oauth2/callback/{registrationId}'
+            scope:
+              - email
+              - profile
           naver:
             client-id: ASDF
             client-secret: ASDF
