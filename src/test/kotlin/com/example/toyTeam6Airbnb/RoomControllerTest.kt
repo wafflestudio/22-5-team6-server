@@ -48,11 +48,10 @@ class RoomControllerTest {
                 "wifi": true,
                 "selfCheckin": false,
                 "luggage": false,
-                "TV": true,
+                "tv": true,
                 "bedroom": 1,
                 "bathroom": 1,
-                "bed": 1,
-                "tv": true
+                "bed": 1
             },
             "price": {
                 "perNight": 5000,
@@ -98,7 +97,7 @@ class RoomControllerTest {
                 "wifi": true,
                 "selfCheckin": false,
                 "luggage": false,
-                "TV": true,
+                "tv": true,
                 "bedroom": 1,
                 "bathroom": 1,
                 "bed": 1
@@ -207,11 +206,10 @@ class RoomControllerTest {
                 "wifi": true,
                 "selfCheckin": false,
                 "luggage": false,
-                "TV": true,
+                "tv": true,
                 "bedroom": 1,
                 "bathroom": 1,
-                "bed": 1,
-                "tv": true
+                "bed": 1
             },
             "price": {
                 "perNight": 5000,
@@ -252,7 +250,7 @@ class RoomControllerTest {
                 "wifi": true,
                 "selfCheckin": false,
                 "luggage": false,
-                "TV": true,
+                "tv": true,
                 "bedroom": 1,
                 "bathroom": 1,
                 "bed": 1
@@ -311,11 +309,10 @@ class RoomControllerTest {
                 "wifi": true,
                 "selfCheckin": false,
                 "luggage": false,
-                "TV": true,
+                "tv": true,
                 "bedroom": 1,
                 "bathroom": 1,
-                "bed": 1,
-                "tv": true
+                "bed": 1
             },
             "price": {
                 "perNight": 5000,

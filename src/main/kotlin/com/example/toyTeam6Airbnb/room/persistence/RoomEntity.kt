@@ -24,7 +24,7 @@ import java.time.Instant
     name = "rooms",
     uniqueConstraints = [
         UniqueConstraint(
-            columnNames = ["detail"]
+            columnNames = ["street", "detail"]
         )
     ]
 )
