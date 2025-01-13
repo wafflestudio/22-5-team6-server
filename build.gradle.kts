@@ -40,6 +40,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("io.github.oshai:kotlin-logging-jvm:5.1.1")
+    implementation("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
+    implementation("software.amazon.awssdk:s3:2.20.32")
+    implementation("com.amazonaws:aws-java-sdk-cloudfront:1.12.592") // 최신 버전 사용, signed URL 생성을 위해 필요
 }
 
 kotlin {
