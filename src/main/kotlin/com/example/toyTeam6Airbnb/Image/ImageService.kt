@@ -57,6 +57,12 @@ class ImageService() {
         expiration: Date
     ): String {
         // privateKey와 keyPairId는 GitHub Secrets에서 가져온 값이 자동으로 주입됨
+        if (privateKey.isBlank()) {
+            throw IllegalStateException("Private key is not configured or is blank")
+        }
+        if (keyPairId.isBlank()) {
+            throw IllegalStateException("Key Pair ID is not configured or is blank")
+        }
         return createSignedUrl(domain, key, privateKey, keyPairId, expiration)
     }
 
