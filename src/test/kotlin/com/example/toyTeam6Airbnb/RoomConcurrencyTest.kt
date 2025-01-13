@@ -55,7 +55,7 @@ class RoomConcurrencyTest {
                 "wifi": true,
                 "selfCheckin": false,
                 "luggage": false,
-                "TV": true,
+                "tv": true,
                 "bedroom": 1,
                 "bathroom": 1,
                 "bed": 1
@@ -64,7 +64,7 @@ class RoomConcurrencyTest {
                 "perNight": 5000,
                 "cleaningFee": 5000,
                 "charge": 5000,
-                "total": 15000
+                "total": 0
             },
             "maxOccupancy": 1
         }
@@ -132,7 +132,7 @@ class RoomConcurrencyTest {
                 "wifi": true,
                 "selfCheckin": false,
                 "luggage": false,
-                "TV": true,
+                "tv": true,
                 "bedroom": 1,
                 "bathroom": 1,
                 "bed": 1

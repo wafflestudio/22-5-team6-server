@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.room.controller
 
+import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.Instant
 import java.time.LocalDate
 
 @RestController
@@ -66,6 +68,16 @@ class RoomController(
     ): ResponseEntity<RoomDetailsDTO> {
         val room = roomService.getRoomDetails(roomId)
         return ResponseEntity.ok(room.toDetailsDTO())
+    }
+
+    @GetMapping("/rooms/main/{roomId}/reviews")
+    fun getRoomReviews(
+        @PathVariable roomId: Long,
+        pageable: Pageable
+    ): ResponseEntity<Page<RoomReviewDTO>> {
+        val validatedPageable = validatePageable(pageable)
+        val reviews = roomService.getRoomReviews(roomId, validatedPageable)
+        return ResponseEntity.ok(reviews)
     }
 
     @PutMapping("/rooms/{roomId}")
@@ -151,3 +163,29 @@ data class UpdateRoomRequest(
     val price: Price,
     val maxOccupancy: Int
 )
+
+data class RoomReviewDTO(
+    val id: Long,
+    val userId: Long,
+    val rating: Int,
+    val content: String,
+    val reservationStartDate: LocalDate,
+    val reservationEndDate: LocalDate,
+    val createdAt: Instant,
+    val updatedAt: Instant
+) {
+    companion object {
+        fun fromEntity(entity: ReviewEntity): RoomReviewDTO {
+            return RoomReviewDTO(
+                id = entity.id!!,
+                userId = entity.user.id!!,
+                rating = entity.rating,
+                content = entity.content,
+                reservationStartDate = entity.reservation.startDate,
+                reservationEndDate = entity.reservation.endDate,
+                createdAt = entity.createdAt,
+                updatedAt = entity.updatedAt
+            )
+        }
+    }
+}
