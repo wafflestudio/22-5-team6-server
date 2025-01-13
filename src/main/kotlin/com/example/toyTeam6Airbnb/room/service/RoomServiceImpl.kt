@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.room.service
 
+import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
 import com.example.toyTeam6Airbnb.room.DuplicateRoomException
 import com.example.toyTeam6Airbnb.room.InvalidAddressException
 import com.example.toyTeam6Airbnb.room.InvalidDescriptionException
@@ -11,6 +12,7 @@ import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.room.controller.RoomReviewDTO
 import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
@@ -30,7 +32,8 @@ import java.time.LocalDate
 @Service
 class RoomServiceImpl(
     private val roomRepository: RoomRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val reviewRepository: ReviewRepository
 ) : RoomService {
 
     @Transactional
@@ -81,6 +84,11 @@ class RoomServiceImpl(
     override fun getRoomDetails(roomId: Long): Room {
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
         return Room.fromEntity(roomEntity)
+    }
+
+    @Transactional
+    override fun getRoomReviews(roomId: Long, pageable: Pageable): Page<RoomReviewDTO> {
+        return reviewRepository.findAllByRoomId(roomId, pageable).map { RoomReviewDTO.fromEntity(it) }
     }
 
     @Transactional
