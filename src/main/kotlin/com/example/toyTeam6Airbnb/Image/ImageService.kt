@@ -29,7 +29,6 @@ class ImageService() {
     private val cloudFrontUrl: String = "https://d3m9s5wmwvsq01.cloudfront.net"
 
     // 파일 업로드 메서드
-    @Transactional
     fun uploadFile(filePath: String, key: String) {
         s3Client.putObject(
             PutObjectRequest.builder()
