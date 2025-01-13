@@ -34,6 +34,13 @@ jobs:
           echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yaml
           echo "${{ secrets.P12_BASE64 }}" | base64 --decode > ./src/main/resources/test.p12
 
+      - name: Set up CloudFront environment variables
+        env:
+          CLF_PRIVATE_KEY: ${{ secrets.CLF_PRIVATE_KEY }}
+          CLF_KEY_PAIR_ID: ${{ secrets.CLF_KEY_PAIR_ID }}
+        run: echo "Environment variables set"
+
+
       - name: Build with Gradle
         run: ./gradlew build -x test
 
