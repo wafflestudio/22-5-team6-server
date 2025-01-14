@@ -57,9 +57,9 @@ class RoomEntity(
     var createdAt: Instant = Instant.now(),
     @Column(nullable = false)
     var updatedAt: Instant = Instant.now(),
-    @Column
+    @Column(columnDefinition = "LONGTEXT")
     var imageDownloadUrl: String? = null,
-    @Column
+    @Column(columnDefinition = "LONGTEXT")
     var imageUploadUrl: String? = null
 ) {
     @PrePersist

@@ -32,9 +32,9 @@ class UserEntity(
     val provider: AuthProvider,
     @Column
     var oAuthId: String? = null,
-    @Column
+    @Column(columnDefinition = "LONGTEXT")
     var imageDownloadUrl: String? = null,
-    @Column
+    @Column(columnDefinition = "LONGTEXT")
     var imageUploadUrl: String? = null,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
