@@ -28,6 +28,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Set up environment variables
+        run: |
+          # GitHub Secrets에서 환경 변수로 주입
+          export CLF_PRIVATE_KEY="${{ secrets.CLF_PRIVATE_KEY }}"
+          export CLF_KEY_PAIR_ID="${{ secrets.CLF_KEY_PAIR_ID }}"
+        shell: bash
+
       # 민감한 정보(ex. DB url, username, password) 는 따로 github secrets에 저장
       - name: Set up application.yaml
         run: |
@@ -86,9 +93,6 @@ jobs:
           username: ${{ env.EC2_SSH_USER }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            # 환경 변수 전달
-            export CLF_PRIVATE_KEY="${{ secrets.CLF_PRIVATE_KEY }}"
-            export CLF_KEY_PAIR_ID="${{ secrets.CLF_KEY_PAIR_ID }}"
             
             echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
             docker rm -f $(docker ps -qa)
