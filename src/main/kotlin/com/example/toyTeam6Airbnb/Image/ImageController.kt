@@ -39,7 +39,7 @@ class ImageController(
     ): ResponseEntity<String> {
         return try {
             val file = request.file
-            val key = request.key
+            val key = request.key.trim()
 
             val tempFile = Paths.get(System.getProperty("java.io.tmpdir"), file.originalFilename).toFile()
             file.transferTo(tempFile) // MultipartFile을 임시 파일로 저장

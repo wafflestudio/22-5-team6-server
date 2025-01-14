@@ -29,6 +29,7 @@ class ImageService() {
 
     // 파일 업로드 메서드
     fun uploadFile(filePath: String, key: String) {
+        println("Uploading File with key : $key") // 디버깅
         s3Client.putObject(
             PutObjectRequest.builder()
                 .bucket(bucketName)
