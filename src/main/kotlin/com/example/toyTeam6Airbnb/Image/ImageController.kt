@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.nio.file.Paths
-import java.util.Date
 
 @RestController
 @RequestMapping("/api/images")
@@ -40,32 +38,18 @@ class ImageController(
         return try {
             val file = request.file
             val key = request.key.trim()
-
-            val tempFile = Paths.get(System.getProperty("java.io.tmpdir"), file.originalFilename).toFile()
-            file.transferTo(tempFile) // MultipartFile을 임시 파일로 저장
-
-            imageService.uploadFile(tempFile.absolutePath, key) // S3에 업로드
-            tempFile.delete() // 임시 파일 삭제
-
-            ResponseEntity("Image uploaded successfully with key: $key", HttpStatus.OK)
+            val fileUrl = imageService.uploadFile(file, key) // S3에 업로드 및 경로 저장
+            ResponseEntity.ok("Image uploaded successfully with key: $key, URL: $fileUrl")
         } catch (e: Exception) {
-            ResponseEntity("Failed to upload image: ${e.message}", HttpStatus.INTERNAL_SERVER_ERROR)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Failed to upload image: ${e.message}")
         }
     }
 
-    @GetMapping("/{key}")
-    fun getImageSignedUrl(
-        @PathVariable("key") key: String
-    ): ResponseEntity<String> {
+    @GetMapping("/get-signed-url/{key}")
+    fun getSignedUrl(@PathVariable key: String): ResponseEntity<String> {
         return try {
-            val expirationDate = Date(System.currentTimeMillis() + 3600_000) // 1시간 유효
-
-            val signedUrl = imageService.generateSignedUrl(
-                "https://d3m9s5wmwvsq01.cloudfront.net",
-                key,
-                expirationDate
-            )
-
+            val signedUrl = imageService.generateSignedUrl(key)
             ResponseEntity.ok(signedUrl)
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
