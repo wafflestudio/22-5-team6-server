@@ -47,14 +47,7 @@ class UserEntity(
     val reviews: List<ReviewEntity> = mutableListOf(),
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
-    val profile: ProfileEntity? = null,
-
-    @Column
-    var imageUploadUrl: String? = null,
-
-    @Column
-    var imageDownloadUrl: String? = null
-
+    val profile: ProfileEntity? = null
 ) {
     fun isSuperhost(): Boolean {
         return profile?.isSuperHost == true

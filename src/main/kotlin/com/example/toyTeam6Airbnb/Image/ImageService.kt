@@ -62,7 +62,7 @@ class ImageService(
         if (resourceType == "users") {
             val userId = resourceId.toLongOrNull() ?: throw RuntimeException("Invalid user ID")
             val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
-            user.imageDownloadUrl = uploadUrl
+            user.imageUploadUrl = uploadUrl
             userRepository.save(user)
         } else if (resourceType == "rooms") {
             val roomId = resourceId.toLongOrNull() ?: throw RuntimeException("Invalid room ID")
