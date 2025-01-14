@@ -105,6 +105,7 @@ class RoomController(
     }
 
     @GetMapping("/rooms/main/search")
+    @Operation(summary = "방 검색", description = "방을 검색합니다(페이지네이션 적용)")
     fun searchRooms(
         @RequestParam(required = false) name: String?,
         @RequestParam(required = false) type: RoomType?,
