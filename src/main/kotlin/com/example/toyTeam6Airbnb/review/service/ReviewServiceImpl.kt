@@ -1,18 +1,24 @@
 package com.example.toyTeam6Airbnb.review.service
+
 import com.example.toyTeam6Airbnb.reservation.ReservationNotFound
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
 import com.example.toyTeam6Airbnb.review.DuplicateReviewException
 import com.example.toyTeam6Airbnb.review.ReviewNotFoundException
 import com.example.toyTeam6Airbnb.review.ReviewPermissionDeniedException
 import com.example.toyTeam6Airbnb.review.controller.Review
+import com.example.toyTeam6Airbnb.review.controller.ReviewDTO
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
-import com.example.toyTeam6Airbnb.profile.RoomNotFoundException
+import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.AuthenticateException
+import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import com.example.toyTeam6Airbnb.validatePageable
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -62,19 +68,29 @@ class ReviewServiceImpl(
     }
 
     @Transactional
-    override fun getReviews(roomId: Long): List<Review> {
+    override fun getReviewsByRoom(roomId: Long, pageable: Pageable): Page<ReviewDTO> {
         roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
 
-        val reviewEntities = reviewRepository.findAllByRoomId(roomId)
+        val reviewEntities = reviewRepository.findAllByRoomId(roomId, validatePageable(pageable))
 
-        val reviews = reviewEntities.map { Review.fromEntity(it) }
+        val reviews = reviewEntities.map { ReviewDTO.fromEntity(it) }
         return reviews
     }
 
     @Transactional
-    override fun getReviewDetails(reviewId: Long): Review {
+    override fun getReviewsByUser(userId: Long, pageable: Pageable): Page<ReviewDTO> {
+        userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
+
+        val reviewEntities = reviewRepository.findAllByUserId(userId, validatePageable(pageable))
+
+        val reviews = reviewEntities.map { ReviewDTO.fromEntity(it) }
+        return reviews
+    }
+
+    @Transactional
+    override fun getReviewDetails(reviewId: Long): ReviewDTO {
         val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFoundException()
-        return Review.fromEntity(reviewEntity)
+        return ReviewDTO.fromEntity(reviewEntity)
     }
 
     @Transactional
