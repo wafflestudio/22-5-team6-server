@@ -1,17 +1,12 @@
 package com.example.toyTeam6Airbnb.Image
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
-import io.swagger.v3.oas.annotations.parameters.RequestBody
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/images")
@@ -19,83 +14,47 @@ class ImageController(
     private val imageService: ImageService
 ) {
     @Operation(
-        summary = "Upload an image",
-        description = "Uploads an image to the server and stores it in S3.",
-        requestBody = RequestBody(
-            content = [
-                Content(
-                    mediaType = "multipart/form-data",
-                    schema = Schema(implementation = UploadImageRequest::class)
-                )
-            ]
-        )
+        summary = "Generate a presigned URL for uploading an image",
+        description = "Generates a presigned URL for uploading an image directly to S3."
     )
-    // 이미지 업로드 엔드포인트
-    @PostMapping("/upload", consumes = ["multipart/form-data"])
-    fun uploadImage(
-        @RequestBody request: UploadImageRequest
+    @GetMapping("/upload-url")
+    fun generateUploadUrl(
+        @RequestParam("key") key: String,
+        @RequestParam("expirationMinutes", defaultValue = "10") expirationMinutes: Long
     ): ResponseEntity<String> {
         return try {
-            val file = request.file
-            val key = request.key.trim()
-            val fileUrl = imageService.uploadFile(file, key) // S3에 업로드 및 경로 저장
-            ResponseEntity.ok("Image uploaded successfully with key: $key, URL: $fileUrl")
+            val uploadUrl = imageService.generateUploadUrl(key, expirationMinutes)
+            ResponseEntity.ok(uploadUrl)
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Failed to upload image: ${e.message}")
+                .body("Failed to generate upload URL: ${e.message}")
         }
     }
 
-    @GetMapping("/get-signed-url/{key}")
-    fun getSignedUrl(@PathVariable key: String): ResponseEntity<String> {
-        return try {
-            val signedUrl = imageService.generateSignedUrl(key)
-            ResponseEntity.ok(signedUrl)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Failed to generate signed URL: ${e.message}")
-        }
-    }
-
-    // 내부 DTO 클래스 정의
-    data class UploadImageRequest(
-        @Schema(type = "string", format = "binary", description = "The image file to upload")
-        val file: MultipartFile,
-
-        @Schema(description = "The key to associate with the uploaded image", example = "example-key")
-        val key: String
+    @Operation(
+        summary = "Generate a presigned URL for downloading an image",
+        description = "Generates a presigned URL for downloading an image directly from S3."
     )
-}
+    @GetMapping("/download-url")
+    fun generateDownloadUrl(
+        @RequestParam("key") key: String,
+        @RequestParam("expirationMinutes", defaultValue = "60") expirationMinutes: Long
+    ): ResponseEntity<String> {
+        return try {
+            val downloadUrl = imageService.generateDownloadUrl(key, expirationMinutes)
+            ResponseEntity.ok(downloadUrl)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Failed to generate download URL: ${e.message}")
+        }
+    }
 
-//    // 이미지 다운로드 엔드포인트
-//    @GetMapping("/download")
-//    fun downloadImage(
-//        @RequestParam("key") key: String,
-//        @RequestParam("destination") destination: String
-//    ): ResponseEntity<String> {
-//        return try {
-//            imageService.downloadFile(key, destination) // S3에서 다운로드
-//            ResponseEntity("Image downloaded successfully to: $destination", HttpStatus.OK)
-//        } catch (e: Exception) {
-//            ResponseEntity("Failed to download image: ${e.message}", HttpStatus.INTERNAL_SERVER_ERROR)
-//        }
-//    }
-
-//    // 이미지를 화면에 표시, 보안 취약
-//    @GetMapping("/{key}")
-//    fun getImage(
-//        @PathVariable("key") key: String
-//    ): ResponseEntity<Void> {
-//        return try {
-//            // CloudFront 배포 URL
-//            val cloudFrontUrl = "https://d3m9s5wmwvsq01.cloudfront.net/$key"
+//    // 내부 DTO 클래스 정의
+//    data class UploadImageRequest(
+//        @Schema(type = "string", format = "binary", description = "The image file to upload")
+//        val file: MultipartFile,
 //
-//            // 302 Redirect
-//            ResponseEntity.status(HttpStatus.FOUND)
-//                .header("Location", cloudFrontUrl)
-//                .build()
-//        } catch (e: Exception) {
-//            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                .body(null)
-//        }
-//    }
+//        @Schema(description = "The key to associate with the uploaded image", example = "example-key")
+//        val key: String
+//    )
+}
