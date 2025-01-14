@@ -86,6 +86,9 @@ jobs:
           username: ${{ env.EC2_SSH_USER }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
+            # 환경 변수 전달
+            export CLF_PRIVATE_KEY="${{ secrets.CLF_PRIVATE_KEY }}"
+            export CLF_KEY_PAIR_ID="${{ secrets.CLF_KEY_PAIR_ID }}"
             
             echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
             docker rm -f $(docker ps -qa)
