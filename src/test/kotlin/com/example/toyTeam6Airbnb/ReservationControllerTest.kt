@@ -342,8 +342,6 @@ class ReservationControllerTest {
         return if (contentNode.isArray) contentNode.size() else 0
     }
 
-
-
     @BeforeEach
     fun setUp() {
         dataGenerator.clearAll()
