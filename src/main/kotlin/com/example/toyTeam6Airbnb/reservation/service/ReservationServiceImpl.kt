@@ -132,8 +132,9 @@ class ReservationServiceImpl(
     }
 
     @Transactional
-    override fun getReservationsByUser(userId: Long, pageable: Pageable): List<ReservationDTO> {
+    override fun getReservationsByUser(viewerId: Long?, userId: Long, pageable: Pageable): List<ReservationDTO> {
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
+        if (viewerId != userId && userEntity.profile?.showMyReservations != true) throw ReservationPermissionDenied()
 
         return reservationRepository.findAllByUser(userEntity).map(ReservationDTO::fromEntity)
     }

@@ -18,6 +18,7 @@ class ProfileServiceImpl(
     private val roomRepository: RoomRepository
 ) : ProfileService {
 
+    @Transactional
     override fun getCurrentUserProfile(
         user: UserEntity
     ): Profile {
@@ -34,6 +35,8 @@ class ProfileServiceImpl(
 
         profile.nickname = request.nickname
         profile.bio = request.bio
+        profile.showMyReviews = request.showMyReviews
+        profile.showMyReservations = request.showMyReservations
         updateSuperHostStatus(profile)
         profileRepository.save(profile)
 
@@ -50,7 +53,9 @@ class ProfileServiceImpl(
         val profile = ProfileEntity(
             user = user,
             nickname = request.nickname,
-            bio = request.bio
+            bio = request.bio,
+            showMyReviews = request.showMyReviews,
+            showMyReservations = request.showMyReservations
         )
         updateSuperHostStatus(profile)
 

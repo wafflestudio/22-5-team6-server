@@ -78,8 +78,9 @@ class ReviewServiceImpl(
     }
 
     @Transactional
-    override fun getReviewsByUser(userId: Long, pageable: Pageable): Page<ReviewDTO> {
-        userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
+    override fun getReviewsByUser(viewerId: Long?, userId: Long, pageable: Pageable): Page<ReviewDTO> {
+        val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
+        if (viewerId != userId && userEntity.profile?.showMyReviews != true) throw ReviewPermissionDeniedException()
 
         val reviewEntities = reviewRepository.findAllByUserId(userId, validatePageable(pageable))
 

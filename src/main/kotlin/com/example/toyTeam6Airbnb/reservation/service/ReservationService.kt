@@ -36,6 +36,7 @@ interface ReservationService {
     ): Reservation
 
     fun getReservationsByUser(
+        viewerId: Long?,
         userId: Long,
         pageable: Pageable
     ): List<ReservationDTO>

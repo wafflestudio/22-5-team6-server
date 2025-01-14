@@ -26,6 +26,7 @@ interface ReviewService {
     ): ReviewDTO
 
     fun getReviewsByUser(
+        viewerId: Long?,
         userId: Long,
         pageable: Pageable
     ): Page<ReviewDTO>

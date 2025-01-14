@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -93,7 +94,16 @@ class ReservationController(
         @PathVariable userId: Long,
         @RequestParam pageable: Pageable
     ): ResponseEntity<List<ReservationDTO>> {
-        val reservations = reservationService.getReservationsByUser(userId, pageable)
+        val viewerId =
+            try {
+                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
+                principalDetails.getUser().id
+                // logic for when the user is logged in
+            } catch (e: ClassCastException) {
+                // logic for when the user is not logged in
+                null
+            }
+        val reservations = reservationService.getReservationsByUser(viewerId, userId, pageable)
         return ResponseEntity.ok(reservations)
     }
 

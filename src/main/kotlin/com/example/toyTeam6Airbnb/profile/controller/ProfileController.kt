@@ -53,10 +53,14 @@ class ProfileController(
 
 data class UpdateProfileRequest(
     val nickname: String,
-    val bio: String
+    val bio: String,
+    val showMyReviews: Boolean,
+    val showMyReservations: Boolean
 )
 
 data class CreateProfileRequest(
     val nickname: String,
-    val bio: String
+    val bio: String,
+    val showMyReviews: Boolean,
+    val showMyReservations: Boolean
 )
