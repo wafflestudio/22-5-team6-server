@@ -2,6 +2,7 @@ package com.example.toyTeam6Airbnb.room.service
 
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.room.controller.RoomReviewDTO
 import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
@@ -25,6 +26,8 @@ interface RoomService {
     fun getRooms(pageable: Pageable): Page<Room>
 
     fun getRoomDetails(roomId: Long): Room
+
+    fun getRoomReviews(roomId: Long, pageable: Pageable): Page<RoomReviewDTO>
 
     fun updateRoom(
         hostId: Long,

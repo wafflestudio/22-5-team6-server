@@ -89,6 +89,7 @@ class SecurityConfig(
                 authorize(HttpMethod.GET, "/api/v1/reviews/**", permitAll)
                 authorize("/error", permitAll)
                 authorize("/redirect", permitAll)
+                authorize(HttpMethod.GET, "/api/images/**", permitAll)
                 authorize(anyRequest, authenticated)
             }
             formLogin {
