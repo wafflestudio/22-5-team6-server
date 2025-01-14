@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 
 @RestController
 @RequestMapping("/api/v1/reviews")
@@ -43,9 +46,10 @@ class ReviewController(
     @GetMapping("/room/{roomId}")
     @Operation(summary = "Get Reviews", description = "Get all reviews for a room")
     fun getReviews(
-        @PathVariable roomId: Long
-    ): ResponseEntity<List<ReviewDTO>> {
-        val reviews = reviewService.getReviews(roomId).map { it.toDTO() }
+        @PathVariable roomId: Long,
+        @RequestParam pageable: Pageable
+    ): ResponseEntity<Page<ReviewDTO>> {
+        val reviews = reviewService.getReviewsByRoom(roomId, pageable).map { it.toDTO() }
         return ResponseEntity.ok(reviews)
     }
 
@@ -56,6 +60,15 @@ class ReviewController(
     ): ResponseEntity<ReviewDTO> {
         val review = reviewService.getReviewDetails(reviewId)
         return ResponseEntity.ok(review.toDTO())
+    }
+
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "Get Reviews by User", description = "Get all reviews by a user")
+    fun getReviewsByUser(
+        @PathVariable userId: Long
+    ): ResponseEntity<Page<ReviewDTO>> {
+        val reviews = reviewService.getReviewsByUser(userId).map { it.toDTO() }
+        return ResponseEntity.ok(reviews)
     }
 
     // Review에 수정 사항이 추가되면 파라미터 수정 필요

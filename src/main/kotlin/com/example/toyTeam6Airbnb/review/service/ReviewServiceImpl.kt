@@ -7,7 +7,7 @@ import com.example.toyTeam6Airbnb.review.ReviewPermissionDeniedException
 import com.example.toyTeam6Airbnb.review.controller.Review
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
-import com.example.toyTeam6Airbnb.room.RoomNotFoundException
+import com.example.toyTeam6Airbnb.profile.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.controller.User

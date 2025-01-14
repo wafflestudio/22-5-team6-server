@@ -2,6 +2,9 @@ package com.example.toyTeam6Airbnb.review.service
 
 import com.example.toyTeam6Airbnb.review.controller.Review
 import com.example.toyTeam6Airbnb.user.controller.User
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+
 interface ReviewService {
 
     fun createReview(
@@ -12,9 +15,15 @@ interface ReviewService {
         rating: Int
     ): Review
 
-    fun getReviews(
-        roomId: Long
-    ): List<Review>
+    fun getReviewsByRoom(
+        roomId: Long,
+        pageable: Pageable
+    ): Page<Review>
+
+    fun getReviewsByUser(
+        userId: Long,
+        pageable: Pageable
+    ): Page<Review>
 
     fun getReviewDetails(
         reviewId: Long
