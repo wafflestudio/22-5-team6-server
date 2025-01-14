@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.room.persistence
 
+import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import jakarta.persistence.LockModeType
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -65,4 +66,6 @@ interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExec
         @Param("detail") detail: String?,
         pageable: Pageable
     ): Page<RoomEntity>
+
+    fun countByHost(userEntity: UserEntity): Int
 }

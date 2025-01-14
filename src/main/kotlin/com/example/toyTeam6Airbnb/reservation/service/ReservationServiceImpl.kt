@@ -9,7 +9,7 @@ import com.example.toyTeam6Airbnb.reservation.controller.Reservation
 import com.example.toyTeam6Airbnb.reservation.controller.RoomAvailabilityResponse
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
-import com.example.toyTeam6Airbnb.room.RoomNotFoundException
+import com.example.toyTeam6Airbnb.profile.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.AuthenticateException
