@@ -13,7 +13,7 @@ sealed class ProfileException(
 
 class ProfileAlreadyExistException : ProfileException(
     errorCode = 5001,
-    httpStatusCode = HttpStatus.BAD_REQUEST,
+    httpStatusCode = HttpStatus.CONFLICT,
     msg = "Profile already exists"
 )
 

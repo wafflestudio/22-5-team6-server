@@ -3,57 +3,63 @@ package com.example.toyTeam6Airbnb.profile.service
 import com.example.toyTeam6Airbnb.profile.ProfileAlreadyExistException
 import com.example.toyTeam6Airbnb.profile.ProfileNotFoundException
 import com.example.toyTeam6Airbnb.profile.controller.CreateProfileRequest
+import com.example.toyTeam6Airbnb.profile.controller.Profile
 import com.example.toyTeam6Airbnb.profile.controller.UpdateProfileRequest
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
-import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ProfileServiceImpl(
     private val profileRepository: ProfileRepository,
-    private val userRepository: UserRepository,
     private val roomRepository: RoomRepository
 ) : ProfileService {
 
     override fun getCurrentUserProfile(
         user: UserEntity
-    ): ProfileEntity {
-        return profileRepository.findByUser(user) ?: throw ProfileNotFoundException()
+    ): Profile {
+        val profile = profileRepository.findByUser(user) ?: throw ProfileNotFoundException()
+        return Profile.fromEntity(profile)
     }
 
     @Transactional
     override fun updateCurrentUserProfile(
         user: UserEntity,
         request: UpdateProfileRequest
-    ): ProfileEntity {
+    ): Profile {
         val profile = profileRepository.findByUser(user) ?: throw ProfileNotFoundException()
 
         profile.nickname = request.nickname
         profile.bio = request.bio
-        updateSuperhostStatus(profile)
+        updateSuperHostStatus(profile)
+        profileRepository.save(profile)
 
-        return profileRepository.save(profile)
+        return Profile.fromEntity(profile)
     }
 
     @Transactional
     override fun addProfileToCurrentUser(
         user: UserEntity,
         request: CreateProfileRequest
-    ): ProfileEntity {
+    ): Profile {
         if (profileRepository.existsByUser(user)) throw ProfileAlreadyExistException()
 
-        val profile = ProfileEntity(user = user, nickname = request.nickname, bio = request.bio)
-        updateSuperhostStatus(profile)
-        return profileRepository.save(profile)
+        val profile = ProfileEntity(
+            user = user,
+            nickname = request.nickname,
+            bio = request.bio
+        )
+        updateSuperHostStatus(profile)
+
+        return Profile.fromEntity(profileRepository.save(profile))
     }
 
     @Transactional
-    override fun updateSuperhostStatus(profile: ProfileEntity) {
+    override fun updateSuperHostStatus(profile: ProfileEntity) {
         val roomCount = roomRepository.countByHost(profile.user)
-        profile.isSuperhost = roomCount >= 5
+        profile.isSuperHost = roomCount >= 5
     }
 }
