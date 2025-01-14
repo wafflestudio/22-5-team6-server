@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface ProfileRepository : JpaRepository<ProfileEntity, Long> {
     fun findByUser(user: UserEntity): ProfileEntity?
+
+    fun existsByUser(user: UserEntity): Boolean
 }

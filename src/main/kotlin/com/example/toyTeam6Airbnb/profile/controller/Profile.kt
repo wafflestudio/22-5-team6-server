@@ -6,6 +6,7 @@ data class Profile(
     val id: Long,
     val userId: Long,
     val nickname: String,
+    val bio: String,
     val isSuperhost: Boolean
 ) {
     companion object {
@@ -14,6 +15,7 @@ data class Profile(
                 id = profileEntity.id,
                 userId = profileEntity.user.id!!,
                 nickname = profileEntity.nickname,
+                bio = profileEntity.bio,
                 isSuperhost = profileEntity.isSuperhost
             )
         }

@@ -26,5 +26,8 @@ class ProfileEntity(
     var nickname: String,
 
     @Column(nullable = false)
+    var bio: String,
+
+    @Column(nullable = false)
     var isSuperhost: Boolean = false
 )
