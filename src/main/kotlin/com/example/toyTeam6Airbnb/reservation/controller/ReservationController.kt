@@ -5,6 +5,7 @@ import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import com.example.toyTeam6Airbnb.user.controller.User
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -92,8 +93,8 @@ class ReservationController(
     @Operation(summary = "유저별 예약 조회", description = "특정 유저의 모든 예약 정보를 조회합니다")
     fun getReservationsByUser(
         @PathVariable userId: Long,
-        @RequestParam pageable: Pageable
-    ): ResponseEntity<List<ReservationDTO>> {
+        pageable: Pageable
+    ): ResponseEntity<Page<ReservationDTO>> {
         val viewerId =
             try {
                 val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails

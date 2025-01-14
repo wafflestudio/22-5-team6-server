@@ -219,5 +219,31 @@ class ReviewIntegrationTest {
         )
             .andExpect(MockMvcResultMatchers.status().isForbidden)
             .andReturn()
+
+        // update user1's profile
+        val updateRequestBody = """
+            {
+                "nickname": "newNickname",
+                "bio": "newBio",
+                "showMyReviews": true,
+                "showMyReservations": true
+            }
+        """.trimIndent()
+        mockMvc.perform(
+            MockMvcRequestBuilders.put("/api/v1/profile")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateRequestBody)
+                .header("Authorization", "Bearer $token1")
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+
+        // user2 should be able to see the reviews now
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/reviews/user/${user1.id}?page=0&size=3")
+                .header("Authorization", "Bearer $token2")
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
     }
 }

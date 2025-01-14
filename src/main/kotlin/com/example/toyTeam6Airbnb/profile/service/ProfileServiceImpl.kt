@@ -31,7 +31,7 @@ class ProfileServiceImpl(
         user: UserEntity,
         request: UpdateProfileRequest
     ): Profile {
-        val profile = profileRepository.findByUser(user) ?: throw ProfileNotFoundException()
+        val profile = profileRepository.findByUser(user) ?: ProfileEntity(user = user, nickname = "", bio = "")
 
         profile.nickname = request.nickname
         profile.bio = request.bio

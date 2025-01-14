@@ -4,6 +4,7 @@ import com.example.toyTeam6Airbnb.reservation.controller.Reservation
 import com.example.toyTeam6Airbnb.reservation.controller.ReservationDTO
 import com.example.toyTeam6Airbnb.reservation.controller.RoomAvailabilityResponse
 import com.example.toyTeam6Airbnb.user.controller.User
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import java.time.LocalDate
 import java.time.YearMonth
@@ -39,7 +40,7 @@ interface ReservationService {
         viewerId: Long?,
         userId: Long,
         pageable: Pageable
-    ): List<ReservationDTO>
+    ): Page<ReservationDTO>
 
 //    fun getReservationsByRoom(
 //        roomId: Long
