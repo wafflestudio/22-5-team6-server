@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.config
 
 import com.example.toyTeam6Airbnb.user.JwtTokenProvider
+import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
@@ -22,6 +23,6 @@ class CustomAuthenticationSuccessHandler(
     ) {
         val token = jwtTokenProvider.generateToken(authentication.name)
 
-        response.sendRedirect("/redirect?token=$token")
+        response.sendRedirect("/redirect?token=$token&userid=${(authentication.principal as PrincipalDetails).getId()}")
     }
 }
