@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Paths
@@ -36,10 +35,12 @@ class ImageController(
     // 이미지 업로드 엔드포인트
     @PostMapping("/upload", consumes = ["multipart/form-data"])
     fun uploadImage(
-        @RequestParam("file") file: MultipartFile,
-        @RequestParam("key") key: String
+        @RequestBody request: UploadImageRequest
     ): ResponseEntity<String> {
         return try {
+            val file = request.file
+            val key = request.key
+
             val tempFile = Paths.get(System.getProperty("java.io.tmpdir"), file.originalFilename).toFile()
             file.transferTo(tempFile) // MultipartFile을 임시 파일로 저장
 
