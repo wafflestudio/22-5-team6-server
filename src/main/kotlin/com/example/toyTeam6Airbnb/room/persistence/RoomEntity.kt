@@ -56,7 +56,11 @@ class RoomEntity(
     @Column(nullable = false)
     var createdAt: Instant = Instant.now(),
     @Column(nullable = false)
-    var updatedAt: Instant = Instant.now()
+    var updatedAt: Instant = Instant.now(),
+    @Column
+    var imageUploadUrl: String? = null,
+    @Column
+    var imageDownloadUrl: String? = null
 ) {
     @PrePersist
     fun onPrePersist() {
