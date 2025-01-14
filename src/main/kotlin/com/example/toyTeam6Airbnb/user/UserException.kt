@@ -52,3 +52,9 @@ class OAuthException : UserException(
     httpStatusCode = HttpStatus.BAD_REQUEST,
     msg = "OAuth Exception"
 )
+
+class UserNotFoundException : UserException(
+    errorCode = 1008,
+    httpStatusCode = HttpStatus.NOT_FOUND,
+    msg = "User not found"
+)
