@@ -14,6 +14,11 @@ jobs:
   build-and-test:  # Job 이름
     runs-on: ubuntu-latest  # 작업 실행 환경
 
+    env:
+      # GitHub Secrets 주입
+      CLOUDFRONT_PRIVATE_KEY: ${{ secrets.CLF_PRIVATE_KEY }}
+      CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLF_KEY_PAIR_ID }}
+
     steps:
       - name: Checkout code  # Step 이름
         uses: actions/checkout@v4  # GitHub Action 사용 (코드 체크아웃)
