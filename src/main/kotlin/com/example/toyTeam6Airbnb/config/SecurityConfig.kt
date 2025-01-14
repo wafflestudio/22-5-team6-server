@@ -15,6 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 import org.springframework.web.cors.CorsConfiguration
@@ -96,6 +97,7 @@ class SecurityConfig(
                 usernameParameter = "username"
                 passwordParameter = "password"
                 authenticationSuccessHandler = customAuthenticationSuccessHandler
+                authenticationFailureHandler = SimpleUrlAuthenticationFailureHandler()
             }
             oauth2Login {
                 authorizationEndpoint {
@@ -105,6 +107,7 @@ class SecurityConfig(
                     baseUri = "/api/oauth2/callback/*"
                 }
                 authenticationSuccessHandler = customAuthenticationSuccessHandler
+                authenticationFailureHandler = SimpleUrlAuthenticationFailureHandler()
             }
             logout {
                 logoutUrl = "/api/auth/logout"

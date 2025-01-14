@@ -5,6 +5,7 @@ import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import com.example.toyTeam6Airbnb.user.controller.User
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -28,11 +29,11 @@ class ReservationController(
 ) {
 
     @PostMapping
-    @Operation(summary = "create Reservation", description = "create Reservation")
+    @Operation(summary = "예약 생성", description = "예약을 생성합니다")
     fun createReservation(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: CreateReservationRequest
-    ): ResponseEntity<ReservationDTO> {
+    ): ResponseEntity<Reservation> {
         val reservation = reservationService.createReservation(
             User.fromEntity(principalDetails.getUser()),
             request.roomId,
@@ -41,11 +42,11 @@ class ReservationController(
             request.numberOfGuests
         )
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservation.toDTO())
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservation)
     }
 
     @DeleteMapping("/{reservationId}")
-    @Operation(summary = "delete Reservation", description = "delete Reservation")
+    @Operation(summary = "예약 삭제", description = "예약을 삭제합니다")
     fun deleteReservation(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable reservationId: Long
@@ -59,12 +60,12 @@ class ReservationController(
     }
 
     @PutMapping("/{reservationId}")
-    @Operation(summary = "update Reservation", description = "update Reservation")
+    @Operation(summary = "예약 수정", description = "예약을 수정합니다")
     fun updateReservation(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable reservationId: Long,
         @RequestBody request: UpdateReservationRequest
-    ): ResponseEntity<ReservationDTO> {
+    ): ResponseEntity<Reservation> {
         val reservation = reservationService.updateReservation(
             User.fromEntity(principalDetails.getUser()),
             reservationId,
@@ -73,28 +74,26 @@ class ReservationController(
             request.numberOfGuests
         )
 
-        return ResponseEntity.ok().body(reservation.toDTO())
+        return ResponseEntity.ok().body(reservation)
     }
 
-    // 특정 reservation을 가져오는 API
     @GetMapping("/{reservationId}")
+    @Operation(summary = "예약 상세 조회", description = "예약 상세 정보를 조회합니다")
     fun getReservation(
         @PathVariable reservationId: Long
-    ): ResponseEntity<ReservationDTO> {
+    ): ResponseEntity<Reservation> {
         val reservation = reservationService.getReservation(reservationId)
 
-        return ResponseEntity.ok(reservation.toDTO())
+        return ResponseEntity.ok(reservation)
     }
 
-    // 특정 user의 reservation을 모두 가져오는 API
-    @GetMapping
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "유저별 예약 조회", description = "특정 유저의 모든 예약 정보를 조회합니다")
     fun getReservationsByUser(
-        @AuthenticationPrincipal principalDetails: PrincipalDetails
+        @PathVariable userId: Long,
+        @RequestParam pageable: Pageable
     ): ResponseEntity<List<ReservationDTO>> {
-        val reservations = reservationService.getReservationsByUser(
-            User.fromEntity(principalDetails.getUser())
-        ).map { it.toDTO() }
-
+        val reservations = reservationService.getReservationsByUser(userId, pageable)
         return ResponseEntity.ok(reservations)
     }
 
@@ -124,7 +123,7 @@ class ReservationController(
 
     // 특정 room의 특정 month의 available/unavailable date를 가져오는 API
     @GetMapping("/availability/{roomId}")
-    @Operation(summary = "get Date Available by month", description = "get Date Available by month")
+    @Operation(summary = "해당 월의 예약 가능 날짜", description = "특정 방의 특정 월에 예약 가능/불가능한 모든 날짜 조회")
     fun getRoomAvailabilityByMonth(
         @PathVariable roomId: Long,
         @RequestParam year: Int,

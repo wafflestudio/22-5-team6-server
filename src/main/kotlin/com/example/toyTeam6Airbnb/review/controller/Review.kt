@@ -2,6 +2,7 @@ package com.example.toyTeam6Airbnb.review.controller
 
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import java.time.Instant
+import java.time.LocalDate
 
 data class Review(
     val id: Long,
@@ -27,17 +28,6 @@ data class Review(
             )
         }
     }
-
-    fun toDTO(): ReviewDTO {
-        return ReviewDTO(
-            id = this.id,
-            userId = this.userId,
-            reservationId = this.reservationId,
-            roomId = this.roomId,
-            content = this.content,
-            rating = this.rating
-        )
-    }
 }
 
 data class ReviewDTO(
@@ -46,5 +36,28 @@ data class ReviewDTO(
     val reservationId: Long,
     val roomId: Long,
     val content: String,
-    val rating: Int
-)
+    val rating: Int,
+    val place: String,
+    val startDate: LocalDate,
+    val endDate: LocalDate,
+    val createdAt: Instant,
+    val updatedAt: Instant
+) {
+    companion object {
+        fun fromEntity(entity: ReviewEntity): ReviewDTO {
+            return ReviewDTO(
+                id = entity.id!!,
+                userId = entity.user.id!!,
+                reservationId = entity.reservation.id!!,
+                roomId = entity.room.id!!,
+                content = entity.content,
+                rating = entity.rating,
+                place = entity.room.address.sido,
+                startDate = entity.reservation.startDate,
+                endDate = entity.reservation.endDate,
+                createdAt = entity.createdAt,
+                updatedAt = entity.updatedAt
+            )
+        }
+    }
+}

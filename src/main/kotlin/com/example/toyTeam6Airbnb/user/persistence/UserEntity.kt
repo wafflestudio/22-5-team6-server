@@ -48,10 +48,9 @@ class UserEntity(
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     val profile: ProfileEntity? = null
-
 ) {
     fun isSuperhost(): Boolean {
-        return profile?.isSuperhost == true
+        return profile?.isSuperHost == true
     }
 }
 

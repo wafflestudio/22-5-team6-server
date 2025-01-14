@@ -5,6 +5,8 @@ import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import com.example.toyTeam6Airbnb.user.controller.User
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -15,21 +17,22 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/reviews")
-@Tag(name = "Review Controller", description = "Review Controller API")
+@Tag(name = "Review Controller", description = "Review Controller API - 리뷰는 예약 당 1개입니다")
 class ReviewController(
     private val reviewService: ReviewService
 ) {
 
     @PostMapping
-    @Operation(summary = "Create Review", description = "Create a new review")
+    @Operation(summary = "리뷰 생성", description = "새로운 리뷰를 생성합니다")
     fun createReview(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: CreateReviewRequest
-    ): ResponseEntity<ReviewDTO> {
+    ): ResponseEntity<Review> {
         val review = reviewService.createReview(
             request.roomId,
             User.fromEntity(principalDetails.getUser()),
@@ -37,46 +40,56 @@ class ReviewController(
             request.content,
             request.rating
         )
-        return ResponseEntity.status(HttpStatus.CREATED).body(review.toDTO())
+        return ResponseEntity.status(HttpStatus.CREATED).body(review)
     }
 
     @GetMapping("/room/{roomId}")
-    @Operation(summary = "Get Reviews", description = "Get all reviews for a room")
-    fun getReviews(
-        @PathVariable roomId: Long
-    ): ResponseEntity<List<ReviewDTO>> {
-        val reviews = reviewService.getReviews(roomId).map { it.toDTO() }
+    @Operation(summary = "특정 방의 리뷰 조회", description = "특정 방의 모든 리뷰를 조회합니다")
+    fun getReviewsByRoom(
+        @PathVariable roomId: Long,
+        @RequestParam pageable: Pageable
+    ): ResponseEntity<Page<ReviewDTO>> {
+        val reviews = reviewService.getReviewsByRoom(roomId, pageable)
         return ResponseEntity.ok(reviews)
     }
 
     @GetMapping("/{reviewId}")
-    @Operation(summary = "Get Review Details", description = "Get details of a specific review")
+    @Operation(summary = "특정 리뷰 상세 조회", description = "특정 리뷰의 상세정보를 조회합니다")
     fun getReviewDetails(
         @PathVariable reviewId: Long
     ): ResponseEntity<ReviewDTO> {
         val review = reviewService.getReviewDetails(reviewId)
-        return ResponseEntity.ok(review.toDTO())
+        return ResponseEntity.ok(review)
     }
 
-    // Review에 수정 사항이 추가되면 파라미터 수정 필요
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "특정 유저의 리뷰 조회", description = "특정 유저의 모든 리뷰를 조회합니다")
+    fun getReviewsByUser(
+        @PathVariable userId: Long,
+        @RequestParam pageable: Pageable
+    ): ResponseEntity<Page<ReviewDTO>> {
+        val reviews = reviewService.getReviewsByUser(userId, pageable)
+        return ResponseEntity.ok(reviews)
+    }
+
     @PutMapping("/{reviewId}")
-    @Operation(summary = "Update Review", description = "Update an existing review")
+    @Operation(summary = "리뷰 수정", description = "존재하는 리뷰를 수정합니다")
     fun updateReview(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable reviewId: Long,
         @RequestBody request: UpdateReviewRequest
-    ): ResponseEntity<ReviewDTO> {
+    ): ResponseEntity<Review> {
         val review = reviewService.updateReview(
             User.fromEntity(principalDetails.getUser()),
             reviewId,
             request.content,
             request.rating
         )
-        return ResponseEntity.ok(review.toDTO())
+        return ResponseEntity.ok(review)
     }
 
     @DeleteMapping("/{reviewId}")
-    @Operation(summary = "Delete Review", description = "Delete a review")
+    @Operation(summary = "리뷰 삭제", description = "리뷰를 삭제합니다")
     fun deleteReview(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable reviewId: Long
