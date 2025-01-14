@@ -1,5 +1,9 @@
 package com.example.toyTeam6Airbnb.Image
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.parameters.RequestBody
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,9 +21,20 @@ import java.util.Date
 class ImageController(
     private val imageService: ImageService
 ) {
-
+    @Operation(
+        summary = "Upload an image",
+        description = "Uploads an image to the server and stores it in S3.",
+        requestBody = RequestBody(
+            content = [
+                Content(
+                    mediaType = "multipart/form-data",
+                    schema = Schema(implementation = UploadImageRequest::class)
+                )
+            ]
+        )
+    )
     // 이미지 업로드 엔드포인트
-    @PostMapping("/upload")
+    @PostMapping("/upload", consumes = ["multipart/form-data"])
     fun uploadImage(
         @RequestParam("file") file: MultipartFile,
         @RequestParam("key") key: String
@@ -56,6 +71,15 @@ class ImageController(
                 .body("Failed to generate signed URL: ${e.message}")
         }
     }
+
+    // 내부 DTO 클래스 정의
+    data class UploadImageRequest(
+        @Schema(type = "string", format = "binary", description = "The image file to upload")
+        val file: MultipartFile,
+
+        @Schema(description = "The key to associate with the uploaded image", example = "example-key")
+        val key: String
+    )
 }
 
 //    // 이미지 다운로드 엔드포인트
