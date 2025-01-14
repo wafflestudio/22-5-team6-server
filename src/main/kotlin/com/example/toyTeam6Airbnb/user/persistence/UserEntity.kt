@@ -32,6 +32,10 @@ class UserEntity(
     val provider: AuthProvider,
     @Column
     var oAuthId: String? = null,
+    @Column(columnDefinition = "LONGTEXT")
+    var imageDownloadUrl: String? = null,
+    @Column(columnDefinition = "LONGTEXT")
+    var imageUploadUrl: String? = null,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val reservations: List<ReservationEntity> = mutableListOf(),
