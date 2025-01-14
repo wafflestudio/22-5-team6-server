@@ -6,17 +6,20 @@ import com.example.toyTeam6Airbnb.reservation.ReservationPermissionDenied
 import com.example.toyTeam6Airbnb.reservation.ReservationUnavailable
 import com.example.toyTeam6Airbnb.reservation.ZeroGuests
 import com.example.toyTeam6Airbnb.reservation.controller.Reservation
+import com.example.toyTeam6Airbnb.reservation.controller.ReservationDTO
 import com.example.toyTeam6Airbnb.reservation.controller.RoomAvailabilityResponse
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
-import com.example.toyTeam6Airbnb.profile.RoomNotFoundException
+import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.AuthenticateException
+import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import jakarta.persistence.EntityManager
 import jakarta.persistence.LockModeType
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
@@ -65,7 +68,7 @@ class ReservationServiceImpl(
         ).let {
             reservationRepository.save(it)
         }
-        println("${roomEntity.id}")
+
         return Reservation.fromEntity(reservationEntity)
     }
 
@@ -129,10 +132,10 @@ class ReservationServiceImpl(
     }
 
     @Transactional
-    override fun getReservationsByUser(user: User): List<Reservation> {
-        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+    override fun getReservationsByUser(userId: Long, pageable: Pageable): List<ReservationDTO> {
+        val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
 
-        return reservationRepository.findAllByUser(userEntity).map(Reservation::fromEntity)
+        return reservationRepository.findAllByUser(userEntity).map(ReservationDTO::fromEntity)
     }
 
 //    @Transactional

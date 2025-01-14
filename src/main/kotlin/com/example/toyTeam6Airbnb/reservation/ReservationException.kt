@@ -31,7 +31,7 @@ class ReservationPermissionDenied : ReservationException(
 
 class MaxOccupancyExceeded : ReservationException(
     errorCode = 4004,
-    httpStatusCode = HttpStatus.CONFLICT,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
     msg = "Max Occupancy Exceeded"
 )
 
