@@ -1,5 +1,9 @@
 package com.example.toyTeam6Airbnb.Image
 
+import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
+import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import org.springdoc.webmvc.ui.SwaggerResourceResolver
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.regions.Region
@@ -11,9 +15,14 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest
 import java.time.Duration
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 @Service
-class ImageService() {
+class ImageService(
+    @Autowired private val userRepository: UserRepository,
+    @Autowired private val roomRepository: RoomRepository,
+    private val swaggerResourceResolver: SwaggerResourceResolver
+) {
 
     @Value("\${cloudfront.private-key}")
     private lateinit var privateKey: String
@@ -31,37 +40,70 @@ class ImageService() {
 
     private val bucketName: String = "waffle-team6-storage"
     private val cloudFrontUrl: String = "https://d3m9s5wmwvsq01.cloudfront.net"
+    private val filePathMap: MutableMap<String, String> = ConcurrentHashMap() // 리소스 타입과 ID로 파일 경로 매핑
 
     // Presigned URL for Upload
-    fun generateUploadUrl(key: String, expirationMinutes: Long): String {
-        val filePath = "$key/${UUID.randomUUID()}_upload.jpg" // 고유 파일 경로 생성
+    fun generateUploadUrl(resourceType: String, resourceId: String): String {
+        val filePath = "$resourceType/$resourceId/${UUID.randomUUID()}_image.jpg"
+        filePathMap["$resourceType:$resourceId"] = filePath // 리소스별 경로 매핑
+
         val putObjectRequest = PutObjectRequest.builder()
             .bucket(bucketName)
             .key(filePath)
             .build()
 
         val presignRequest = PutObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofMinutes(expirationMinutes))
+            .signatureDuration(Duration.ofMinutes(60))
             .putObjectRequest(putObjectRequest)
             .build()
 
-        return s3Presigner.presignPutObject(presignRequest).url().toString()
+        val uploadUrl = s3Presigner.presignPutObject(presignRequest).url().toString()
+
+        if (resourceType == "users") {
+            val userId = resourceId.toLongOrNull() ?: throw RuntimeException("Invalid user ID")
+            val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
+            user.imageDownloadUrl = uploadUrl
+            userRepository.save(user)
+        } else if (resourceType == "rooms") {
+            val roomId = resourceId.toLongOrNull() ?: throw RuntimeException("Invalid room ID")
+            val room = roomRepository.findById(roomId).orElseThrow { RuntimeException("Room not found") }
+            room.imageDownloadUrl = uploadUrl
+            roomRepository.save(room)
+        }
+
+        return uploadUrl
     }
 
     // Presigned URL for Download
-    // 사용자가 Upload시 생성한 Key를 그대로 입력하면 됨. (UUID 없이)
-    fun generateDownloadUrl(key: String, expirationMinutes: Long): String {
+    fun generateDownloadUrl(resourceType: String, resourceId: String): String {
+        val filePath = filePathMap["$resourceType:$resourceId"]
+            ?: throw IllegalArgumentException("No file found for the given resource: $resourceType with ID: $resourceId")
+
         val getObjectRequest = GetObjectRequest.builder()
             .bucket(bucketName)
-            .key(key)
+            .key(filePath)
             .build()
 
         val presignRequest = GetObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofMinutes(expirationMinutes))
+            .signatureDuration(Duration.ofMinutes(60))
             .getObjectRequest(getObjectRequest)
             .build()
 
-        return s3Presigner.presignGetObject(presignRequest).url().toString()
+        val downloadUrl = s3Presigner.presignGetObject(presignRequest).url().toString()
+
+        if (resourceType == "users") {
+            val userId = resourceId.toLongOrNull() ?: throw RuntimeException("Invalid user ID")
+            val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
+            user.imageDownloadUrl = downloadUrl
+            userRepository.save(user)
+        } else if (resourceType == "rooms") {
+            val roomId = resourceId.toLongOrNull() ?: throw RuntimeException("Invalid room ID")
+            val room = roomRepository.findById(roomId).orElseThrow { RuntimeException("Room not found") }
+            room.imageDownloadUrl = downloadUrl
+            roomRepository.save(room)
+        }
+
+        return downloadUrl
     }
 
 //    // 파일 업로드 메서드
