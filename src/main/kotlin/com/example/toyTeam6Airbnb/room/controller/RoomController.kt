@@ -1,14 +1,13 @@
 package com.example.toyTeam6Airbnb.room.controller
 
-import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.room.service.RoomService
-import com.example.toyTeam6Airbnb.room.validatePageable
 import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import com.example.toyTeam6Airbnb.user.controller.User
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.time.Instant
 import java.time.LocalDate
 
 @RestController
@@ -34,6 +32,7 @@ class RoomController(
     private val roomService: RoomService
 ) {
     @PostMapping("/rooms")
+    @Operation(summary = "방 생성", description = "방을 생성합니다")
     fun createRoom(
         @RequestBody request: CreateRoomRequest,
         @AuthenticationPrincipal principalDetails: PrincipalDetails
@@ -49,38 +48,29 @@ class RoomController(
             maxOccupancy = request.maxOccupancy
         )
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(room.toDetailsDTO())
+        return ResponseEntity.status(HttpStatus.CREATED).body(room)
     }
 
     @GetMapping("/rooms/main")
+    @Operation(summary = "메인 페이지 방 조회", description = "메인 페이지 용 방 목록을 조회합니다(페이지네이션 적용)")
     fun getRooms(
         pageable: Pageable
-    ): ResponseEntity<Page<RoomDTO>> {
-        // 정렬 기준 검증 및 기본값 처리
-        val validatedPageable = validatePageable(pageable)
-        val rooms = roomService.getRooms(validatedPageable).map { it.toDTO() }
+    ): ResponseEntity<Page<Room>> {
+        val rooms = roomService.getRooms(pageable)
         return ResponseEntity.ok(rooms)
     }
 
     @GetMapping("/rooms/main/{roomId}")
+    @Operation(summary = "방 상세 조회", description = "특정 방의 상세 정보를 조회합니다")
     fun getRoomDetails(
         @PathVariable roomId: Long
     ): ResponseEntity<RoomDetailsDTO> {
         val room = roomService.getRoomDetails(roomId)
-        return ResponseEntity.ok(room.toDetailsDTO())
-    }
-
-    @GetMapping("/rooms/main/{roomId}/reviews")
-    fun getRoomReviews(
-        @PathVariable roomId: Long,
-        pageable: Pageable
-    ): ResponseEntity<Page<RoomReviewDTO>> {
-        val validatedPageable = validatePageable(pageable)
-        val reviews = roomService.getRoomReviews(roomId, validatedPageable)
-        return ResponseEntity.ok(reviews)
+        return ResponseEntity.ok(room)
     }
 
     @PutMapping("/rooms/{roomId}")
+    @Operation(summary = "방 정보 수정", description = "방의 정보를 수정합니다")
     fun updateRoom(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long,
@@ -98,10 +88,11 @@ class RoomController(
             request.maxOccupancy
         )
 
-        return ResponseEntity.ok(updatedRoom.toDetailsDTO())
+        return ResponseEntity.ok(updatedRoom)
     }
 
     @DeleteMapping("/rooms/{roomId}")
+    @Operation(summary = "방 삭제", description = "방을 삭제합니다")
     fun deleteRoom(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long
@@ -114,6 +105,7 @@ class RoomController(
     }
 
     @GetMapping("/rooms/main/search")
+    @Operation(summary = "방 검색", description = "방을 검색합니다(페이지네이션 적용)")
     fun searchRooms(
         @RequestParam(required = false) name: String?,
         @RequestParam(required = false) type: RoomType?,
@@ -128,11 +120,9 @@ class RoomController(
         @RequestParam(required = false) startDate: LocalDate?,
         @RequestParam(required = false) endDate: LocalDate?,
         pageable: Pageable
-    ): ResponseEntity<Page<RoomDTO>> {
+    ): ResponseEntity<Page<Room>> {
         val address = AddressSearchDTO(sido, sigungu, street, detail)
-        val validatedPage = validatePageable(pageable)
-        val rooms = roomService.searchRooms(name, type, minPrice, maxPrice, address, maxOccupancy, rating, startDate, endDate, validatedPage)
-            .map { it.toDTO() }
+        val rooms = roomService.searchRooms(name, type, minPrice, maxPrice, address, maxOccupancy, rating, startDate, endDate, pageable)
         return ResponseEntity.ok(rooms)
     }
 }
@@ -163,29 +153,3 @@ data class UpdateRoomRequest(
     val price: Price,
     val maxOccupancy: Int
 )
-
-data class RoomReviewDTO(
-    val id: Long,
-    val userId: Long,
-    val rating: Int,
-    val content: String,
-    val reservationStartDate: LocalDate,
-    val reservationEndDate: LocalDate,
-    val createdAt: Instant,
-    val updatedAt: Instant
-) {
-    companion object {
-        fun fromEntity(entity: ReviewEntity): RoomReviewDTO {
-            return RoomReviewDTO(
-                id = entity.id!!,
-                userId = entity.user.id!!,
-                rating = entity.rating,
-                content = entity.content,
-                reservationStartDate = entity.reservation.startDate,
-                reservationEndDate = entity.reservation.endDate,
-                createdAt = entity.createdAt,
-                updatedAt = entity.updatedAt
-            )
-        }
-    }
-}

@@ -1,4 +1,4 @@
-package com.example.toyTeam6Airbnb.room
+package com.example.toyTeam6Airbnb
 
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable

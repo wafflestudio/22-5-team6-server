@@ -6,15 +6,17 @@ data class Profile(
     val id: Long,
     val userId: Long,
     val nickname: String,
-    val isSuperhost: Boolean
+    val bio: String,
+    val isSuperHost: Boolean
 ) {
     companion object {
         fun fromEntity(profileEntity: ProfileEntity): Profile {
             return Profile(
-                id = profileEntity.id,
+                id = profileEntity.id!!,
                 userId = profileEntity.user.id!!,
                 nickname = profileEntity.nickname,
-                isSuperhost = profileEntity.isSuperhost
+                bio = profileEntity.bio,
+                isSuperHost = profileEntity.isSuperHost
             )
         }
     }

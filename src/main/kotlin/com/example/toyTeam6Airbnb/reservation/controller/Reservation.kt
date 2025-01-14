@@ -12,7 +12,7 @@ data class Reservation(
     val startDate: LocalDate,
     val endDate: LocalDate,
     val totalPrice: Double,
-    val numberofGuests: Int,
+    val numberOfGuests: Int,
     val createdAt: Instant,
     val updatedAt: Instant
 ) {
@@ -28,28 +28,32 @@ data class Reservation(
                 totalPrice = entity.totalPrice,
                 createdAt = entity.createdAt,
                 updatedAt = entity.updatedAt,
-                numberofGuests = entity.numberOfGuests
+                numberOfGuests = entity.numberOfGuests
             )
         }
-    }
-
-    fun toDTO(): ReservationDTO {
-        return ReservationDTO(
-            id = this.id,
-            userId = this.userId,
-            roomId = this.roomId,
-            startDate = this.startDate,
-            endDate = this.endDate,
-            numberOfGuests = this.numberofGuests
-        )
     }
 }
 
 data class ReservationDTO(
     val id: Long,
-    val roomId: Long,
     val userId: Long,
+    val roomId: Long,
     val startDate: LocalDate,
     val endDate: LocalDate,
+    val place: String,
     val numberOfGuests: Int
-)
+) {
+    companion object {
+        fun fromEntity(entity: ReservationEntity): ReservationDTO {
+            return ReservationDTO(
+                id = entity.id!!,
+                userId = entity.user.id!!,
+                roomId = entity.room.id!!,
+                startDate = entity.startDate,
+                endDate = entity.endDate,
+                place = entity.room.address.sido,
+                numberOfGuests = entity.numberOfGuests
+            )
+        }
+    }
+}

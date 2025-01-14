@@ -16,7 +16,7 @@ import jakarta.persistence.Table
 class ProfileEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    val id: Long? = null,
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -26,5 +26,8 @@ class ProfileEntity(
     var nickname: String,
 
     @Column(nullable = false)
-    var isSuperhost: Boolean = false
+    var bio: String,
+
+    @Column(nullable = false)
+    var isSuperHost: Boolean = false
 )

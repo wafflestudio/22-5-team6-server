@@ -14,6 +14,10 @@ class PrincipalDetails(
         return user
     }
 
+    fun getId(): Long {
+        return user.id!!
+    }
+
     override fun getAttributes(): MutableMap<String, Any> {
         return attributes
     }
@@ -26,7 +30,7 @@ class PrincipalDetails(
         return listOf(GrantedAuthority { user.username })
     }
 
-    override fun getPassword(): String? {
+    override fun getPassword(): String {
         return user.password
     }
 

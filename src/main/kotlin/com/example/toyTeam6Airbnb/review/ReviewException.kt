@@ -13,7 +13,7 @@ sealed class ReviewException(
 
 class ReviewNotFoundException : ReviewException(
     errorCode = 3001,
-    httpStatusCode = HttpStatus.CONFLICT,
+    httpStatusCode = HttpStatus.NOT_FOUND,
     msg = "Review doesn't exist"
 )
 
@@ -25,6 +25,6 @@ class ReviewPermissionDeniedException : ReviewException(
 
 class DuplicateReviewException : ReviewException(
     errorCode = 3003,
-    httpStatusCode = HttpStatus.BAD_REQUEST,
+    httpStatusCode = HttpStatus.CONFLICT,
     msg = "Review Already Exists"
 )

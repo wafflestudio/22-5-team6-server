@@ -163,27 +163,6 @@ class ReservationControllerTest {
     }
 
     @Test
-    fun `전체 예약 조회시 200 응답을 반환한다`() {
-        val (user, token) = dataGenerator.generateUserAndToken()
-        val room = dataGenerator.generateRoom(maxOccupancy = 10)
-        val roomId = room.id
-        dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2023, 12, 1), endDate = LocalDate.of(2023, 12, 10), numberOfGuests = 2)
-        dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2024, 12, 1), endDate = LocalDate.of(2024, 12, 10), numberOfGuests = 2)
-
-        val result = mockMvc.perform(
-            MockMvcRequestBuilders.get("/api/v1/reservations")
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer $token")
-        )
-            .andExpect(MockMvcResultMatchers.status().isOk) // expect 200 status
-            .andReturn()
-
-        val responseContent = result.response.contentAsString
-        // Add assertions to verify the response content if needed
-        println(responseContent)
-    }
-
-    @Test
     fun `예약에대한 Availablity를 200을 반환한다`() {
         val (user, token) = dataGenerator.generateUserAndToken()
         val room = dataGenerator.generateRoom(maxOccupancy = 10)

@@ -12,7 +12,7 @@ import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
-import com.example.toyTeam6Airbnb.room.controller.RoomReviewDTO
+import com.example.toyTeam6Airbnb.room.controller.RoomDetailsDTO
 import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
@@ -21,6 +21,7 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import com.example.toyTeam6Airbnb.validatePageable
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -46,7 +47,7 @@ class RoomServiceImpl(
         roomDetails: RoomDetails,
         price: Price,
         maxOccupancy: Int
-    ): Room {
+    ): RoomDetailsDTO {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
 
         validateRoomInfo(name, description, type, address, price, maxOccupancy)
@@ -69,7 +70,7 @@ class RoomServiceImpl(
                 roomRepository.save(it)
             }
 
-            return Room.fromEntity(roomEntity)
+            return RoomDetailsDTO.fromEntity(roomEntity)
         } catch (e: DataIntegrityViolationException) {
             throw DuplicateRoomException()
         }
@@ -77,18 +78,13 @@ class RoomServiceImpl(
 
     @Transactional
     override fun getRooms(pageable: Pageable): Page<Room> {
-        return roomRepository.findAll(pageable).map { Room.fromEntity(it) }
+        return roomRepository.findAll(validatePageable(pageable)).map { Room.fromEntity(it) }
     }
 
     @Transactional
-    override fun getRoomDetails(roomId: Long): Room {
+    override fun getRoomDetails(roomId: Long): RoomDetailsDTO {
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
-        return Room.fromEntity(roomEntity)
-    }
-
-    @Transactional
-    override fun getRoomReviews(roomId: Long, pageable: Pageable): Page<RoomReviewDTO> {
-        return reviewRepository.findAllByRoomId(roomId, pageable).map { RoomReviewDTO.fromEntity(it) }
+        return RoomDetailsDTO.fromEntity(roomEntity)
     }
 
     @Transactional
@@ -102,7 +98,7 @@ class RoomServiceImpl(
         roomDetails: RoomDetails,
         price: Price,
         maxOccupancy: Int
-    ): Room {
+    ): RoomDetailsDTO {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
@@ -124,7 +120,7 @@ class RoomServiceImpl(
         roomEntity.maxOccupancy = maxOccupancy
 
         roomRepository.save(roomEntity)
-        return Room.fromEntity(roomEntity)
+        return RoomDetailsDTO.fromEntity(roomEntity)
     }
 
     @Transactional
@@ -166,7 +162,7 @@ class RoomServiceImpl(
             sigungu = address?.sigungu,
             street = address?.street,
             detail = address?.detail,
-            pageable = pageable
+            pageable = validatePageable(pageable)
         )
         return rooms.map { Room.fromEntity(it) }
     }
