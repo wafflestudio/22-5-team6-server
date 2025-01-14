@@ -220,6 +220,12 @@ class ReviewIntegrationTest {
             .andExpect(MockMvcResultMatchers.status().isForbidden)
             .andReturn()
 
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/reviews/user/${user1.id}?page=0&size=3")
+        )
+            .andExpect(MockMvcResultMatchers.status().isForbidden)
+            .andReturn()
+
         // update user1's profile
         val updateRequestBody = """
             {
@@ -242,6 +248,12 @@ class ReviewIntegrationTest {
         mockMvc.perform(
             MockMvcRequestBuilders.get("/api/v1/reviews/user/${user1.id}?page=0&size=3")
                 .header("Authorization", "Bearer $token2")
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/reviews/user/${user1.id}?page=0&size=3")
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andReturn()
