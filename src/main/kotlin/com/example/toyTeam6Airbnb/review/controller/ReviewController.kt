@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -47,7 +47,7 @@ class ReviewController(
     @Operation(summary = "특정 방의 리뷰 조회", description = "특정 방의 모든 리뷰를 조회합니다")
     fun getReviewsByRoom(
         @PathVariable roomId: Long,
-        @RequestParam pageable: Pageable
+        pageable: Pageable
     ): ResponseEntity<Page<ReviewDTO>> {
         val reviews = reviewService.getReviewsByRoom(roomId, pageable)
         return ResponseEntity.ok(reviews)
@@ -66,9 +66,18 @@ class ReviewController(
     @Operation(summary = "특정 유저의 리뷰 조회", description = "특정 유저의 모든 리뷰를 조회합니다")
     fun getReviewsByUser(
         @PathVariable userId: Long,
-        @RequestParam pageable: Pageable
+        pageable: Pageable
     ): ResponseEntity<Page<ReviewDTO>> {
-        val reviews = reviewService.getReviewsByUser(userId, pageable)
+        val viewerId =
+            try {
+                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
+                principalDetails.getUser().id
+                // logic for when the user is logged in
+            } catch (e: ClassCastException) {
+                // logic for when the user is not logged in
+                null
+            }
+        val reviews = reviewService.getReviewsByUser(viewerId, userId, pageable)
         return ResponseEntity.ok(reviews)
     }
 

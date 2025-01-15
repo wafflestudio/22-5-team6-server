@@ -19,6 +19,7 @@ import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import jakarta.persistence.EntityManager
 import jakarta.persistence.LockModeType
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -132,10 +133,11 @@ class ReservationServiceImpl(
     }
 
     @Transactional
-    override fun getReservationsByUser(userId: Long, pageable: Pageable): List<ReservationDTO> {
+    override fun getReservationsByUser(viewerId: Long?, userId: Long, pageable: Pageable): Page<ReservationDTO> {
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
+        if (viewerId != userId && userEntity.profile?.showMyReservations != true) throw ReservationPermissionDenied()
 
-        return reservationRepository.findAllByUser(userEntity).map(ReservationDTO::fromEntity)
+        return reservationRepository.findAllByUser(userEntity, pageable).map(ReservationDTO::fromEntity)
     }
 
 //    @Transactional

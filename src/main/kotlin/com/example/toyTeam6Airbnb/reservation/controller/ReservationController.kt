@@ -5,10 +5,12 @@ import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import com.example.toyTeam6Airbnb.user.controller.User
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -91,9 +93,18 @@ class ReservationController(
     @Operation(summary = "유저별 예약 조회", description = "특정 유저의 모든 예약 정보를 조회합니다")
     fun getReservationsByUser(
         @PathVariable userId: Long,
-        @RequestParam pageable: Pageable
-    ): ResponseEntity<List<ReservationDTO>> {
-        val reservations = reservationService.getReservationsByUser(userId, pageable)
+        pageable: Pageable
+    ): ResponseEntity<Page<ReservationDTO>> {
+        val viewerId =
+            try {
+                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
+                principalDetails.getUser().id
+                // logic for when the user is logged in
+            } catch (e: ClassCastException) {
+                // logic for when the user is not logged in
+                null
+            }
+        val reservations = reservationService.getReservationsByUser(viewerId, userId, pageable)
         return ResponseEntity.ok(reservations)
     }
 

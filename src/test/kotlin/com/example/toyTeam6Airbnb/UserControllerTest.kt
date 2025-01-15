@@ -30,7 +30,11 @@ constructor(
         val requestBody = """
             {
                 "username": "testuser",
-                "password": "password123"
+                "password": "password123",
+                "nickname": "testuser",
+                "bio": "Hello, I'm a test user!",
+                "showMyReviews": true,
+                "showMyReservations": true
             }
         """.trimIndent()
 

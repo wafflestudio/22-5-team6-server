@@ -31,7 +31,7 @@ class UserController(
     fun register(
         @RequestBody request: RegisterRequest
     ): ResponseEntity<Unit> {
-        userService.register(username = request.username, password = request.password)
+        userService.register(request)
         return ResponseEntity.ok().build()
     }
 
@@ -47,5 +47,9 @@ class UserController(
 
 data class RegisterRequest(
     val username: String,
-    val password: String
+    val password: String,
+    val nickname: String,
+    val bio: String,
+    val showMyReviews: Boolean,
+    val showMyReservations: Boolean
 )
