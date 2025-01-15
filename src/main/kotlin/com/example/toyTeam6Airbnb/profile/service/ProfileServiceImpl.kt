@@ -26,11 +26,18 @@ class ProfileServiceImpl(
         return Profile.fromEntity(profile)
     }
 
+    override fun getProfileByUserId(
+        userId: Long
+    ): Profile {
+        val profile = profileRepository.findByUserId(userId) ?: throw ProfileNotFoundException()
+        return Profile.fromEntity(profile)
+    }
+
     @Transactional
     override fun updateCurrentUserProfile(
         user: UserEntity,
         request: UpdateProfileRequest
-    ): Profile {
+    ) {
         val profile = profileRepository.findByUser(user) ?: ProfileEntity(user = user, nickname = "", bio = "")
 
         profile.nickname = request.nickname
@@ -39,15 +46,13 @@ class ProfileServiceImpl(
         profile.showMyReservations = request.showMyReservations
         updateSuperHostStatus(profile)
         profileRepository.save(profile)
-
-        return Profile.fromEntity(profile)
     }
 
     @Transactional
     override fun addProfileToCurrentUser(
         user: UserEntity,
         request: CreateProfileRequest
-    ): Profile {
+    ) {
         if (profileRepository.existsByUser(user)) throw ProfileAlreadyExistException()
 
         val profile = ProfileEntity(
@@ -58,8 +63,6 @@ class ProfileServiceImpl(
             showMyReservations = request.showMyReservations
         )
         updateSuperHostStatus(profile)
-
-        return Profile.fromEntity(profileRepository.save(profile))
     }
 
     @Transactional

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -30,14 +31,23 @@ class ProfileController(
         return ResponseEntity.ok(profile)
     }
 
+    @GetMapping("/{userId}")
+    @Operation(summary = "특정 유저 프로필 가져오기", description = "특정 user의 프로필을 가져옵니다.")
+    fun getProfileByUserId(
+        @PathVariable userId: Long
+    ): ResponseEntity<Profile> {
+        val profile = profileService.getProfileByUserId(userId)
+        return ResponseEntity.ok(profile)
+    }
+
     @PutMapping
     @Operation(summary = "유저 프로필 업데이트하기", description = "현재 로그인 되어 있는 user의 프로필을 업데이트합니다.")
     fun updateCurrentUserProfile(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: UpdateProfileRequest
-    ): ResponseEntity<Profile> {
-        val updatedProfile = profileService.updateCurrentUserProfile(principalDetails.getUser(), request)
-        return ResponseEntity.ok(updatedProfile)
+    ): ResponseEntity<Unit> {
+        profileService.updateCurrentUserProfile(principalDetails.getUser(), request)
+        return ResponseEntity.ok().build()
     }
 
     @PostMapping
@@ -45,9 +55,9 @@ class ProfileController(
     fun addProfileToCurrentUser(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: CreateProfileRequest
-    ): ResponseEntity<Profile> {
-        val profile = profileService.addProfileToCurrentUser(principalDetails.getUser(), request)
-        return ResponseEntity.status(HttpStatus.CREATED).body(profile)
+    ): ResponseEntity<Unit> {
+        profileService.addProfileToCurrentUser(principalDetails.getUser(), request)
+        return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 }
 
