@@ -40,8 +40,8 @@ class UserController(
     // just return the token parameter in body
     @Operation(summary = "Redirect", description = "Redirect to the token", hidden = true)
     @GetMapping("/redirect")
-    fun redirect(@RequestParam token: String): ResponseEntity<String> {
-        return ResponseEntity.ok(token)
+    fun redirect(@RequestParam token: String, @RequestParam userid: Long): ResponseEntity<RedirectResponse> {
+        return ResponseEntity.ok(RedirectResponse(token, userid))
     }
 }
 
@@ -52,4 +52,9 @@ data class RegisterRequest(
     val bio: String,
     val showMyReviews: Boolean,
     val showMyReservations: Boolean
+)
+
+data class RedirectResponse(
+    val token: String,
+    val userId: Long
 )
