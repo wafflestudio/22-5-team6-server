@@ -29,5 +29,11 @@ class ProfileEntity(
     var bio: String,
 
     @Column(nullable = false)
-    var isSuperHost: Boolean = false
+    var isSuperHost: Boolean = false,
+
+    @Column(nullable = false)
+    var showMyReviews: Boolean = false,
+
+    @Column(nullable = false)
+    var showMyReservations: Boolean = false
 )

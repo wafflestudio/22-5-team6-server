@@ -1,6 +1,9 @@
 package com.example.toyTeam6Airbnb
 
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -259,6 +262,96 @@ class ReservationControllerTest {
         )
             .andExpect(MockMvcResultMatchers.status().isBadRequest) // expect 400 status
             .andReturn()
+    }
+
+    @Test
+    fun `should get reservations by user`() {
+        val (user, token) = dataGenerator.generateUserAndToken()
+        val room = dataGenerator.generateRoom()
+        val reservation1 = dataGenerator.generateReservation(user, room)
+        val reservation2 = dataGenerator.generateReservation(user, room)
+
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/reservations/user/${user.id}?page=0&size=3")
+                .header("Authorization", "Bearer $token")
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        println(result)
+        // check result length
+        Assertions.assertEquals(getContentLength(result), 2)
+
+        // check if all reviews are in the result
+        Assertions.assertEquals(getNthContentId(result, 0), reservation1.id)
+        Assertions.assertEquals(getNthContentId(result, 1), reservation2.id)
+
+        // another user should not be able to see the reservations
+        val (user2, token2) = dataGenerator.generateUserAndToken()
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/reservations/user/${user.id}?page=0&size=3")
+                .header("Authorization", "Bearer $token2")
+        )
+            .andExpect(MockMvcResultMatchers.status().isForbidden)
+            .andReturn()
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/reservations/user/${user.id}?page=0&size=3")
+        )
+            .andExpect(MockMvcResultMatchers.status().isForbidden)
+            .andReturn()
+
+        // update user1's profile
+        val updateRequestBody = """
+            {
+                "nickname": "newNickname",
+                "bio": "newBio",
+                "showMyReviews": true,
+                "showMyReservations": true
+            }
+        """.trimIndent()
+        mockMvc.perform(
+            MockMvcRequestBuilders.put("/api/v1/profile")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateRequestBody)
+                .header("Authorization", "Bearer $token")
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+
+        // user2 should be able to see the reservations now
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/reservations/user/${user.id}?page=0&size=3")
+                .header("Authorization", "Bearer $token2")
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/reservations/user/${user.id}?page=0&size=3")
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+    }
+
+    fun getNthContentId(jsonString: String, n: Int): Long? {
+        val objectMapper = ObjectMapper()
+        val rootNode: JsonNode = objectMapper.readTree(jsonString)
+        val contentNode: JsonNode = rootNode.path("content")
+        return if (contentNode.isArray && contentNode.size() > n) {
+            contentNode[n].path("id").asLong()
+        } else {
+            null
+        }
+    }
+
+    fun getContentLength(jsonString: String): Int {
+        val objectMapper = ObjectMapper()
+        val rootNode: JsonNode = objectMapper.readTree(jsonString)
+        val contentNode: JsonNode = rootNode.path("content")
+        return if (contentNode.isArray) contentNode.size() else 0
     }
 
     @BeforeEach

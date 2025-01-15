@@ -86,6 +86,7 @@ class SecurityConfig(
                 authorize("/api/oauth2/**", permitAll)
                 authorize(HttpMethod.GET, "/api/v1/rooms/main/**", permitAll)
                 authorize(HttpMethod.GET, "/api/v1/reservations/availability/**", permitAll)
+                authorize(HttpMethod.GET, "/api/v1/reservations/user/**", permitAll)
                 authorize(HttpMethod.GET, "/api/v1/reviews/**", permitAll)
                 authorize("/error", permitAll)
                 authorize("/redirect", permitAll)
