@@ -9,12 +9,12 @@ import java.time.Instant
 
 data class Room(
     val roomId: Long,
-    val name: String,
-    val type: RoomType,
+    val roomName: String,
+    val roomType: RoomType,
     val sido: String,
     val price: Double,
     val averageRating: Double
-    // val imageUrl: String
+    // val imageUrl: String //대표 이미지 1개만 return
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity): Room {
@@ -23,8 +23,8 @@ data class Room(
 
             return Room(
                 roomId = entity.id!!,
-                name = entity.name,
-                type = entity.type,
+                roomName = entity.name,
+                roomType = entity.type,
                 sido = entity.address.sido,
                 price = entity.price.perNight,
                 averageRating = averageRating
@@ -37,9 +37,10 @@ data class Room(
 data class RoomDetailsDTO(
     val roomId: Long,
     val hostId: Long,
-    val name: String,
+    val hostName: String?,
+    val roomName: String,
     val description: String,
-    val type: RoomType,
+    val roomType: RoomType,
     val address: Address,
     val roomDetails: RoomDetails,
     val price: Price,
@@ -49,7 +50,7 @@ data class RoomDetailsDTO(
     val isSuperHost: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant
-    // val imageUrl: String,
+    // val imageUrl: List<String>, //방에 대한 모든 image url 전달
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity): RoomDetailsDTO {
@@ -59,9 +60,10 @@ data class RoomDetailsDTO(
             return RoomDetailsDTO(
                 roomId = entity.id!!,
                 hostId = entity.host.id!!,
-                name = entity.name,
+                hostName = entity.host.profile?.nickname,
+                roomName = entity.name,
                 description = entity.description,
-                type = entity.type,
+                roomType = entity.type,
                 address = entity.address,
                 roomDetails = entity.roomDetails,
                 price = entity.price,
@@ -71,7 +73,7 @@ data class RoomDetailsDTO(
                 isSuperHost = entity.host.isSuperhost(),
                 createdAt = entity.createdAt,
                 updatedAt = entity.updatedAt
-                // imageUrl = entity.images.firstOrNull()?.url ?: ""
+                // imageUrl = entity.images.map { imageService(it.url) }
             )
         }
     }
@@ -79,13 +81,13 @@ data class RoomDetailsDTO(
 
 data class RoomShortDTO(
     val roomId: Long
-    // val imageUrl: String,
+    // val imageUrl: String, // 이미지가 여러 개면 List<String> 형태로 여러 개의 cloudfront url 전달
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity): RoomShortDTO {
             return RoomShortDTO(
                 roomId = entity.id!!
-                // imageUrl = entity.images.firstOrNull()?.url ?: ""
+                // imageUrl = entity.images.map { imageService(it.url) }
             )
         }
     }

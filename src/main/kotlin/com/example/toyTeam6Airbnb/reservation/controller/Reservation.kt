@@ -17,7 +17,6 @@ data class Reservation(
 
 data class ReservationDetails(
     val reservationId: Long,
-    val userId: Long,
     val roomId: Long,
     val startDate: LocalDate,
     val endDate: LocalDate,
@@ -29,7 +28,6 @@ data class ReservationDetails(
         fun fromEntity(entity: ReservationEntity): ReservationDetails {
             return ReservationDetails(
                 reservationId = entity.id!!,
-                userId = entity.user.id!!,
                 roomId = entity.room.id!!,
                 startDate = entity.startDate,
                 endDate = entity.endDate,
