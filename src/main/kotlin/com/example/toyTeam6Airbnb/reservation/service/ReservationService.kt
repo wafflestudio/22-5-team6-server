@@ -33,6 +33,7 @@ interface ReservationService {
     ): Reservation
 
     fun getReservation(
+        userId: Long,
         reservationId: Long
     ): Reservation
 

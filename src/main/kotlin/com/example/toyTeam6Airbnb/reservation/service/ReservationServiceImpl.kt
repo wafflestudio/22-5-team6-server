@@ -126,8 +126,12 @@ class ReservationServiceImpl(
     }
 
     @Transactional
-    override fun getReservation(reservationId: Long): Reservation {
+    override fun getReservation(
+        userId: Long,
+        reservationId: Long
+    ): Reservation {
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
+        if (reservationEntity.user.id != userId) throw ReservationPermissionDenied()
 
         return Reservation.fromEntity(reservationEntity)
     }

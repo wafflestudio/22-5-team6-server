@@ -5,7 +5,8 @@ import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
 import com.example.toyTeam6Airbnb.review.DuplicateReviewException
 import com.example.toyTeam6Airbnb.review.ReviewNotFoundException
 import com.example.toyTeam6Airbnb.review.ReviewPermissionDeniedException
-import com.example.toyTeam6Airbnb.review.controller.Review
+import com.example.toyTeam6Airbnb.review.controller.ReviewByRoomDTO
+import com.example.toyTeam6Airbnb.review.controller.ReviewByUserDTO
 import com.example.toyTeam6Airbnb.review.controller.ReviewDTO
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
@@ -34,22 +35,20 @@ class ReviewServiceImpl(
 
     @Transactional
     override fun createReview(
-        roomId: Long,
         user: User,
         reservationId: Long,
         content: String,
         rating: Int
-    ): Review {
+    ): Long {
         // 1. userEntity, roomEntity, reservationEntity 가져오기 (없으면 예외처리)
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
-        val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
         if (reservationEntity.user.id != user.id) throw ReviewPermissionDeniedException()
 
         try {
             val reviewEntity = ReviewEntity(
                 user = userEntity,
-                room = roomEntity,
+                room = reservationEntity.room,
                 content = content,
                 rating = rating,
                 // 예약에 대해서는 리뷰가 있어야함. 예약 번호도 가져와야할듯.
@@ -59,32 +58,30 @@ class ReviewServiceImpl(
             ).let {
                 reviewRepository.save(it)
             }
-
-            // 3. review 반환
-            return Review.fromEntity(reviewEntity)
+            return reviewEntity.id!!
         } catch (e: DataIntegrityViolationException) {
             throw DuplicateReviewException()
         }
     }
 
     @Transactional
-    override fun getReviewsByRoom(roomId: Long, pageable: Pageable): Page<ReviewDTO> {
+    override fun getReviewsByRoom(roomId: Long, pageable: Pageable): Page<ReviewByRoomDTO> {
         roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
 
         val reviewEntities = reviewRepository.findAllByRoomId(roomId, validatePageable(pageable))
 
-        val reviews = reviewEntities.map { ReviewDTO.fromEntity(it) }
+        val reviews = reviewEntities.map { ReviewByRoomDTO.fromEntity(it) }
         return reviews
     }
 
     @Transactional
-    override fun getReviewsByUser(viewerId: Long?, userId: Long, pageable: Pageable): Page<ReviewDTO> {
+    override fun getReviewsByUser(viewerId: Long?, userId: Long, pageable: Pageable): Page<ReviewByUserDTO> {
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         if (viewerId != userId && userEntity.profile?.showMyReviews != true) throw ReviewPermissionDeniedException()
 
         val reviewEntities = reviewRepository.findAllByUserId(userId, validatePageable(pageable))
 
-        val reviews = reviewEntities.map { ReviewDTO.fromEntity(it) }
+        val reviews = reviewEntities.map { ReviewByUserDTO.fromEntity(it) }
         return reviews
     }
 
@@ -95,7 +92,12 @@ class ReviewServiceImpl(
     }
 
     @Transactional
-    override fun updateReview(user: User, reviewId: Long, content: String?, rating: Int?): Review {
+    override fun updateReview(
+        user: User,
+        reviewId: Long,
+        content: String?,
+        rating: Int?
+    ): Long {
         userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
         val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFoundException()
         if (reviewEntity.user.id != user.id) throw ReviewPermissionDeniedException()
@@ -104,8 +106,7 @@ class ReviewServiceImpl(
         reviewEntity.rating = rating ?: reviewEntity.rating
 
         reviewRepository.save(reviewEntity)
-
-        return Review.fromEntity(reviewEntity)
+        return reviewEntity.id!!
     }
 
     @Transactional

@@ -28,33 +28,33 @@ class ReviewController(
 ) {
 
     @PostMapping
-    @Operation(summary = "리뷰 생성", description = "새로운 리뷰를 생성합니다")
+    @Operation(summary = "리뷰 생성", description = "새로운 리뷰를 생성합니다. 리뷰는 예약 당 1개입니다. Response body에는 생성된 review의 id가 들어갑니다.")
     fun createReview(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: CreateReviewRequest
-    ): ResponseEntity<Review> {
-        val review = reviewService.createReview(
-            request.roomId,
+    ): ResponseEntity<Long> {
+        val reviewId = reviewService.createReview(
             User.fromEntity(principalDetails.getUser()),
             request.reservationId,
             request.content,
             request.rating
         )
-        return ResponseEntity.status(HttpStatus.CREATED).body(review)
+        return ResponseEntity.status(HttpStatus.CREATED).body(reviewId)
     }
 
     @GetMapping("/room/{roomId}")
-    @Operation(summary = "특정 방의 리뷰 조회", description = "특정 방의 모든 리뷰를 조회합니다")
+    @Operation(summary = "특정 방의 리뷰 조회", description = "특정 방의 모든 리뷰를 조회합니다.")
     fun getReviewsByRoom(
         @PathVariable roomId: Long,
         pageable: Pageable
-    ): ResponseEntity<Page<ReviewDTO>> {
+    ): ResponseEntity<Page<ReviewByRoomDTO>> {
         val reviews = reviewService.getReviewsByRoom(roomId, pageable)
         return ResponseEntity.ok(reviews)
     }
 
+    // hidden
     @GetMapping("/{reviewId}")
-    @Operation(summary = "특정 리뷰 상세 조회", description = "특정 리뷰의 상세정보를 조회합니다")
+    @Operation(summary = "특정 리뷰 상세 조회", description = "특정 리뷰의 상세 정보를 조회합니다.", hidden = true)
     fun getReviewDetails(
         @PathVariable reviewId: Long
     ): ResponseEntity<ReviewDTO> {
@@ -63,11 +63,11 @@ class ReviewController(
     }
 
     @GetMapping("/user/{userId}")
-    @Operation(summary = "특정 유저의 리뷰 조회", description = "특정 유저의 모든 리뷰를 조회합니다")
+    @Operation(summary = "특정 유저의 리뷰 조회", description = "특정 유저의 모든 리뷰를 조회합니다.")
     fun getReviewsByUser(
         @PathVariable userId: Long,
         pageable: Pageable
-    ): ResponseEntity<Page<ReviewDTO>> {
+    ): ResponseEntity<Page<ReviewByUserDTO>> {
         val viewerId =
             try {
                 val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
@@ -82,23 +82,23 @@ class ReviewController(
     }
 
     @PutMapping("/{reviewId}")
-    @Operation(summary = "리뷰 수정", description = "존재하는 리뷰를 수정합니다")
+    @Operation(summary = "리뷰 수정", description = "존재하는 리뷰를 수정합니다. 수정할 내용은 content와 rating입니다. Response body에는 수정된 review의 id가 들어갑니다. POST API와의 통일성을 위해 response body에 review id가 포함되긴 하나, 수정 시에도 id는 바뀌지 않으므로 큰 의미는 없습니다.")
     fun updateReview(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable reviewId: Long,
         @RequestBody request: UpdateReviewRequest
-    ): ResponseEntity<Review> {
-        val review = reviewService.updateReview(
+    ): ResponseEntity<Long> {
+        reviewService.updateReview(
             User.fromEntity(principalDetails.getUser()),
             reviewId,
             request.content,
             request.rating
         )
-        return ResponseEntity.ok(review)
+        return ResponseEntity.ok(reviewId)
     }
 
     @DeleteMapping("/{reviewId}")
-    @Operation(summary = "리뷰 삭제", description = "리뷰를 삭제합니다")
+    @Operation(summary = "리뷰 삭제", description = "리뷰를 삭제합니다.")
     fun deleteReview(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable reviewId: Long
@@ -109,7 +109,6 @@ class ReviewController(
 }
 
 data class CreateReviewRequest(
-    val roomId: Long,
     val reservationId: Long,
     val content: String,
     val rating: Int

@@ -11,15 +11,19 @@ interface ProfileService {
         user: UserEntity
     ): Profile
 
+    fun getProfileByUserId(
+        userId: Long
+    ): Profile
+
     fun updateCurrentUserProfile(
         user: UserEntity,
         request: UpdateProfileRequest
-    ): Profile
+    )
 
     fun addProfileToCurrentUser(
         user: UserEntity,
         request: CreateProfileRequest
-    ): Profile
+    )
 
     fun updateSuperHostStatus(
         profile: ProfileEntity
