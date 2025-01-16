@@ -8,15 +8,13 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import java.time.Instant
 
 data class Room(
-    val id: Long,
-    val hostId: Long,
-    val name: String,
-    val description: String,
-    val type: RoomType,
-    val address: Address,
-    val price: Price,
-    val maxOccupancy: Int,
-    val rating: Double
+    val roomId: Long,
+    val roomName: String,
+    val roomType: RoomType,
+    val sido: String,
+    val price: Double,
+    val averageRating: Double
+    // val imageUrl: String //대표 이미지 1개만 return
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity): Room {
@@ -24,35 +22,35 @@ data class Room(
             if (averageRating.isNaN()) averageRating = 0.0
 
             return Room(
-                id = entity.id!!,
-                hostId = entity.host.id!!,
-                name = entity.name,
-                description = entity.description,
-                type = entity.type,
-                address = entity.address,
-                price = entity.price,
-                maxOccupancy = entity.maxOccupancy,
-                rating = averageRating
+                roomId = entity.id!!,
+                roomName = entity.name,
+                roomType = entity.type,
+                sido = entity.address.sido,
+                price = entity.price.perNight,
+                averageRating = averageRating
+                // imageUrl = entity.images.firstOrNull()?.url ?: ""
             )
         }
     }
 }
 
 data class RoomDetailsDTO(
-    val id: Long,
+    val roomId: Long,
     val hostId: Long,
-    val name: String,
+    val hostName: String?,
+    val roomName: String,
     val description: String,
-    val type: RoomType,
+    val roomType: RoomType,
     val address: Address,
     val roomDetails: RoomDetails,
     val price: Price,
     val maxOccupancy: Int,
-    val rating: Double,
+    val averageRating: Double,
     val reviewCount: Int,
     val isSuperHost: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant
+    // val imageUrl: List<String>, //방에 대한 모든 image url 전달
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity): RoomDetailsDTO {
@@ -60,20 +58,36 @@ data class RoomDetailsDTO(
             if (averageRating.isNaN()) averageRating = 0.0
 
             return RoomDetailsDTO(
-                id = entity.id!!,
+                roomId = entity.id!!,
                 hostId = entity.host.id!!,
-                name = entity.name,
+                hostName = entity.host.profile?.nickname,
+                roomName = entity.name,
                 description = entity.description,
-                type = entity.type,
+                roomType = entity.type,
                 address = entity.address,
                 roomDetails = entity.roomDetails,
                 price = entity.price,
                 maxOccupancy = entity.maxOccupancy,
-                rating = averageRating,
+                averageRating = averageRating,
                 reviewCount = entity.reviews.size,
                 isSuperHost = entity.host.isSuperhost(),
                 createdAt = entity.createdAt,
                 updatedAt = entity.updatedAt
+                // imageUrl = entity.images.map { imageService(it.url) }
+            )
+        }
+    }
+}
+
+data class RoomShortDTO(
+    val roomId: Long
+    // val imageUrl: String, // 이미지가 여러 개면 List<String> 형태로 여러 개의 cloudfront url 전달
+) {
+    companion object {
+        fun fromEntity(entity: RoomEntity): RoomShortDTO {
+            return RoomShortDTO(
+                roomId = entity.id!!
+                // imageUrl = entity.images.map { imageService(it.url) }
             )
         }
     }

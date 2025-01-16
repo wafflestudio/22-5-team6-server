@@ -36,12 +36,12 @@ class RoomController(
     fun createRoom(
         @RequestBody request: CreateRoomRequest,
         @AuthenticationPrincipal principalDetails: PrincipalDetails
-    ): ResponseEntity<RoomDetailsDTO> {
+    ): ResponseEntity<RoomShortDTO> {
         val room = roomService.createRoom(
             hostId = User.fromEntity(principalDetails.getUser()).id,
-            name = request.name,
+            name = request.roomName,
             description = request.description,
-            type = request.type,
+            type = request.roomType,
             address = request.address,
             roomDetails = request.roomDetails,
             price = request.price,
@@ -75,13 +75,13 @@ class RoomController(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long,
         @RequestBody request: UpdateRoomRequest
-    ): ResponseEntity<RoomDetailsDTO> {
+    ): ResponseEntity<RoomShortDTO> {
         val updatedRoom = roomService.updateRoom(
             User.fromEntity(principalDetails.getUser()).id,
             roomId,
-            request.name,
+            request.roomName,
             request.description,
-            request.type,
+            request.roomType,
             request.address,
             request.roomDetails,
             request.price,
@@ -107,8 +107,8 @@ class RoomController(
     @GetMapping("/rooms/main/search")
     @Operation(summary = "방 검색", description = "방을 검색합니다(페이지네이션 적용)")
     fun searchRooms(
-        @RequestParam(required = false) name: String?,
-        @RequestParam(required = false) type: RoomType?,
+        @RequestParam(required = false) roomName: String?,
+        @RequestParam(required = false) roomType: RoomType?,
         @RequestParam(required = false) minPrice: Double?,
         @RequestParam(required = false) maxPrice: Double?,
         @RequestParam(required = false) sido: String?,
@@ -122,7 +122,7 @@ class RoomController(
         pageable: Pageable
     ): ResponseEntity<Page<Room>> {
         val address = AddressSearchDTO(sido, sigungu, street, detail)
-        val rooms = roomService.searchRooms(name, type, minPrice, maxPrice, address, maxOccupancy, rating, startDate, endDate, pageable)
+        val rooms = roomService.searchRooms(roomName, roomType, minPrice, maxPrice, address, maxOccupancy, rating, startDate, endDate, pageable)
         return ResponseEntity.ok(rooms)
     }
 }
@@ -135,9 +135,9 @@ data class AddressSearchDTO(
 )
 
 data class CreateRoomRequest(
-    val name: String,
+    val roomName: String,
     val description: String,
-    val type: RoomType,
+    val roomType: RoomType,
     val address: Address,
     val roomDetails: RoomDetails,
     val price: Price,
@@ -145,9 +145,9 @@ data class CreateRoomRequest(
 )
 
 data class UpdateRoomRequest(
-    val name: String,
+    val roomName: String,
     val description: String,
-    val type: RoomType,
+    val roomType: RoomType,
     val address: Address,
     val roomDetails: RoomDetails,
     val price: Price,

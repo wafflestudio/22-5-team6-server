@@ -2,6 +2,7 @@ package com.example.toyTeam6Airbnb.reservation.service
 
 import com.example.toyTeam6Airbnb.reservation.controller.Reservation
 import com.example.toyTeam6Airbnb.reservation.controller.ReservationDTO
+import com.example.toyTeam6Airbnb.reservation.controller.ReservationDetails
 import com.example.toyTeam6Airbnb.reservation.controller.RoomAvailabilityResponse
 import com.example.toyTeam6Airbnb.user.controller.User
 import org.springframework.data.domain.Page
@@ -35,7 +36,7 @@ interface ReservationService {
     fun getReservation(
         userId: Long,
         reservationId: Long
-    ): Reservation
+    ): ReservationDetails
 
     fun getReservationsByUser(
         viewerId: Long?,

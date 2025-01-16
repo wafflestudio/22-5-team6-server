@@ -17,6 +17,7 @@ import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import com.example.toyTeam6Airbnb.validatePageable
+import com.example.toyTeam6Airbnb.validateSortedPageable
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -68,7 +69,7 @@ class ReviewServiceImpl(
     override fun getReviewsByRoom(roomId: Long, pageable: Pageable): Page<ReviewByRoomDTO> {
         roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
 
-        val reviewEntities = reviewRepository.findAllByRoomId(roomId, validatePageable(pageable))
+        val reviewEntities = reviewRepository.findAllByRoomId(roomId, validateSortedPageable(pageable))
 
         val reviews = reviewEntities.map { ReviewByRoomDTO.fromEntity(it) }
         return reviews

@@ -84,7 +84,7 @@ class ReservationController(
     fun getReservation(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable reservationId: Long
-    ): ResponseEntity<Reservation> {
+    ): ResponseEntity<ReservationDetails> {
         val reservation = reservationService.getReservation(principalDetails.getUser().id!!, reservationId)
 
         return ResponseEntity.ok(reservation)
