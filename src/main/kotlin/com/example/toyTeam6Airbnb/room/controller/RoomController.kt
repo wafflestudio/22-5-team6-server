@@ -36,7 +36,7 @@ class RoomController(
     fun createRoom(
         @RequestBody request: CreateRoomRequest,
         @AuthenticationPrincipal principalDetails: PrincipalDetails
-    ): ResponseEntity<RoomDetailsDTO> {
+    ): ResponseEntity<RoomShortDTO> {
         val room = roomService.createRoom(
             hostId = User.fromEntity(principalDetails.getUser()).id,
             name = request.name,
@@ -75,7 +75,7 @@ class RoomController(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long,
         @RequestBody request: UpdateRoomRequest
-    ): ResponseEntity<RoomDetailsDTO> {
+    ): ResponseEntity<RoomShortDTO> {
         val updatedRoom = roomService.updateRoom(
             User.fromEntity(principalDetails.getUser()).id,
             roomId,
