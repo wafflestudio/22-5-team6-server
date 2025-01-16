@@ -35,9 +35,9 @@ class RoomControllerTest {
 
         val requestBody = """
         {
-            "name": "Sample Room",
+            "roomName": "Sample Room",
             "description": "A beautiful and cozy apartment located in the heart of Seoul. Perfect for travelers!",
-            "type": "APARTMENT",
+            "roomType": "APARTMENT",
             "address": {
                 "sido": "Seoul",
                 "sigungu": "Jongno-gu",
@@ -84,9 +84,9 @@ class RoomControllerTest {
         // create a room with mockmvc
         val requestBody = """
         {
-            "name": "Sample Room_2",
+            "roomName": "Sample Room_2",
             "description": "A nice place to stay",
-            "type": "VILLA",
+            "roomType": "VILLA",
             "address": {
                 "sido": "Seoul",
                 "sigungu": "Gangnam",
@@ -124,7 +124,7 @@ class RoomControllerTest {
 
         // extract room id from create_result's body
         val responseBody = create_result.contentAsString
-        val roomId = responseBody.split("\"id\":")[1].split(",")[0].toLong()
+        val roomId = responseBody.split("\"roomId\":")[1].split(",")[0].toLong()
 
         // room should be accessible without authentication
         val result = mockMvc.perform(
@@ -173,7 +173,7 @@ class RoomControllerTest {
         val rootNode: JsonNode = objectMapper.readTree(jsonString)
         val contentNode: JsonNode = rootNode.path("content")
         return if (contentNode.isArray && contentNode.size() > n) {
-            contentNode[n].path("id").asLong()
+            contentNode[n].path("roomId").asLong()
         } else {
             null
         }
@@ -193,9 +193,9 @@ class RoomControllerTest {
 
         val requestBody = """
         {
-            "name": "Sample Room",
+            "roomName": "Sample Room",
             "description": "A beautiful and cozy apartment located in the heart of Seoul. Perfect for travelers!",
-            "type": "APARTMENT",
+            "roomType": "APARTMENT",
             "address": {
                 "sido": "Seoul",
                 "sigungu": "Jongno-gu",
@@ -233,13 +233,13 @@ class RoomControllerTest {
         // Add assertions to verify the response content if needed
         println(responseContent)
 
-        val roomId = responseContent.split("\"id\":")[1].split(",")[0].toLong()
+        val roomId = responseContent.split("\"roomId\":")[1].split(",")[0].toLong()
 
         val updateRequestBody = """
             {
-            "name": "Sample Room_2",
+            "roomName": "Sample Room_2",
             "description": "A nice place to stay",
-            "type": "VILLA",
+            "roomType": "VILLA",
             "address": {
                 "sido": "Seoul",
                 "sigungu": "Gangnam",
@@ -296,9 +296,9 @@ class RoomControllerTest {
 
         val requestBody = """
         {
-            "name": "Sample Room",
+            "roomName": "Sample Room",
             "description": "A beautiful and cozy apartment located in the heart of Seoul. Perfect for travelers!",
-            "type": "APARTMENT",
+            "roomType": "APARTMENT",
             "address": {
                 "sido": "Seoul",
                 "sigungu": "Jongno-gu",
@@ -337,7 +337,7 @@ class RoomControllerTest {
         // Add assertions to verify the response content if needed
         println(responseContent)
 
-        val roomId = responseContent.split("\"id\":")[1].split(",")[0].toLong()
+        val roomId = responseContent.split("\"roomId\":")[1].split(",")[0].toLong()
 
         // verify 403 forbidden for user 2
         val deleteResult2 = mockMvc.perform(
@@ -379,7 +379,7 @@ class RoomControllerTest {
 
         val result = mockMvc.perform(
             MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
-                .param("name", "Room1")
+                .param("roomName", "Room1")
                 .param("page", "0")
                 .param("size", "10")
                 .accept(MediaType.APPLICATION_JSON)

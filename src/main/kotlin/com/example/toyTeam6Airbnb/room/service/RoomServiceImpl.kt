@@ -13,6 +13,7 @@ import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
 import com.example.toyTeam6Airbnb.room.controller.RoomDetailsDTO
+import com.example.toyTeam6Airbnb.room.controller.RoomShortDTO
 import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
@@ -47,7 +48,7 @@ class RoomServiceImpl(
         roomDetails: RoomDetails,
         price: Price,
         maxOccupancy: Int
-    ): RoomDetailsDTO {
+    ): RoomShortDTO {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
 
         validateRoomInfo(name, description, type, address, price, maxOccupancy)
@@ -70,7 +71,7 @@ class RoomServiceImpl(
                 roomRepository.save(it)
             }
 
-            return RoomDetailsDTO.fromEntity(roomEntity)
+            return RoomShortDTO.fromEntity(roomEntity)
         } catch (e: DataIntegrityViolationException) {
             throw DuplicateRoomException()
         }
@@ -98,7 +99,7 @@ class RoomServiceImpl(
         roomDetails: RoomDetails,
         price: Price,
         maxOccupancy: Int
-    ): RoomDetailsDTO {
+    ): RoomShortDTO {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
@@ -120,7 +121,7 @@ class RoomServiceImpl(
         roomEntity.maxOccupancy = maxOccupancy
 
         roomRepository.save(roomEntity)
-        return RoomDetailsDTO.fromEntity(roomEntity)
+        return RoomShortDTO.fromEntity(roomEntity)
     }
 
     @Transactional

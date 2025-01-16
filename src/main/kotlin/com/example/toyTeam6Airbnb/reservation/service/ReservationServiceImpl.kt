@@ -7,6 +7,7 @@ import com.example.toyTeam6Airbnb.reservation.ReservationUnavailable
 import com.example.toyTeam6Airbnb.reservation.ZeroGuests
 import com.example.toyTeam6Airbnb.reservation.controller.Reservation
 import com.example.toyTeam6Airbnb.reservation.controller.ReservationDTO
+import com.example.toyTeam6Airbnb.reservation.controller.ReservationDetails
 import com.example.toyTeam6Airbnb.reservation.controller.RoomAvailabilityResponse
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
@@ -126,10 +127,14 @@ class ReservationServiceImpl(
     }
 
     @Transactional
-    override fun getReservation(reservationId: Long): Reservation {
+    override fun getReservation(
+        userId: Long,
+        reservationId: Long
+    ): ReservationDetails {
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
+        if (reservationEntity.user.id != userId) throw ReservationPermissionDenied()
 
-        return Reservation.fromEntity(reservationEntity)
+        return ReservationDetails.fromEntity(reservationEntity)
     }
 
     @Transactional

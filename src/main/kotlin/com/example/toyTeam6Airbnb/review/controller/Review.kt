@@ -4,27 +4,45 @@ import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import java.time.Instant
 import java.time.LocalDate
 
-data class Review(
-    val id: Long,
+data class ReviewByRoomDTO(
     val userId: Long,
-    val reservationId: Long,
-    val roomId: Long,
+    val nickname: String,
+    val profileImage: String,
     val content: String,
     val rating: Int,
-    val createdAt: Instant,
-    val updatedAt: Instant
+    val startDate: LocalDate,
+    val endDate: LocalDate
 ) {
     companion object {
-        fun fromEntity(entity: ReviewEntity): Review {
-            return Review(
-                id = entity.id!!,
+        fun fromEntity(entity: ReviewEntity): ReviewByRoomDTO {
+            return ReviewByRoomDTO(
                 userId = entity.user.id!!,
-                reservationId = entity.reservation.id!!,
-                roomId = entity.room.id!!,
+                nickname = entity.user.profile?.nickname ?: entity.user.username,
+                profileImage = "",
                 content = entity.content,
                 rating = entity.rating,
-                createdAt = entity.createdAt,
-                updatedAt = entity.updatedAt
+                startDate = entity.reservation.startDate,
+                endDate = entity.reservation.endDate
+            )
+        }
+    }
+}
+
+data class ReviewByUserDTO(
+    val content: String,
+    val rating: Int,
+    val place: String,
+    val startDate: LocalDate,
+    val endDate: LocalDate
+) {
+    companion object {
+        fun fromEntity(entity: ReviewEntity): ReviewByUserDTO {
+            return ReviewByUserDTO(
+                content = entity.content,
+                rating = entity.rating,
+                place = entity.room.address.sido,
+                startDate = entity.reservation.startDate,
+                endDate = entity.reservation.endDate
             )
         }
     }
