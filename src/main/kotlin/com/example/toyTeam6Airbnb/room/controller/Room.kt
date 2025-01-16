@@ -13,8 +13,8 @@ data class Room(
     val type: RoomType,
     val sido: String,
     val price: Double,
-    val averageRating: Double,
-    //val imageUrl: String
+    val averageRating: Double
+    // val imageUrl: String
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity): Room {
@@ -27,8 +27,8 @@ data class Room(
                 type = entity.type,
                 sido = entity.address.sido,
                 price = entity.price.perNight,
-                averageRating = averageRating,
-                //imageUrl = entity.images.firstOrNull()?.url ?: ""
+                averageRating = averageRating
+                // imageUrl = entity.images.firstOrNull()?.url ?: ""
             )
         }
     }
@@ -48,8 +48,8 @@ data class RoomDetailsDTO(
     val reviewCount: Int,
     val isSuperHost: Boolean,
     val createdAt: Instant,
-    val updatedAt: Instant,
-    //val imageUrl: String,
+    val updatedAt: Instant
+    // val imageUrl: String,
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity): RoomDetailsDTO {
@@ -70,23 +70,22 @@ data class RoomDetailsDTO(
                 reviewCount = entity.reviews.size,
                 isSuperHost = entity.host.isSuperhost(),
                 createdAt = entity.createdAt,
-                updatedAt = entity.updatedAt,
-                //imageUrl = entity.images.firstOrNull()?.url ?: ""
+                updatedAt = entity.updatedAt
+                // imageUrl = entity.images.firstOrNull()?.url ?: ""
             )
         }
     }
 }
 
 data class RoomShortDTO(
-    val roomId: Long,
-    //val imageUrl: String,
+    val roomId: Long
+    // val imageUrl: String,
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity): RoomShortDTO {
-
             return RoomShortDTO(
-                roomId = entity.id!!,
-                //imageUrl = entity.images.firstOrNull()?.url ?: ""
+                roomId = entity.id!!
+                // imageUrl = entity.images.firstOrNull()?.url ?: ""
             )
         }
     }
