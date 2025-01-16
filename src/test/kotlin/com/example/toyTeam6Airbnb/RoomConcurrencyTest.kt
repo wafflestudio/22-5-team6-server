@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
@@ -34,7 +34,7 @@ class RoomConcurrencyTest {
     }
 
     @Test
-    fun `동일한 요청이 2개들어오면 방 하나만 만들어야함(멱등성)`() {
+    fun `should throw DuplicateRoomException when two identical requests are made concurrently`() {
         val (user, token) = dataGenerator.generateUserAndToken()
 
         val latch = CountDownLatch(2)
@@ -42,9 +42,9 @@ class RoomConcurrencyTest {
 
         val requestBody = """
         {
-            "name": "Cozy Apartment in Seoul",
+            "roomName": "Cozy Apartment in Seoul",
             "description": "A beautiful and cozy apartment located in the heart of Seoul. Perfect for travelers!",
-            "type": "APARTMENT",
+            "roomType": "APARTMENT",
             "address": {
                 "sido": "Seoul",
                 "sigungu": "Jongno-gu",
@@ -63,12 +63,13 @@ class RoomConcurrencyTest {
             "price": {
                 "perNight": 5000,
                 "cleaningFee": 5000,
-                "charge": 5000,
-                "total": 0
+                "charge": 5000
             },
             "maxOccupancy": 1
         }
         """.trimIndent()
+
+        val results = mutableListOf<Int>()
 
         executor.submit {
             try {
@@ -78,9 +79,9 @@ class RoomConcurrencyTest {
                         .content(requestBody)
                         .header("Authorization", "Bearer $token")
                 )
-                    .andDo(MockMvcResultHandlers.print()) // Log request/response
-                    .andExpect(MockMvcResultMatchers.status().isOk)
+                    .andDo(MockMvcResultHandlers.print())
                     .andReturn()
+                results.add(result.response.status)
             } finally {
                 latch.countDown()
             }
@@ -94,9 +95,9 @@ class RoomConcurrencyTest {
                         .content(requestBody)
                         .header("Authorization", "Bearer $token")
                 )
-                    .andDo(MockMvcResultHandlers.print()) // Log request/response
-                    .andExpect(MockMvcResultMatchers.status().isOk)
+                    .andDo(MockMvcResultHandlers.print())
                     .andReturn()
+                results.add(result.response.status)
             } finally {
                 latch.countDown()
             }
@@ -104,13 +105,15 @@ class RoomConcurrencyTest {
 
         latch.await()
 
+        assertEquals(1, results.count { it == HttpStatus.CREATED.value() })
+        assertEquals(1, results.count { it == HttpStatus.CONFLICT.value() })
+
         val rooms = roomRepository.findAll()
         assertEquals(1, rooms.size)
     }
 
-    // requestBody를 위와 같은 형태로 하여 서로 다른 유저가 같은 방을 만드는 동시성 상황에 대한 테스트 케이스 형성
     @Test
-    fun `동일한 요청이 서로 다른 유저로부터 들어오면 방이 하나만 만들어져야함`() {
+    fun `should throw DuplicateRoomException when identical requests are made by different users concurrently`() {
         val (user1, token1) = dataGenerator.generateUserAndToken()
         val (user2, token2) = dataGenerator.generateUserAndToken()
 
@@ -119,9 +122,9 @@ class RoomConcurrencyTest {
 
         val requestBody = """
         {
-            "name": "Cozy Apartment in Seoul",
+            "roomName": "Cozy Apartment in Seoul",
             "description": "A beautiful and cozy apartment located in the heart of Seoul. Perfect for travelers!",
-            "type": "APARTMENT",
+            "roomType": "APARTMENT",
             "address": {
                 "sido": "Seoul",
                 "sigungu": "Jongno-gu",
@@ -140,12 +143,13 @@ class RoomConcurrencyTest {
             "price": {
                 "perNight": 50000,
                 "cleaningFee": 20000,
-                "charge": 5000,
-                "total": 0
+                "charge": 5000
             },
             "maxOccupancy": 4
         }
         """.trimIndent()
+
+        val results = mutableListOf<Int>()
 
         executor.submit {
             try {
@@ -155,9 +159,9 @@ class RoomConcurrencyTest {
                         .content(requestBody)
                         .header("Authorization", "Bearer $token1")
                 )
-                    .andDo(MockMvcResultHandlers.print()) // Log request/response
-                    .andExpect(MockMvcResultMatchers.status().isOk)
+                    .andDo(MockMvcResultHandlers.print())
                     .andReturn()
+                results.add(result.response.status)
             } finally {
                 latch.countDown()
             }
@@ -171,15 +175,18 @@ class RoomConcurrencyTest {
                         .content(requestBody)
                         .header("Authorization", "Bearer $token2")
                 )
-                    .andDo(MockMvcResultHandlers.print()) // Log request/response
-                    .andExpect(MockMvcResultMatchers.status().isOk)
+                    .andDo(MockMvcResultHandlers.print())
                     .andReturn()
+                results.add(result.response.status)
             } finally {
                 latch.countDown()
             }
         }
 
         latch.await()
+
+        assertEquals(1, results.count { it == HttpStatus.CREATED.value() })
+        assertEquals(1, results.count { it == HttpStatus.CONFLICT.value() })
 
         val rooms = roomRepository.findAll()
         assertEquals(1, rooms.size)

@@ -74,7 +74,7 @@ class ReservationIntegrationTest {
                         .header("Authorization", "Bearer $token")
                 )
                     .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
-                    .andExpect(MockMvcResultMatchers.status().isOk)
+                    .andExpect(MockMvcResultMatchers.status().isCreated)
                     .andReturn()
             } finally {
                 latch.countDown()
@@ -90,7 +90,7 @@ class ReservationIntegrationTest {
                         .header("Authorization", "Bearer $token")
                 )
                     .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
-                    .andExpect(MockMvcResultMatchers.status().isOk)
+                    .andExpect(MockMvcResultMatchers.status().isConflict)
                     .andReturn()
             } finally {
                 latch.countDown()
@@ -133,7 +133,7 @@ class ReservationIntegrationTest {
                         .header("Authorization", "Bearer $token1")
                 )
                     .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
-                    .andExpect(MockMvcResultMatchers.status().isOk)
+                    .andExpect(MockMvcResultMatchers.status().isCreated)
                     .andReturn()
             } finally {
                 latch.countDown()
@@ -149,7 +149,7 @@ class ReservationIntegrationTest {
                         .header("Authorization", "Bearer $token2")
                 )
                     .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
-                    .andExpect(MockMvcResultMatchers.status().isBadRequest)
+                    .andExpect(MockMvcResultMatchers.status().isConflict)
                     .andReturn()
             } finally {
                 latch.countDown()
@@ -203,7 +203,7 @@ class ReservationIntegrationTest {
                         .header("Authorization", "Bearer $token1")
                 )
                     .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
-                    .andExpect(MockMvcResultMatchers.status().isOk)
+                    .andExpect(MockMvcResultMatchers.status().isCreated)
                     .andReturn()
             } finally {
                 latch.countDown()
@@ -219,7 +219,7 @@ class ReservationIntegrationTest {
                         .header("Authorization", "Bearer $token2")
                 )
                     .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
-                    .andExpect(MockMvcResultMatchers.status().isOk)
+                    .andExpect(MockMvcResultMatchers.status().isCreated)
                     .andReturn()
             } finally {
                 latch.countDown()
@@ -232,8 +232,6 @@ class ReservationIntegrationTest {
         assertEquals(2, reservations.size)
     }
 
-    // 기간이 5.10 ~ 5.15  5.12 ~ 5.17로 이렇게 겹치는 경우에 대해서도 테스트코드 작성해줘
-    // 5.10 ~ 5.15  5.12 ~ 5.17로 겹치는 경우에 대해서는 5.10~5.15 건만 예약 성공해야함
     @Test
     fun `should not allow overlapping reservations`() {
         val (user1, token1) = dataGenerator.generateUserAndToken()
@@ -275,7 +273,7 @@ class ReservationIntegrationTest {
                         .header("Authorization", "Bearer $token1")
                 )
                     .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
-                    .andExpect(MockMvcResultMatchers.status().isOk)
+                    .andExpect(MockMvcResultMatchers.status().isCreated)
                     .andReturn()
             } finally {
                 latch.countDown()
@@ -291,7 +289,7 @@ class ReservationIntegrationTest {
                         .header("Authorization", "Bearer $token2")
                 )
                     .andDo(MockMvcResultHandlers.print()) // 요청/응답 로깅
-                    .andExpect(MockMvcResultMatchers.status().isBadRequest)
+                    .andExpect(MockMvcResultMatchers.status().isConflict)
                     .andReturn()
             } finally {
                 latch.countDown()

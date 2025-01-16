@@ -83,7 +83,6 @@ class ReservationControllerTest {
 
         val updateRequestBody = """
             {
-                "roomId": ${room.id},
                 "startDate": "2023-12-01",
                 "endDate": "2024-01-05",
                 "numberOfGuests": 2
@@ -114,7 +113,6 @@ class ReservationControllerTest {
         // 다른 유저가 예약 수정 시 403 반환
         val updateRequestBody = """
             {
-                "roomId": ${room.id},
                 "startDate": "2023-12-01",
                 "endDate": "2024-01-05",
                 "numberOfGuests": 2
@@ -188,7 +186,6 @@ class ReservationControllerTest {
         println(responseContent)
     }
 
-    // 예약 생성을 2개할때, 중복이 되면 exception 처리가 되는지 확인하는 테스트코드를 작성
     @Test
     fun `예약 생성시 기간이 겹치면 409 응답을 반환한다`() {
         val (user, token) = dataGenerator.generateUserAndToken()
@@ -341,7 +338,7 @@ class ReservationControllerTest {
         val rootNode: JsonNode = objectMapper.readTree(jsonString)
         val contentNode: JsonNode = rootNode.path("content")
         return if (contentNode.isArray && contentNode.size() > n) {
-            contentNode[n].path("id").asLong()
+            contentNode[n].path("reservationId").asLong()
         } else {
             null
         }
