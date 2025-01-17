@@ -3,6 +3,7 @@ package com.example.toyTeam6Airbnb.review.service
 import com.example.toyTeam6Airbnb.review.controller.ReviewByRoomDTO
 import com.example.toyTeam6Airbnb.review.controller.ReviewByUserDTO
 import com.example.toyTeam6Airbnb.review.controller.ReviewDTO
+import com.example.toyTeam6Airbnb.review.controller.ReviewIdWithImage
 import com.example.toyTeam6Airbnb.user.controller.User
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -14,7 +15,7 @@ interface ReviewService {
         reservationId: Long,
         content: String,
         rating: Int
-    ): Long
+    ): ReviewIdWithImage
 
     fun getReviewsByRoom(
         roomId: Long,
@@ -36,7 +37,7 @@ interface ReviewService {
         reviewId: Long,
         content: String?,
         rating: Int?
-    ): Long
+    ): ReviewIdWithImage
 
     fun deleteReview(
         user: User,

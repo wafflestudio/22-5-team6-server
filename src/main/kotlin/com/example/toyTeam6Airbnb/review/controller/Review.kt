@@ -79,3 +79,15 @@ data class ReviewDTO(
         }
     }
 }
+
+data class ReviewIdWithImage(
+    val reviewId: Long
+) {
+    companion object {
+        fun fromEntity(entity: ReviewEntity): ReviewIdWithImage {
+            return ReviewIdWithImage(
+                reviewId = entity.id!!
+            )
+        }
+    }
+}

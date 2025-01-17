@@ -1,6 +1,10 @@
 package com.example.toyTeam6Airbnb.Image
 
+import com.example.toyTeam6Airbnb.Image.persistence.ImageEntity
+import com.example.toyTeam6Airbnb.Image.persistence.ImageRepository
+import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
+import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import org.springdoc.webmvc.ui.SwaggerResourceResolver
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,13 +18,13 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest
 import java.time.Duration
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class ImageService(
     @Autowired private val userRepository: UserRepository,
     @Autowired private val roomRepository: RoomRepository,
+    @Autowired private val imageRepository: ImageRepository,
     private val swaggerResourceResolver: SwaggerResourceResolver
 ) {
 
@@ -42,42 +46,55 @@ class ImageService(
     private val cloudFrontUrl: String = "https://d3m9s5wmwvsq01.cloudfront.net"
     private val filePathMap: MutableMap<String, String> = ConcurrentHashMap() // 리소스 타입과 ID로 파일 경로 매핑
 
-    // Presigned URL for Upload
-    fun generateUploadUrl(resourceType: String, resourceId: String): String {
-        val filePath = "$resourceType/$resourceId/${UUID.randomUUID()}_image.jpg"
-        filePathMap["$resourceType:$resourceId"] = filePath // 리소스별 경로 매핑
+    // Presigned URL for Profile Image Upload
+    // ImageEntity 생성해주고, 생성된 이미지 엔티티 Id를 가지고 filepath를 'Images/{이미지엔티티의 id}.jpg'로 설정
+    // 이렇게 해서 이미지 엔티티의 id를 리턴해주면, 프론트에서 이미지 엔티티의 id를 받아서 이미지 엔티티의 id로 이미지를 가져올 수 있게 됨
+    fun generateProfileImageUploadUrl(userId: Long): String {
+        val userEntity = userRepository.findById(userId).orElseThrow { UserNotFoundException() }
 
-        val putObjectRequest = PutObjectRequest.builder()
-            .bucket(bucketName)
-            .key(filePath)
-            .build()
+        // userEntity의 Image가 null이 아니면 이미지가 존재하는 것이므로 해당 이미지 엔티티의 ID로 filePath 설정후 생성
+        // if문으로 이미지가 존재하는지 확인하는 것이 좋을듯
+        if (userEntity.image != null) {
+            val imageId = userEntity.image!!.id
+            val filePath = "Images/$imageId.jpg"
+            filePathMap["images:$imageId"] = filePath
+            val putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(filePath)
+                .build()
 
-        val presignRequest = PutObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofMinutes(60))
-            .putObjectRequest(putObjectRequest)
-            .build()
+            val presignRequest = PutObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(60))
+                .putObjectRequest(putObjectRequest)
+                .build()
 
-        val uploadUrl = s3Presigner.presignPutObject(presignRequest).url().toString()
+            return s3Presigner.presignPutObject(presignRequest).url().toString()
+        } else {
+            val imageEntity = ImageEntity(
+                user = userEntity
+            )
+            val imageId = imageRepository.save(imageEntity).id
+            val filePath = "Images/$imageId.jpg"
+            filePathMap["images:$imageId"] = filePath
+            val putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(filePath)
+                .build()
 
-        if (resourceType == "users") {
-            val userId = resourceId.toLongOrNull() ?: throw RuntimeException("Invalid user ID")
-            val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
-            user.imageUploadUrl = uploadUrl
-            userRepository.save(user)
-        } else if (resourceType == "rooms") {
-            val roomId = resourceId.toLongOrNull() ?: throw RuntimeException("Invalid room ID")
-            val room = roomRepository.findById(roomId).orElseThrow { RuntimeException("Room not found") }
-            room.imageDownloadUrl = uploadUrl
-            roomRepository.save(room)
+            val presignRequest = PutObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(60))
+                .putObjectRequest(putObjectRequest)
+                .build()
+
+            return s3Presigner.presignPutObject(presignRequest).url().toString()
         }
-
-        return uploadUrl
     }
 
-    // Presigned URL for Download
-    fun generateDownloadUrl(resourceType: String, resourceId: String): String {
-        val filePath = filePathMap["$resourceType:$resourceId"]
-            ?: throw IllegalArgumentException("No file found for the given resource: $resourceType with ID: $resourceId")
+    // Generate download URL for profile image
+    fun generateProfileImageDownloadUrl(userId: Long): String {
+        val user = userRepository.findById(userId).orElseThrow { UserNotFoundException() }
+        val image = user.image ?: throw RuntimeException("No profile image found for user")
+        val filePath = "Images/${image.id}.jpg"
 
         val getObjectRequest = GetObjectRequest.builder()
             .bucket(bucketName)
@@ -89,22 +106,116 @@ class ImageService(
             .getObjectRequest(getObjectRequest)
             .build()
 
-        val downloadUrl = s3Presigner.presignGetObject(presignRequest).url().toString()
+        return s3Presigner.presignGetObject(presignRequest).url().toString()
+    }
 
-        if (resourceType == "users") {
-            val userId = resourceId.toLongOrNull() ?: throw RuntimeException("Invalid user ID")
-            val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
-            user.imageDownloadUrl = downloadUrl
-            userRepository.save(user)
-        } else if (resourceType == "rooms") {
-            val roomId = resourceId.toLongOrNull() ?: throw RuntimeException("Invalid room ID")
-            val room = roomRepository.findById(roomId).orElseThrow { RuntimeException("Room not found") }
-            room.imageDownloadUrl = downloadUrl
-            roomRepository.save(room)
+    // requestBody : roomId(long), Imageslot(long)
+    // ImageSlot 개수만큼 이미지 엔티티 생성 매칭하는 roomEntity랑 매핑시킴
+    // 이미지 엔티티의 id를 가지고 filepath를 'Rooms/{roomEntity의 id}/{이미지엔티티의 id}.jpg'로 설정
+    // url 리스트를 반환해줌
+    fun generateRoomImageUploadUrl(roomId: Long, imageSlot: Int): List<String> {
+        val roomEntity = roomRepository.findById(roomId).orElseThrow { RoomNotFoundException() }
+        val imageUrls = mutableListOf<String>()
+
+        // 해당 RoomID의 ImageEntity 개수가 몇개인지 체크
+        // 1. ImageEntity 개수가 0이면, 이미지 슬롯 만큼 엔티티 생성 후 저장
+        // 2. ImageEntity 개수가 slot보다 많으면, 이미 저장되어 있는 만큼 slot 개수만큼 url 생성후 반환 (abcde) (abc) // 저장공간 낭비
+        // 3. ImageEntity 개수가 slot보다 적으면, 저장되어 있는 엔티티는 불러와서 url 생성후, 부족한 만큼 이미지 엔티티 생성 후 저장
+
+        val existingImages = imageRepository.findByRoomId(roomId)
+        if (existingImages.size >= imageSlot) {
+            existingImages.take(imageSlot).forEach { imageEntity ->
+                val filePath = "Images/${imageEntity.id}.jpg"
+                filePathMap["images:${imageEntity.id}"] = filePath
+
+                val putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(filePath)
+                    .build()
+
+                val presignRequest = PutObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofMinutes(60))
+                    .putObjectRequest(putObjectRequest)
+                    .build()
+
+                imageUrls.add(s3Presigner.presignPutObject(presignRequest).url().toString())
+            }
+        } else {
+            existingImages.forEach { imageEntity ->
+                val filePath = "Images/${imageEntity.id}.jpg"
+                filePathMap["images:${imageEntity.id}"] = filePath
+
+                val putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(filePath)
+                    .build()
+
+                val presignRequest = PutObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofMinutes(60))
+                    .putObjectRequest(putObjectRequest)
+                    .build()
+
+                imageUrls.add(s3Presigner.presignPutObject(presignRequest).url().toString())
+            }
+            // 새롭게 추가 되어야 하는 이미지 엔티티 생성
+            for (i in existingImages.size until imageSlot) {
+                val imageEntity = ImageEntity(
+                    room = roomEntity
+                )
+                val imageId = imageRepository.save(imageEntity).id
+                val filePath = "Images/${imageEntity.id}.jpg"
+                filePathMap["images:${imageEntity.id}"] = filePath
+
+                val putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(filePath)
+                    .build()
+
+                val presignRequest = PutObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofMinutes(60))
+                    .putObjectRequest(putObjectRequest)
+                    .build()
+
+                imageUrls.add(s3Presigner.presignPutObject(presignRequest).url().toString())
+            }
+        }
+        return imageUrls
+    }
+
+    // Presigned URL for Download Room Images
+    // requestBody : roomId(long), Imageslot(long)
+    // 방에대한 이미지를 다운로드할 수 있는 URL 생성
+    // 룸 엔티티를 찾아서, 존재하는 이미지 개수만큼 이미지 엔티티의 id를 가지고 filepath를 'Images/{이미지엔티티의 id}.jpg'로 설정
+    // 이미지가 아예 존재하지 않으면 Exception 발생 시키기
+    fun generateRoomImageDownloadUrls(roomId: Long): List<String> {
+        val roomEntity = roomRepository.findById(roomId).orElseThrow { RoomNotFoundException() }
+        val imageEntities = imageRepository.findByRoomId(roomId)
+
+        if (imageEntities.isEmpty()) {
+            throw RuntimeException("No images for the Room")
         }
 
-        return downloadUrl
+        // imageEntities 개수만큼 url 경로 만들어주도록 코드 수정
+        return imageEntities.map { imageEntity ->
+            val filePath = "Images/${imageEntity.id}.jpg"
+            val getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(filePath)
+                .build()
+
+            val presignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(60))
+                .getObjectRequest(getObjectRequest)
+                .build()
+
+            s3Presigner.presignGetObject(presignRequest).url().toString()
+        }
     }
+
+    // Delete ImageEntity by ID
+    // 이미지 엔티티의 id를 받아서 삭제
+    // 룸자체 다 삭제
+    // 룸 몇개만
 
 //    // 파일 업로드 메서드
 //    fun uploadFile(file: MultipartFile, key: String): String {

@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.room.persistence
 
+import com.example.toyTeam6Airbnb.Image.persistence.ImageEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
@@ -53,6 +54,8 @@ class RoomEntity(
     val reservations: List<ReservationEntity> = mutableListOf(),
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     val reviews: List<ReviewEntity> = mutableListOf(),
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    val images: List<ImageEntity> = mutableListOf(),
     @Column(nullable = false)
     var createdAt: Instant = Instant.now(),
     @Column(nullable = false)

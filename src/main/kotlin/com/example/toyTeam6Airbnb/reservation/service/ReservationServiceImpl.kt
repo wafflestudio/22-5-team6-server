@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.reservation.service
 
+import com.example.toyTeam6Airbnb.Image.ImageService
 import com.example.toyTeam6Airbnb.reservation.MaxOccupancyExceeded
 import com.example.toyTeam6Airbnb.reservation.ReservationNotFound
 import com.example.toyTeam6Airbnb.reservation.ReservationPermissionDenied
@@ -35,7 +36,8 @@ class ReservationServiceImpl(
     private val reservationRepository: ReservationRepository,
     private val userRepository: UserRepository,
     private val roomRepository: RoomRepository,
-    private val entityManager: EntityManager
+    private val entityManager: EntityManager,
+    private val imageService: ImageService
 ) : ReservationService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -134,15 +136,24 @@ class ReservationServiceImpl(
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
         if (reservationEntity.user.id != userId) throw ReservationPermissionDenied()
 
-        return ReservationDetails.fromEntity(reservationEntity)
+        // 예약이 어떤 방에대한건지 찾기
+        // 방 id를 이용해서 ImageService의 generateRoomImageDownloadUrl을 호출해서 imageUrl을 가져오기 (first로 첫번쨰 것만)
+        val roomId = reservationEntity.room.id!!
+        val imageUrl = imageService.generateRoomImageDownloadUrls(roomId).first()
+        return ReservationDetails.fromEntity(reservationEntity, imageUrl)
     }
 
     @Transactional
     override fun getReservationsByUser(viewerId: Long?, userId: Long, pageable: Pageable): Page<ReservationDTO> {
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         if (viewerId != userId && userEntity.profile?.showMyReservations != true) throw ReservationPermissionDenied()
-
-        return reservationRepository.findAllByUser(userEntity, pageable).map(ReservationDTO::fromEntity)
+        // 예약이 어떤 방에대한건지 찾기
+        // 방 id를 이용해서 ImageService의 generateRoomImageDownloadUrl을 호출해서 imageUrl을 가져오기 (first로 첫번쨰 것만)
+        return reservationRepository.findAllByUser(userEntity, pageable).map { reservation ->
+            val roomId = reservation.room.id!!
+            val imageUrl = imageService.generateRoomImageDownloadUrls(roomId).first()
+            ReservationDTO.fromEntity(reservation, imageUrl)
+        }
     }
 
 //    @Transactional
