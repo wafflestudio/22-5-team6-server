@@ -32,7 +32,7 @@ class ReviewController(
     fun createReview(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: CreateReviewRequest
-    ): ResponseEntity<Long> {
+    ): ResponseEntity<ReviewIdWithImage> {
         val reviewId = reviewService.createReview(
             User.fromEntity(principalDetails.getUser()),
             request.reservationId,
@@ -87,14 +87,14 @@ class ReviewController(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable reviewId: Long,
         @RequestBody request: UpdateReviewRequest
-    ): ResponseEntity<Long> {
-        reviewService.updateReview(
+    ): ResponseEntity<ReviewIdWithImage> {
+        val reviewIdWithImage = reviewService.updateReview(
             User.fromEntity(principalDetails.getUser()),
             reviewId,
             request.content,
             request.rating
         )
-        return ResponseEntity.ok(reviewId)
+        return ResponseEntity.ok(reviewIdWithImage)
     }
 
     @DeleteMapping("/{reviewId}")

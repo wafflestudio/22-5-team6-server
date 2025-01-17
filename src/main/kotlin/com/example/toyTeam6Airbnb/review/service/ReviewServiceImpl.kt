@@ -8,6 +8,7 @@ import com.example.toyTeam6Airbnb.review.ReviewPermissionDeniedException
 import com.example.toyTeam6Airbnb.review.controller.ReviewByRoomDTO
 import com.example.toyTeam6Airbnb.review.controller.ReviewByUserDTO
 import com.example.toyTeam6Airbnb.review.controller.ReviewDTO
+import com.example.toyTeam6Airbnb.review.controller.ReviewIdWithImage
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
 import com.example.toyTeam6Airbnb.room.RoomNotFoundException
@@ -40,7 +41,7 @@ class ReviewServiceImpl(
         reservationId: Long,
         content: String,
         rating: Int
-    ): Long {
+    ): ReviewIdWithImage {
         // 1. userEntity, roomEntity, reservationEntity 가져오기 (없으면 예외처리)
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
@@ -59,7 +60,7 @@ class ReviewServiceImpl(
             ).let {
                 reviewRepository.save(it)
             }
-            return reviewEntity.id!!
+            return ReviewIdWithImage.fromEntity(reviewEntity)
         } catch (e: DataIntegrityViolationException) {
             throw DuplicateReviewException()
         }
@@ -98,7 +99,7 @@ class ReviewServiceImpl(
         reviewId: Long,
         content: String?,
         rating: Int?
-    ): Long {
+    ): ReviewIdWithImage {
         userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
         val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFoundException()
         if (reviewEntity.user.id != user.id) throw ReviewPermissionDeniedException()
@@ -107,7 +108,7 @@ class ReviewServiceImpl(
         reviewEntity.rating = rating ?: reviewEntity.rating
 
         reviewRepository.save(reviewEntity)
-        return reviewEntity.id!!
+        return ReviewIdWithImage.fromEntity(reviewEntity)
     }
 
     @Transactional
