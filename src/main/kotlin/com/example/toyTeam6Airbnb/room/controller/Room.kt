@@ -49,7 +49,7 @@ data class RoomDetailsDTO(
     val isSuperHost: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant,
-    val imageUrlList: List<String> // 방에 대한 모든 Download Presigned url 전달
+    val imageUrlList: List<String> // 방에 대한 모든 Download url 전달
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity, imageUrlList: List<String>): RoomDetailsDTO {
@@ -80,13 +80,13 @@ data class RoomDetailsDTO(
 
 data class RoomShortDTO(
     val roomId: Long,
-    val imageUploadUrl: List<String> // 이미지가 여러 개면 List<String> 형태로 Upload Presigned URL 제공
+    val imageUploadUrlList: List<String> // 이미지가 여러 개면 List<String> 형태로 Upload Presigned URL 제공
 ) {
     companion object {
-        fun fromEntity(entity: RoomEntity, imageUploadUrl: List<String>): RoomShortDTO {
+        fun fromEntity(entity: RoomEntity, imageUploadUrlList: List<String>): RoomShortDTO {
             return RoomShortDTO(
                 roomId = entity.id!!,
-                imageUploadUrl = imageUploadUrl
+                imageUploadUrlList = imageUploadUrlList
             )
         }
     }
