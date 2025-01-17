@@ -26,6 +26,7 @@ class ProfileController(
     @Operation(summary = "유저 프로필 가져오기", description = "현재 로그인 되어 있는 user의 프로필을 가져옵니다.")
     fun getCurrentUserProfile(
         @AuthenticationPrincipal principalDetails: PrincipalDetails
+        // 이미지 다운로드 url
     ): ResponseEntity<Profile> {
         val profile = profileService.getCurrentUserProfile(principalDetails.getUser())
         return ResponseEntity.ok(profile)
@@ -35,6 +36,7 @@ class ProfileController(
     @Operation(summary = "특정 유저 프로필 가져오기", description = "특정 user의 프로필을 가져옵니다.")
     fun getProfileByUserId(
         @PathVariable userId: Long
+        // 이미지 다운로드 url
     ): ResponseEntity<Profile> {
         val profile = profileService.getProfileByUserId(userId)
         return ResponseEntity.ok(profile)
@@ -45,7 +47,8 @@ class ProfileController(
     fun updateCurrentUserProfile(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: UpdateProfileRequest
-    ): ResponseEntity<Unit> {
+    ): ResponseEntity<UrlResponse> {
+        // 이거 UpdateUrl 리턴하게 해줘야함
         profileService.updateCurrentUserProfile(principalDetails.getUser(), request)
         return ResponseEntity.ok().build()
     }
@@ -55,7 +58,8 @@ class ProfileController(
     fun addProfileToCurrentUser(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: CreateProfileRequest
-    ): ResponseEntity<Unit> {
+    ): ResponseEntity<UrlResponse> {
+        // UpdateUrl 리턴하게 해줘야함
         profileService.addProfileToCurrentUser(principalDetails.getUser(), request)
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
@@ -65,12 +69,18 @@ data class UpdateProfileRequest(
     val nickname: String,
     val bio: String,
     val showMyReviews: Boolean,
-    val showMyReservations: Boolean
+    val showMyReservations: Boolean,
+    val imageSlot: Int
 )
 
 data class CreateProfileRequest(
     val nickname: String,
     val bio: String,
     val showMyReviews: Boolean,
-    val showMyReservations: Boolean
+    val showMyReservations: Boolean,
+    val imageSlot: Int
+)
+
+data class UrlResponse(
+    val url: String
 )

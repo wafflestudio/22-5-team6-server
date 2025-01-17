@@ -1,10 +1,12 @@
 package com.example.toyTeam6Airbnb.profile.service
 
+import com.example.toyTeam6Airbnb.Image.ImageService
 import com.example.toyTeam6Airbnb.profile.ProfileAlreadyExistException
 import com.example.toyTeam6Airbnb.profile.ProfileNotFoundException
 import com.example.toyTeam6Airbnb.profile.controller.CreateProfileRequest
 import com.example.toyTeam6Airbnb.profile.controller.Profile
 import com.example.toyTeam6Airbnb.profile.controller.UpdateProfileRequest
+import com.example.toyTeam6Airbnb.profile.controller.UrlResponse
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
@@ -15,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ProfileServiceImpl(
     private val profileRepository: ProfileRepository,
-    private val roomRepository: RoomRepository
+    private val roomRepository: RoomRepository,
+    private val imageService: ImageService
 ) : ProfileService {
 
     @Transactional
@@ -23,21 +26,27 @@ class ProfileServiceImpl(
         user: UserEntity
     ): Profile {
         val profile = profileRepository.findByUser(user) ?: throw ProfileNotFoundException()
-        return Profile.fromEntity(profile)
+        // 이미지 url 가져오기
+        // user.id 기반으로 이미지 url 가져오기
+        val imageUrl = imageService.generateProfileImageDownloadUrl(user.id!!)
+        return Profile.fromEntity(profile, imageUrl)
     }
 
     override fun getProfileByUserId(
         userId: Long
     ): Profile {
         val profile = profileRepository.findByUserId(userId) ?: throw ProfileNotFoundException()
-        return Profile.fromEntity(profile)
+        // 이미지 url 가져오기
+        // userId 기반으로 이미지 url 가져오기
+        val imageUrl = imageService.generateProfileImageDownloadUrl(userId)
+        return Profile.fromEntity(profile, imageUrl)
     }
 
     @Transactional
     override fun updateCurrentUserProfile(
         user: UserEntity,
         request: UpdateProfileRequest
-    ) {
+    ): UrlResponse {
         val profile = profileRepository.findByUser(user) ?: ProfileEntity(user = user, nickname = "", bio = "")
 
         profile.nickname = request.nickname
@@ -46,13 +55,15 @@ class ProfileServiceImpl(
         profile.showMyReservations = request.showMyReservations
         updateSuperHostStatus(profile)
         profileRepository.save(profile)
+
+        return UrlResponse(imageService.generateProfileImageUploadUrl(user.id!!))
     }
 
     @Transactional
     override fun addProfileToCurrentUser(
         user: UserEntity,
         request: CreateProfileRequest
-    ) {
+    ): UrlResponse {
         if (profileRepository.existsByUser(user)) throw ProfileAlreadyExistException()
 
         val profile = ProfileEntity(
@@ -63,6 +74,8 @@ class ProfileServiceImpl(
             showMyReservations = request.showMyReservations
         )
         updateSuperHostStatus(profile)
+
+        return UrlResponse(imageService.generateProfileImageUploadUrl(user.id!!))
     }
 
     @Transactional

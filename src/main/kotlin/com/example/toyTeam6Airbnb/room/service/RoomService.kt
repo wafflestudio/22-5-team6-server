@@ -21,7 +21,8 @@ interface RoomService {
         address: Address,
         roomDetails: RoomDetails,
         price: Price,
-        maxOccupancy: Int
+        maxOccupancy: Int,
+        imageSlot: Int // imageSlot Request Body에 추가
     ): RoomShortDTO
 
     fun getRooms(pageable: Pageable): Page<Room>
@@ -37,7 +38,8 @@ interface RoomService {
         address: Address,
         roomDetails: RoomDetails,
         price: Price,
-        maxOccupancy: Int
+        maxOccupancy: Int,
+        imageSlot: Int // imageSlot Request Body에 추가
     ): RoomShortDTO
 
     fun deleteRoom(
