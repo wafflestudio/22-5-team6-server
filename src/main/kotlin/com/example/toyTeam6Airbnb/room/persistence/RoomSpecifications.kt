@@ -2,8 +2,8 @@ package com.example.toyTeam6Airbnb.room.persistence
 
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
-import org.springframework.data.jpa.domain.Specification
 import jakarta.persistence.criteria.Predicate
+import org.springframework.data.jpa.domain.Specification
 import java.time.LocalDate
 
 class RoomSpecifications {
