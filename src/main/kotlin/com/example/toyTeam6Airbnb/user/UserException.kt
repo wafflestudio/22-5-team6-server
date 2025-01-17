@@ -58,3 +58,11 @@ class UserNotFoundException : UserException(
     httpStatusCode = HttpStatus.NOT_FOUND,
     msg = "User not found"
 )
+
+// Not used in code, but added for documentation purposes
+// Returned within ProfileExistenceFilter.kt
+class UserWithNoProfileException : UserException(
+    errorCode = 1009,
+    httpStatusCode = HttpStatus.FORBIDDEN,
+    msg = "User with no profile"
+)

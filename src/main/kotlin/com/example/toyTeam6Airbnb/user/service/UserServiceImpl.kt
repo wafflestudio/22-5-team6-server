@@ -41,4 +41,12 @@ class UserServiceImpl(
         ).let { profileRepository.save(it) }
         return User.fromEntity(userEntity)
     }
+
+    @Transactional
+    override fun hasProfile(
+        username: String
+    ): Boolean {
+        userRepository.findByUsername(username)?.profile ?: return false
+        return true
+    }
 }
