@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.room.service
 
+import com.example.toyTeam6Airbnb.Image.ImageService
 import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
 import com.example.toyTeam6Airbnb.room.DuplicateRoomException
 import com.example.toyTeam6Airbnb.room.InvalidAddressException
@@ -35,7 +36,8 @@ import java.time.LocalDate
 class RoomServiceImpl(
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
-    private val reviewRepository: ReviewRepository
+    private val reviewRepository: ReviewRepository,
+    private val imageService: ImageService
 ) : RoomService {
 
     @Transactional
@@ -47,7 +49,8 @@ class RoomServiceImpl(
         address: Address,
         roomDetails: RoomDetails,
         price: Price,
-        maxOccupancy: Int
+        maxOccupancy: Int,
+        imageSlot: Int // imageSlot Request Body에 추가
     ): RoomShortDTO {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
 
@@ -71,7 +74,9 @@ class RoomServiceImpl(
                 roomRepository.save(it)
             }
 
-            return RoomShortDTO.fromEntity(roomEntity)
+            val imageUploadUrl = imageService.generateRoomImageUploadUrl(roomEntity.id!!, imageSlot) // 리스트로 이미지 업로드 URL 이미지 개수만큼 생성
+
+            return RoomShortDTO.fromEntity(roomEntity, imageUploadUrl)
         } catch (e: DataIntegrityViolationException) {
             throw DuplicateRoomException()
         }
@@ -79,13 +84,20 @@ class RoomServiceImpl(
 
     @Transactional
     override fun getRooms(pageable: Pageable): Page<Room> {
-        return roomRepository.findAll(validatePageable(pageable)).map { Room.fromEntity(it) }
+        // Room에서 이미지 url 가져오기
+        // imageService의 generateRoomImageDownloadUrls() 사용후 첫번쨰 String만 가져오기
+        return roomRepository.findAll(validatePageable(pageable)).map {
+            val imageUrl = imageService.generateRoomImageDownloadUrls(it.id!!).first() // Null 처리는 imageService에서 처리
+            Room.fromEntity(it, imageUrl)
+        }
     }
 
     @Transactional
     override fun getRoomDetails(roomId: Long): RoomDetailsDTO {
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
-        return RoomDetailsDTO.fromEntity(roomEntity)
+        // roomEntity에 종속된 이미지 리스트들 얻어오기
+        val imageUrlList = imageService.generateRoomImageDownloadUrls(roomEntity.id!!) // 이미지 리스트 가져오기
+        return RoomDetailsDTO.fromEntity(roomEntity, imageUrlList)
     }
 
     @Transactional
@@ -98,7 +110,8 @@ class RoomServiceImpl(
         address: Address,
         roomDetails: RoomDetails,
         price: Price,
-        maxOccupancy: Int
+        maxOccupancy: Int,
+        imageSlot: Int // imageSlot Request Body에 추가
     ): RoomShortDTO {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
@@ -121,7 +134,9 @@ class RoomServiceImpl(
         roomEntity.maxOccupancy = maxOccupancy
 
         roomRepository.save(roomEntity)
-        return RoomShortDTO.fromEntity(roomEntity)
+
+        val imageUploadUrl = imageService.generateRoomImageUploadUrl(roomEntity.id!!, imageSlot) // 리스트로 이미지 업로드 URL 이미지 개수만큼 생성
+        return RoomShortDTO.fromEntity(roomEntity, imageUploadUrl)
     }
 
     @Transactional
@@ -134,6 +149,8 @@ class RoomServiceImpl(
 
         if (roomEntity.host.id != hostEntity.id) throw RoomPermissionDeniedException()
 
+        // 이미지 엔티티도 삭제하도록 하기
+        // imageEntity delete
         roomRepository.delete(roomEntity)
     }
 
@@ -165,7 +182,10 @@ class RoomServiceImpl(
             detail = address?.detail,
             pageable = validatePageable(pageable)
         )
-        return rooms.map { Room.fromEntity(it) }
+        return rooms.map {
+            val imageUrl = imageService.generateRoomImageDownloadUrls(it.id!!).first() // Null 처리는 imageService에서 처리
+            Room.fromEntity(it, imageUrl)
+        }
     }
 
     private fun validateRoomInfo(
