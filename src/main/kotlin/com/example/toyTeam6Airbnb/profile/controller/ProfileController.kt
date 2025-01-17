@@ -76,5 +76,5 @@ data class CreateProfileRequest(
 )
 
 data class UrlResponse(
-    val url: String
+    val imageUploadUrl: String
 )
