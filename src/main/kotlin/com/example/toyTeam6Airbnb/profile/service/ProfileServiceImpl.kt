@@ -1,6 +1,6 @@
 package com.example.toyTeam6Airbnb.profile.service
 
-import com.example.toyTeam6Airbnb.Image.ImageService
+import com.example.toyTeam6Airbnb.image.ImageService
 import com.example.toyTeam6Airbnb.profile.ProfileAlreadyExistException
 import com.example.toyTeam6Airbnb.profile.ProfileNotFoundException
 import com.example.toyTeam6Airbnb.profile.controller.CreateProfileRequest
@@ -26,8 +26,7 @@ class ProfileServiceImpl(
         user: UserEntity
     ): Profile {
         val profile = profileRepository.findByUser(user) ?: throw ProfileNotFoundException()
-        // 이미지 url 가져오기
-        // user.id 기반으로 이미지 url 가져오기
+
         val imageUrl = imageService.generateProfileImageDownloadUrl(user.id!!)
         return Profile.fromEntity(profile, imageUrl)
     }
@@ -36,8 +35,7 @@ class ProfileServiceImpl(
         userId: Long
     ): Profile {
         val profile = profileRepository.findByUserId(userId) ?: throw ProfileNotFoundException()
-        // 이미지 url 가져오기
-        // userId 기반으로 이미지 url 가져오기
+
         val imageUrl = imageService.generateProfileImageDownloadUrl(userId)
         return Profile.fromEntity(profile, imageUrl)
     }
