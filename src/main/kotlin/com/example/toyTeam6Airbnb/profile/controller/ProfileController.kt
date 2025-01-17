@@ -69,18 +69,16 @@ data class UpdateProfileRequest(
     val nickname: String,
     val bio: String,
     val showMyReviews: Boolean,
-    val showMyReservations: Boolean,
-    val imageSlot: Int
+    val showMyReservations: Boolean
 )
 
 data class CreateProfileRequest(
     val nickname: String,
     val bio: String,
     val showMyReviews: Boolean,
-    val showMyReservations: Boolean,
-    val imageSlot: Int
+    val showMyReservations: Boolean
 )
 
 data class UrlResponse(
-    val url: String
+    val imageUploadUrl: String
 )
