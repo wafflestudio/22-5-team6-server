@@ -1,6 +1,6 @@
 package com.example.toyTeam6Airbnb.user.persistence
 
-import com.example.toyTeam6Airbnb.Image.persistence.ImageEntity
+import com.example.toyTeam6Airbnb.image.persistence.ImageEntity
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
