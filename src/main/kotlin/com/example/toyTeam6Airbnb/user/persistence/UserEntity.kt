@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.user.persistence
 
+import com.example.toyTeam6Airbnb.Image.persistence.ImageEntity
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
@@ -30,12 +31,17 @@ class UserEntity(
 
     @Enumerated(EnumType.STRING)
     val provider: AuthProvider,
+
     @Column
     var oAuthId: String? = null,
-    @Column(columnDefinition = "LONGTEXT")
-    var imageDownloadUrl: String? = null,
-    @Column(columnDefinition = "LONGTEXT")
-    var imageUploadUrl: String? = null,
+
+    @OneToOne(mappedBy = "user")
+    val image: ImageEntity? = null,
+
+//    @Column(columnDefinition = "LONGTEXT")
+//    var imageDownloadUrl: String? = null,
+//    @Column(columnDefinition = "LONGTEXT")
+//    var imageUploadUrl: String? = null,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val reservations: List<ReservationEntity> = mutableListOf(),

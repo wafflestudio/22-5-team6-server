@@ -32,7 +32,7 @@ class RoomController(
     private val roomService: RoomService
 ) {
     @PostMapping("/rooms")
-    @Operation(summary = "방 생성", description = "방을 생성합니다")
+    @Operation(summary = "방 생성", description = "방을 생성합니다, 이미지 업로드 Url도 함께 제공됨")
     fun createRoom(
         @RequestBody request: CreateRoomRequest,
         @AuthenticationPrincipal principalDetails: PrincipalDetails
@@ -45,7 +45,8 @@ class RoomController(
             address = request.address,
             roomDetails = request.roomDetails,
             price = request.price,
-            maxOccupancy = request.maxOccupancy
+            maxOccupancy = request.maxOccupancy,
+            imageSlot = request.imageSlot
         )
 
         return ResponseEntity.status(HttpStatus.CREATED).body(room)
@@ -70,7 +71,7 @@ class RoomController(
     }
 
     @PutMapping("/rooms/{roomId}")
-    @Operation(summary = "방 정보 수정", description = "방의 정보를 수정합니다")
+    @Operation(summary = "방 정보 수정", description = "방의 정보를 수정합니다, 이미지 업로드 Url도 함께 제공됨")
     fun updateRoom(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long,
@@ -85,7 +86,8 @@ class RoomController(
             request.address,
             request.roomDetails,
             request.price,
-            request.maxOccupancy
+            request.maxOccupancy,
+            request.imageSlot
         )
 
         return ResponseEntity.ok(updatedRoom)
@@ -141,7 +143,8 @@ data class CreateRoomRequest(
     val address: Address,
     val roomDetails: RoomDetails,
     val price: Price,
-    val maxOccupancy: Int
+    val maxOccupancy: Int,
+    val imageSlot: Int
 )
 
 data class UpdateRoomRequest(
@@ -151,5 +154,6 @@ data class UpdateRoomRequest(
     val address: Address,
     val roomDetails: RoomDetails,
     val price: Price,
-    val maxOccupancy: Int
+    val maxOccupancy: Int,
+    val imageSlot: Int
 )
