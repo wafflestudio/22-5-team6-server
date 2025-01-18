@@ -120,6 +120,9 @@ class SecurityConfig(
             sessionManagement {
                 sessionCreationPolicy = SessionCreationPolicy.STATELESS
             }
+            exceptionHandling {
+                authenticationEntryPoint = customAuthenticationEntryPoint
+            }
             addFilterAfter<UsernamePasswordAuthenticationFilter>(profileExistenceFilter)
             addFilterBefore<UsernamePasswordAuthenticationFilter>(jwtAuthenticationFilter)
         }
