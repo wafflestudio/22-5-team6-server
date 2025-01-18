@@ -28,11 +28,13 @@ class UserController(
     }
 
     @PostMapping("/api/auth/register")
+    @Operation(summary = "회원가입", description = "유저 생성 및 프로필 이미지 업로드 URL 제공", hidden = true)
     fun register(
         @RequestBody request: RegisterRequest
-    ): ResponseEntity<Unit> {
-        userService.register(request)
-        return ResponseEntity.ok().build()
+    ): ResponseEntity<UrlResponse> {
+        // Url 함게 반환하도록 수정
+        val (user, url) = userService.register(request)
+        return ResponseEntity.ok(UrlResponse(url))
     }
 
     // a mapping just for swagger testing
@@ -57,4 +59,8 @@ data class RegisterRequest(
 data class RedirectResponse(
     val token: String,
     val userId: Long
+)
+
+data class UrlResponse(
+    val imageUploadurl: String
 )

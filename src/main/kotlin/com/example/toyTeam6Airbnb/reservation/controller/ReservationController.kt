@@ -80,7 +80,7 @@ class ReservationController(
     }
 
     @GetMapping("/{reservationId}")
-    @Operation(summary = "예약 상세 조회", description = "예약 상세 정보를 조회합니다")
+    @Operation(summary = "예약 상세 조회", description = "예약 상세 정보를 조회합니다. 예약한 숙소 이미지 조회 URL 제공")
     fun getReservation(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable reservationId: Long
@@ -91,7 +91,7 @@ class ReservationController(
     }
 
     @GetMapping("/user/{userId}")
-    @Operation(summary = "유저별 예약 조회", description = "특정 유저의 모든 예약 정보를 조회합니다")
+    @Operation(summary = "유저별 예약 조회", description = "특정 유저의 모든 예약 정보를 조회합니다. 숙소 이미지 조회 URL 제공")
     fun getReservationsByUser(
         @PathVariable userId: Long,
         pageable: Pageable
