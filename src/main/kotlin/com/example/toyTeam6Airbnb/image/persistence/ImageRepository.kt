@@ -1,4 +1,4 @@
-package com.example.toyTeam6Airbnb.Image.persistence
+package com.example.toyTeam6Airbnb.image.persistence
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository

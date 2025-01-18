@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.user.service
 
+import com.example.toyTeam6Airbnb.image.ImageService
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileRepository
 import com.example.toyTeam6Airbnb.user.SignUpBadUsernameException
@@ -17,12 +18,13 @@ import org.springframework.stereotype.Service
 class UserServiceImpl(
     private val userRepository: UserRepository,
     private val profileRepository: ProfileRepository,
+    private val imageService: ImageService,
     private val passwordEncoder: PasswordEncoder
 ) : UserService {
     @Transactional
     override fun register(
         request: RegisterRequest
-    ): User? {
+    ): Pair<User?, String> {
         if (request.username.startsWith("OAUTH")) throw SignUpBadUsernameException()
         if (userRepository.existsByUsername(request.username)) throw SignUpUsernameConflictException()
         val userEntity = UserEntity(
@@ -39,6 +41,15 @@ class UserServiceImpl(
             showMyReviews = request.showMyReviews,
             showMyReservations = request.showMyReservations
         ).let { profileRepository.save(it) }
-        return User.fromEntity(userEntity)
+        val imageUploadUrl = imageService.generateProfileImageUploadUrl(userEntity.id!!)
+        return User.fromEntity(userEntity) to imageUploadUrl
+    }
+
+    @Transactional
+    override fun hasProfile(
+        username: String
+    ): Boolean {
+        userRepository.findByUsername(username)?.profile ?: return false
+        return true
     }
 }

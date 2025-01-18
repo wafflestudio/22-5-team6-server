@@ -1,7 +1,6 @@
 package com.example.toyTeam6Airbnb.room.service
 
-import com.example.toyTeam6Airbnb.Image.ImageService
-import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
+import com.example.toyTeam6Airbnb.image.service.ImageService
 import com.example.toyTeam6Airbnb.room.DuplicateRoomException
 import com.example.toyTeam6Airbnb.room.InvalidAddressException
 import com.example.toyTeam6Airbnb.room.InvalidDescriptionException
@@ -20,6 +19,7 @@ import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
+import com.example.toyTeam6Airbnb.room.persistence.RoomSpecifications
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
@@ -27,6 +27,7 @@ import com.example.toyTeam6Airbnb.validatePageable
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -36,7 +37,6 @@ import java.time.LocalDate
 class RoomServiceImpl(
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
-    private val reviewRepository: ReviewRepository,
     private val imageService: ImageService
 ) : RoomService {
 
@@ -74,9 +74,9 @@ class RoomServiceImpl(
                 roomRepository.save(it)
             }
 
-            val imageUploadUrl = imageService.generateRoomImageUploadUrl(roomEntity.id!!, imageSlot) // 리스트로 이미지 업로드 URL 이미지 개수만큼 생성
+            val imageUploadUrls = imageService.generateRoomImageUploadUrls(roomEntity.id!!, imageSlot) // 리스트로 이미지 업로드 URL 이미지 개수만큼 생성
 
-            return RoomShortDTO.fromEntity(roomEntity, imageUploadUrl)
+            return RoomShortDTO.fromEntity(roomEntity, imageUploadUrls)
         } catch (e: DataIntegrityViolationException) {
             throw DuplicateRoomException()
         }
@@ -84,10 +84,8 @@ class RoomServiceImpl(
 
     @Transactional
     override fun getRooms(pageable: Pageable): Page<Room> {
-        // Room에서 이미지 url 가져오기
-        // imageService의 generateRoomImageDownloadUrls() 사용후 첫번쨰 String만 가져오기
         return roomRepository.findAll(validatePageable(pageable)).map {
-            val imageUrl = imageService.generateRoomImageDownloadUrls(it.id!!).first() // Null 처리는 imageService에서 처리
+            val imageUrl = imageService.generateRoomImageDownloadUrl(it.id!!)
             Room.fromEntity(it, imageUrl)
         }
     }
@@ -95,8 +93,7 @@ class RoomServiceImpl(
     @Transactional
     override fun getRoomDetails(roomId: Long): RoomDetailsDTO {
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
-        // roomEntity에 종속된 이미지 리스트들 얻어오기
-        val imageUrlList = imageService.generateRoomImageDownloadUrls(roomEntity.id!!) // 이미지 리스트 가져오기
+        val imageUrlList = imageService.generateRoomImageDownloadUrls(roomEntity.id!!)
         return RoomDetailsDTO.fromEntity(roomEntity, imageUrlList)
     }
 
@@ -135,8 +132,8 @@ class RoomServiceImpl(
 
         roomRepository.save(roomEntity)
 
-        val imageUploadUrl = imageService.generateRoomImageUploadUrl(roomEntity.id!!, imageSlot) // 리스트로 이미지 업로드 URL 이미지 개수만큼 생성
-        return RoomShortDTO.fromEntity(roomEntity, imageUploadUrl)
+        val imageUploadUrls = imageService.generateRoomImageUploadUrls(roomEntity.id!!, imageSlot)
+        return RoomShortDTO.fromEntity(roomEntity, imageUploadUrls)
     }
 
     @Transactional
@@ -149,12 +146,11 @@ class RoomServiceImpl(
 
         if (roomEntity.host.id != hostEntity.id) throw RoomPermissionDeniedException()
 
-        // 이미지 엔티티도 삭제하도록 하기
-        // imageEntity delete
+        imageService.deleteRoomImages(roomId)
         roomRepository.delete(roomEntity)
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     override fun searchRooms(
         name: String?,
         type: RoomType?,
@@ -167,23 +163,16 @@ class RoomServiceImpl(
         endDate: LocalDate?,
         pageable: Pageable
     ): Page<Room> {
-        val rooms = roomRepository.searchAvailableRooms(
-            name = name,
-            type = type,
-            minPrice = minPrice,
-            maxPrice = maxPrice,
-            maxOccupancy = maxOccupancy,
-            rating = rating,
-            startDate = startDate,
-            endDate = endDate,
-            sido = address?.sido,
-            sigungu = address?.sigungu,
-            street = address?.street,
-            detail = address?.detail,
-            pageable = validatePageable(pageable)
-        )
-        return rooms.map {
-            val imageUrl = imageService.generateRoomImageDownloadUrls(it.id!!).first() // Null 처리는 imageService에서 처리
+        val spec = Specification.where(RoomSpecifications.hasName(name))
+            .and(RoomSpecifications.hasType(type))
+            .and(RoomSpecifications.hasPriceBetween(minPrice, maxPrice))
+            .and(RoomSpecifications.hasMaxOccupancy(maxOccupancy))
+            .and(RoomSpecifications.isAvailable(startDate, endDate))
+            .and(RoomSpecifications.hasAddress(address?.sido, address?.sigungu, address?.street, address?.detail))
+            .and(RoomSpecifications.hasRating(rating))
+
+        return roomRepository.findAll(spec, validatePageable(pageable)).map {
+            val imageUrl = imageService.generateRoomImageDownloadUrl(it.id!!)
             Room.fromEntity(it, imageUrl)
         }
     }

@@ -23,45 +23,41 @@ class ProfileController(
 ) {
 
     @GetMapping
-    @Operation(summary = "유저 프로필 가져오기", description = "현재 로그인 되어 있는 user의 프로필을 가져옵니다.")
+    @Operation(summary = "유저 프로필 가져오기", description = "현재 로그인 되어 있는 user의 프로필을 가져옵니다. 이미지 조회 Url 제공")
     fun getCurrentUserProfile(
         @AuthenticationPrincipal principalDetails: PrincipalDetails
-        // 이미지 다운로드 url
     ): ResponseEntity<Profile> {
         val profile = profileService.getCurrentUserProfile(principalDetails.getUser())
         return ResponseEntity.ok(profile)
     }
 
     @GetMapping("/{userId}")
-    @Operation(summary = "특정 유저 프로필 가져오기", description = "특정 user의 프로필을 가져옵니다.")
+    @Operation(summary = "특정 유저 프로필 가져오기", description = "특정 user의 프로필을 가져옵니다. 이미지 조회 Url 제공")
     fun getProfileByUserId(
         @PathVariable userId: Long
-        // 이미지 다운로드 url
     ): ResponseEntity<Profile> {
         val profile = profileService.getProfileByUserId(userId)
         return ResponseEntity.ok(profile)
     }
 
     @PutMapping
-    @Operation(summary = "유저 프로필 업데이트하기", description = "현재 로그인 되어 있는 user의 프로필을 업데이트합니다.")
+    @Operation(summary = "유저 프로필 업데이트하기", description = "현재 로그인 되어 있는 user의 프로필을 업데이트합니다. 이미지 업로드 URL 제공")
     fun updateCurrentUserProfile(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: UpdateProfileRequest
     ): ResponseEntity<UrlResponse> {
-        // 이거 UpdateUrl 리턴하게 해줘야함
-        profileService.updateCurrentUserProfile(principalDetails.getUser(), request)
-        return ResponseEntity.ok().build()
+        val urlResponse = profileService.updateCurrentUserProfile(principalDetails.getUser(), request)
+        return ResponseEntity.ok(urlResponse)
     }
 
     @PostMapping
-    @Operation(summary = "유저 프로필 추가", description = "현재 로그인 되어 있는 user에게 프로필을 추가합니다. (소셜 로그인 전용)")
+    @Operation(summary = "유저 프로필 추가", description = "현재 로그인 되어 있는 user에게 프로필을 추가합니다. (소셜 로그인 전용) 이미지 업로드 URL 제공")
     fun addProfileToCurrentUser(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: CreateProfileRequest
     ): ResponseEntity<UrlResponse> {
-        // UpdateUrl 리턴하게 해줘야함
-        profileService.addProfileToCurrentUser(principalDetails.getUser(), request)
-        return ResponseEntity.status(HttpStatus.CREATED).build()
+        val urlResponse = profileService.addProfileToCurrentUser(principalDetails.getUser(), request)
+        return ResponseEntity.status(HttpStatus.CREATED).body(urlResponse)
     }
 }
 
@@ -69,18 +65,16 @@ data class UpdateProfileRequest(
     val nickname: String,
     val bio: String,
     val showMyReviews: Boolean,
-    val showMyReservations: Boolean,
-    val imageSlot: Int
+    val showMyReservations: Boolean
 )
 
 data class CreateProfileRequest(
     val nickname: String,
     val bio: String,
     val showMyReviews: Boolean,
-    val showMyReservations: Boolean,
-    val imageSlot: Int
+    val showMyReservations: Boolean
 )
 
 data class UrlResponse(
-    val url: String
+    val imageUploadUrl: String
 )

@@ -1,6 +1,6 @@
 package com.example.toyTeam6Airbnb.room.persistence
 
-import com.example.toyTeam6Airbnb.Image.persistence.ImageEntity
+import com.example.toyTeam6Airbnb.image.persistence.ImageEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
@@ -59,11 +59,7 @@ class RoomEntity(
     @Column(nullable = false)
     var createdAt: Instant = Instant.now(),
     @Column(nullable = false)
-    var updatedAt: Instant = Instant.now(),
-    @Column(columnDefinition = "LONGTEXT")
-    var imageDownloadUrl: String? = null,
-    @Column(columnDefinition = "LONGTEXT")
-    var imageUploadUrl: String? = null
+    var updatedAt: Instant = Instant.now()
 ) {
     @PrePersist
     fun onPrePersist() {
