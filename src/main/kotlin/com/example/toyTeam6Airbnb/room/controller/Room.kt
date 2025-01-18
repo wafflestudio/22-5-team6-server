@@ -12,6 +12,7 @@ data class Room(
     val roomName: String,
     val roomType: RoomType,
     val sido: String,
+    val sigungu: String,
     val price: Double,
     val averageRating: Double,
     val imageUrl: String // 대표 이미지 1개만 return (downloadUrl)
@@ -20,11 +21,13 @@ data class Room(
         fun fromEntity(entity: RoomEntity, imageUrl: String): Room {
             var averageRating = entity.reviews.map { it.rating }.average()
             if (averageRating.isNaN()) averageRating = 0.0
+
             return Room(
                 roomId = entity.id!!,
                 roomName = entity.name,
                 roomType = entity.type,
                 sido = entity.address.sido,
+                sigungu = entity.address.sigungu,
                 price = entity.price.perNight,
                 averageRating = averageRating,
                 imageUrl = imageUrl // imageService에서 대표 이미지 url 가져오기, list<String>의 첫번째 값"
