@@ -2,11 +2,18 @@ package com.example.toyTeam6Airbnb
 
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 
 fun validatePageable(pageable: Pageable): Pageable {
-    return PageRequest.of(pageable.pageNumber, pageable.pageSize)
+    val defaultSort = Sort.by(Sort.Direction.DESC, "id")
+
+    return PageRequest.of(
+        pageable.pageNumber,
+        pageable.pageSize,
+        defaultSort
+    )
 }
 
 fun validateSortedPageable(pageable: Pageable): Pageable {
