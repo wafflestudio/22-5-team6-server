@@ -7,7 +7,6 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
@@ -23,11 +22,11 @@ class ImageService(
     @Autowired private val imageRepository: ImageRepository
 ) {
 
-    //@Value("\${cloudfront.private-key}")
-    //private lateinit var privateKey: String
+    // @Value("\${cloudfront.private-key}")
+    // private lateinit var privateKey: String
 
-    //@Value("\${cloudfront.key-pair-id}")
-    //private lateinit var keyPairId: String
+    // @Value("\${cloudfront.key-pair-id}")
+    // private lateinit var keyPairId: String
 
     private val s3Client: S3Client = S3Client.builder()
         .region(Region.AP_NORTHEAST_2) // 원하는 리전 설정

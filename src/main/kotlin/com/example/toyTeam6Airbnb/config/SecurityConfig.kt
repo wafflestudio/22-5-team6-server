@@ -15,7 +15,6 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 import org.springframework.web.cors.CorsConfiguration
@@ -28,7 +27,9 @@ class SecurityConfig(
     private val profileExistenceFilter: ProfileExistenceFilter,
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
     private val principalDetailsService: PrincipalDetailsService,
-    private val customAuthenticationSuccessHandler: CustomAuthenticationSuccessHandler
+    private val customAuthenticationSuccessHandler: CustomAuthenticationSuccessHandler,
+    private val customUrlAuthenticationFailureHandler: CustomUrlAuthenticationFailureHandler,
+    private val customAuthenticationEntryPoint: CustomAuthenticationEntryPoint
 ) {
 
     @Bean
@@ -74,6 +75,9 @@ class SecurityConfig(
         http {
             cors { configurationSource = corsConfigurationSource() }
             csrf { disable() }
+            exceptionHandling {
+                authenticationEntryPoint = customAuthenticationEntryPoint
+            }
             authorizeHttpRequests {
                 authorize("/", permitAll)
                 authorize("/error", permitAll)
@@ -99,7 +103,7 @@ class SecurityConfig(
                 usernameParameter = "username"
                 passwordParameter = "password"
                 authenticationSuccessHandler = customAuthenticationSuccessHandler
-                authenticationFailureHandler = SimpleUrlAuthenticationFailureHandler()
+                authenticationFailureHandler = customUrlAuthenticationFailureHandler
             }
             oauth2Login {
                 authorizationEndpoint {
@@ -109,7 +113,7 @@ class SecurityConfig(
                     baseUri = "/api/oauth2/callback/*"
                 }
                 authenticationSuccessHandler = customAuthenticationSuccessHandler
-                authenticationFailureHandler = SimpleUrlAuthenticationFailureHandler()
+                authenticationFailureHandler = customUrlAuthenticationFailureHandler
             }
             logout {
                 logoutUrl = "/api/auth/logout"

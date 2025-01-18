@@ -29,16 +29,16 @@ class SignUpBadPasswordException : UserException(
     msg = "Bad password"
 )
 
-class SignInUserNotFoundException : UserException(
+class SignInUnknownException : UserException(
     errorCode = 1004,
-    httpStatusCode = HttpStatus.UNAUTHORIZED,
-    msg = "User not found"
+    httpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR,
+    msg = "Unknown sign-in error"
 )
 
-class SignInInvalidPasswordException : UserException(
+class SignInBadUsernameOrPasswordException : UserException(
     errorCode = 1005,
     httpStatusCode = HttpStatus.UNAUTHORIZED,
-    msg = "Invalid password"
+    msg = "Bad username or password"
 )
 
 class AuthenticateException : UserException(
@@ -50,7 +50,7 @@ class AuthenticateException : UserException(
 class OAuthException : UserException(
     errorCode = 1007,
     httpStatusCode = HttpStatus.BAD_REQUEST,
-    msg = "OAuth Exception"
+    msg = "Problem with OAuth provider"
 )
 
 class UserNotFoundException : UserException(
@@ -65,4 +65,10 @@ class UserWithNoProfileException : UserException(
     errorCode = 1009,
     httpStatusCode = HttpStatus.FORBIDDEN,
     msg = "User with no profile"
+)
+
+class JWTException : UserException(
+    errorCode = 1010,
+    httpStatusCode = HttpStatus.UNAUTHORIZED,
+    msg = "JWT Token error"
 )

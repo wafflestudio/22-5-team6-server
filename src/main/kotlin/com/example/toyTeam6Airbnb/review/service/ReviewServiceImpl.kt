@@ -17,7 +17,6 @@ import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
-import com.example.toyTeam6Airbnb.validatePageable
 import com.example.toyTeam6Airbnb.validateSortedPageable
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
