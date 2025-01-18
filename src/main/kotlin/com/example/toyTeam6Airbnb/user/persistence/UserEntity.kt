@@ -36,12 +36,7 @@ class UserEntity(
     var oAuthId: String? = null,
 
     @OneToOne(mappedBy = "user")
-    val image: ImageEntity? = null,
-
-//    @Column(columnDefinition = "LONGTEXT")
-//    var imageDownloadUrl: String? = null,
-//    @Column(columnDefinition = "LONGTEXT")
-//    var imageUploadUrl: String? = null,
+    var image: ImageEntity? = null,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val reservations: List<ReservationEntity> = mutableListOf(),
@@ -53,7 +48,7 @@ class UserEntity(
     val reviews: List<ReviewEntity> = mutableListOf(),
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
-    val profile: ProfileEntity? = null
+    var profile: ProfileEntity? = null
 ) {
     fun isSuperhost(): Boolean {
         return profile?.isSuperHost == true

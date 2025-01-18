@@ -1,6 +1,6 @@
 package com.example.toyTeam6Airbnb.profile.service
 
-import com.example.toyTeam6Airbnb.image.ImageService
+import com.example.toyTeam6Airbnb.image.service.ImageService
 import com.example.toyTeam6Airbnb.profile.ProfileAlreadyExistException
 import com.example.toyTeam6Airbnb.profile.ProfileNotFoundException
 import com.example.toyTeam6Airbnb.profile.controller.CreateProfileRequest
