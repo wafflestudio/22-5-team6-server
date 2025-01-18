@@ -72,7 +72,7 @@ class DataGenerator(
             )
         )
 
-        imageRepository.save(ImageEntity(user=userEntity))
+        imageRepository.save(ImageEntity(user = userEntity))
 
         val profile = generateProfile(userEntity)
         userEntity.profile = profile
