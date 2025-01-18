@@ -62,7 +62,7 @@ class ImageService(
             imageRepository.save(newImage).id
         }
 
-        val filePath = "Images/$imageId.jpg"
+        val filePath = "Images/$imageId"
         return generatePresignedUrl(filePath)
     }
 
@@ -70,7 +70,7 @@ class ImageService(
         val user = userRepository.findById(userId).orElseThrow { UserNotFoundException() }
         val image = user.image ?: return ""
 
-        return "$cloudFrontUrl/Images/${image.id}.jpg"
+        return "$cloudFrontUrl/Images/${image.id}"
     }
 
     fun generateRoomImageUploadUrls(roomId: Long, imageSlot: Int): List<String> {
@@ -80,25 +80,25 @@ class ImageService(
         val existingImages = imageRepository.findByRoomId(roomId)
 
         return if (existingImages.size == imageSlot) {
-            existingImages.map { generatePresignedUrl("Images/${it.id}.jpg") }
+            existingImages.map { generatePresignedUrl("Images/${it.id}") }
         } else if (existingImages.size > imageSlot) {
             val overSizedImages = existingImages.drop(imageSlot)
             overSizedImages.forEach { image ->
                 imageRepository.delete(image)
-                s3Client.deleteObject { it.bucket(bucketName).key("Images/${image.id}.jpg") }
+                s3Client.deleteObject { it.bucket(bucketName).key("Images/${image.id}") }
             }
 
             existingImages.take(imageSlot).map {
-                generatePresignedUrl("Images/${it.id}.jpg")
+                generatePresignedUrl("Images/${it.id}")
             }
         } else {
             val imageUrls = existingImages.map {
-                generatePresignedUrl("Images/${it.id}.jpg")
+                generatePresignedUrl("Images/${it.id}")
             }.toMutableList()
 
             repeat(imageSlot - existingImages.size) {
                 val imageEntity = imageRepository.save(ImageEntity(room = roomEntity))
-                imageUrls += generatePresignedUrl("Images/${imageEntity.id}.jpg")
+                imageUrls += generatePresignedUrl("Images/${imageEntity.id}")
             }
 
             imageUrls
@@ -112,7 +112,7 @@ class ImageService(
         if (imageEntities.isEmpty()) return emptyList()
 
         return imageEntities.map { imageEntity ->
-            "$cloudFrontUrl/Images/${imageEntity.id}.jpg"
+            "$cloudFrontUrl/Images/${imageEntity.id}"
         }
     }
 
@@ -122,7 +122,7 @@ class ImageService(
         if (imageEntities.isEmpty()) return ""
 
         val imageEntity = imageEntities.first()
-        return "$cloudFrontUrl/Images/${imageEntity.id}.jpg"
+        return "$cloudFrontUrl/Images/${imageEntity.id}"
     }
 
     fun deleteRoomImages(roomId: Long) {
@@ -130,7 +130,7 @@ class ImageService(
         val imageEntities = imageRepository.findByRoomId(roomId)
 
         imageEntities.forEach { imageEntity ->
-            s3Client.deleteObject { it.bucket(bucketName).key("Images/${imageEntity.id}.jpg") }
+            s3Client.deleteObject { it.bucket(bucketName).key("Images/${imageEntity.id}") }
             imageRepository.delete(imageEntity)
         }
     }
