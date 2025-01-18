@@ -7,4 +7,8 @@ interface UserService {
     fun register(
         request: RegisterRequest
     ): User?
+
+    fun hasProfile(
+        username: String
+    ): Boolean
 }

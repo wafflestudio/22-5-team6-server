@@ -32,6 +32,7 @@ class ProfileServiceImpl(
         return Profile.fromEntity(profile, imageUrl)
     }
 
+    @Transactional
     override fun getProfileByUserId(
         userId: Long
     ): Profile {
