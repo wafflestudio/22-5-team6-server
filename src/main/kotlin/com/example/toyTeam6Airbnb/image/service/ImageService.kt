@@ -1,5 +1,6 @@
-package com.example.toyTeam6Airbnb.image
+package com.example.toyTeam6Airbnb.image.service
 
+import com.example.toyTeam6Airbnb.image.ImageNotFoundException
 import com.example.toyTeam6Airbnb.image.persistence.ImageEntity
 import com.example.toyTeam6Airbnb.image.persistence.ImageRepository
 import com.example.toyTeam6Airbnb.room.RoomNotFoundException
@@ -68,7 +69,7 @@ class ImageService(
 
     fun generateProfileImageDownloadUrl(userId: Long): String {
         val user = userRepository.findById(userId).orElseThrow { UserNotFoundException() }
-        val image = user.image ?: return ""
+        val image = user.image ?: throw ImageNotFoundException()
 
         return "$cloudFrontUrl/Images/${image.id}.jpg"
     }
@@ -109,7 +110,7 @@ class ImageService(
         roomRepository.findById(roomId).orElseThrow { RoomNotFoundException() }
         val imageEntities = imageRepository.findByRoomId(roomId)
 
-        if (imageEntities.isEmpty()) return emptyList()
+        if (imageEntities.isEmpty()) throw ImageNotFoundException()
 
         return imageEntities.map { imageEntity ->
             "$cloudFrontUrl/Images/${imageEntity.id}.jpg"
@@ -119,7 +120,7 @@ class ImageService(
     fun generateRoomImageDownloadUrl(roomId: Long): String {
         roomRepository.findById(roomId).orElseThrow { RoomNotFoundException() }
         val imageEntities = imageRepository.findByRoomId(roomId)
-        if (imageEntities.isEmpty()) return ""
+        if (imageEntities.isEmpty()) throw ImageNotFoundException()
 
         val imageEntity = imageEntities.first()
         return "$cloudFrontUrl/Images/${imageEntity.id}.jpg"

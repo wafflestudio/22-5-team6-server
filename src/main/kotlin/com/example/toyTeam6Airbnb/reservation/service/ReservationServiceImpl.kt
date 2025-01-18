@@ -1,6 +1,6 @@
 package com.example.toyTeam6Airbnb.reservation.service
 
-import com.example.toyTeam6Airbnb.image.ImageService
+import com.example.toyTeam6Airbnb.image.service.ImageService
 import com.example.toyTeam6Airbnb.reservation.MaxOccupancyExceeded
 import com.example.toyTeam6Airbnb.reservation.ReservationNotFound
 import com.example.toyTeam6Airbnb.reservation.ReservationPermissionDenied
