@@ -32,7 +32,7 @@ class RoomController(
     private val roomService: RoomService
 ) {
     @PostMapping("/rooms")
-    @Operation(summary = "방 생성", description = "방을 생성합니다, 이미지 업로드 Url도 함께 제공됨")
+    @Operation(summary = "방 생성", description = "방을 생성합니다, 이미지 업로드 URL 제공")
     fun createRoom(
         @RequestBody request: CreateRoomRequest,
         @AuthenticationPrincipal principalDetails: PrincipalDetails
@@ -53,7 +53,7 @@ class RoomController(
     }
 
     @GetMapping("/rooms/main")
-    @Operation(summary = "메인 페이지 방 조회", description = "메인 페이지 용 방 목록을 조회합니다(페이지네이션 적용)")
+    @Operation(summary = "메인 페이지 방 조회", description = "메인 페이지 용 방 목록을 조회합니다(페이지네이션 적용), 대표이미지 조회 URL 제공")
     fun getRooms(
         pageable: Pageable
     ): ResponseEntity<Page<Room>> {
@@ -62,7 +62,7 @@ class RoomController(
     }
 
     @GetMapping("/rooms/main/{roomId}")
-    @Operation(summary = "방 상세 조회", description = "특정 방의 상세 정보를 조회합니다")
+    @Operation(summary = "방 상세 조회", description = "특정 방의 상세 정보를 조회합니다. 방에 대한 모든 이미지에대해 조회 URL 제공")
     fun getRoomDetails(
         @PathVariable roomId: Long
     ): ResponseEntity<RoomDetailsDTO> {
@@ -71,7 +71,7 @@ class RoomController(
     }
 
     @PutMapping("/rooms/{roomId}")
-    @Operation(summary = "방 정보 수정", description = "방의 정보를 수정합니다, 이미지 업로드 Url도 함께 제공됨")
+    @Operation(summary = "방 정보 수정", description = "방의 정보를 수정합니다, 이미지 업로드 URL 제공")
     fun updateRoom(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long,
@@ -94,7 +94,7 @@ class RoomController(
     }
 
     @DeleteMapping("/rooms/{roomId}")
-    @Operation(summary = "방 삭제", description = "방을 삭제합니다")
+    @Operation(summary = "방 삭제", description = "방을 삭제합니다. 이미지도 삭제됨")
     fun deleteRoom(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long
@@ -107,7 +107,7 @@ class RoomController(
     }
 
     @GetMapping("/rooms/main/search")
-    @Operation(summary = "방 검색", description = "방을 검색합니다(페이지네이션 적용)")
+    @Operation(summary = "방 검색", description = "방을 검색합니다(페이지네이션 적용). 대표이미지 조회 URL 제공")
     fun searchRooms(
         @RequestParam(required = false) roomName: String?,
         @RequestParam(required = false) roomType: RoomType?,

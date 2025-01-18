@@ -23,7 +23,7 @@ class ProfileController(
 ) {
 
     @GetMapping
-    @Operation(summary = "유저 프로필 가져오기", description = "현재 로그인 되어 있는 user의 프로필을 가져옵니다.")
+    @Operation(summary = "유저 프로필 가져오기", description = "현재 로그인 되어 있는 user의 프로필을 가져옵니다. 이미지 조회 Url 제공")
     fun getCurrentUserProfile(
         @AuthenticationPrincipal principalDetails: PrincipalDetails
     ): ResponseEntity<Profile> {
@@ -32,7 +32,7 @@ class ProfileController(
     }
 
     @GetMapping("/{userId}")
-    @Operation(summary = "특정 유저 프로필 가져오기", description = "특정 user의 프로필을 가져옵니다.")
+    @Operation(summary = "특정 유저 프로필 가져오기", description = "특정 user의 프로필을 가져옵니다. 이미지 조회 Url 제공")
     fun getProfileByUserId(
         @PathVariable userId: Long
     ): ResponseEntity<Profile> {
@@ -41,7 +41,7 @@ class ProfileController(
     }
 
     @PutMapping
-    @Operation(summary = "유저 프로필 업데이트하기", description = "현재 로그인 되어 있는 user의 프로필을 업데이트합니다.")
+    @Operation(summary = "유저 프로필 업데이트하기", description = "현재 로그인 되어 있는 user의 프로필을 업데이트합니다. 이미지 업로드 URL 제공")
     fun updateCurrentUserProfile(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: UpdateProfileRequest
@@ -51,7 +51,7 @@ class ProfileController(
     }
 
     @PostMapping
-    @Operation(summary = "유저 프로필 추가", description = "현재 로그인 되어 있는 user에게 프로필을 추가합니다. (소셜 로그인 전용)")
+    @Operation(summary = "유저 프로필 추가", description = "현재 로그인 되어 있는 user에게 프로필을 추가합니다. (소셜 로그인 전용) 이미지 업로드 URL 제공")
     fun addProfileToCurrentUser(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: CreateProfileRequest
