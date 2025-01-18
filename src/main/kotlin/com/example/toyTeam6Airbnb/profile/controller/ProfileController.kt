@@ -46,8 +46,8 @@ class ProfileController(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: UpdateProfileRequest
     ): ResponseEntity<UrlResponse> {
-        profileService.updateCurrentUserProfile(principalDetails.getUser(), request)
-        return ResponseEntity.ok().build()
+        val urlResponse = profileService.updateCurrentUserProfile(principalDetails.getUser(), request)
+        return ResponseEntity.ok(urlResponse)
     }
 
     @PostMapping
@@ -56,8 +56,8 @@ class ProfileController(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @RequestBody request: CreateProfileRequest
     ): ResponseEntity<UrlResponse> {
-        profileService.addProfileToCurrentUser(principalDetails.getUser(), request)
-        return ResponseEntity.status(HttpStatus.CREATED).build()
+        val urlResponse = profileService.addProfileToCurrentUser(principalDetails.getUser(), request)
+        return ResponseEntity.status(HttpStatus.CREATED).body(urlResponse)
     }
 }
 
