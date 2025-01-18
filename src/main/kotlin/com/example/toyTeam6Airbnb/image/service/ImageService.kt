@@ -1,4 +1,4 @@
-package com.example.toyTeam6Airbnb.image
+package com.example.toyTeam6Airbnb.image.service
 
 import com.example.toyTeam6Airbnb.image.persistence.ImageEntity
 import com.example.toyTeam6Airbnb.image.persistence.ImageRepository
@@ -23,11 +23,11 @@ class ImageService(
     @Autowired private val imageRepository: ImageRepository
 ) {
 
-    @Value("\${cloudfront.private-key}")
-    private lateinit var privateKey: String
+    //@Value("\${cloudfront.private-key}")
+    //private lateinit var privateKey: String
 
-    @Value("\${cloudfront.key-pair-id}")
-    private lateinit var keyPairId: String
+    //@Value("\${cloudfront.key-pair-id}")
+    //private lateinit var keyPairId: String
 
     private val s3Client: S3Client = S3Client.builder()
         .region(Region.AP_NORTHEAST_2) // 원하는 리전 설정

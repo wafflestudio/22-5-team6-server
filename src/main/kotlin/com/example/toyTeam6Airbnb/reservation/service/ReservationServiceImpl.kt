@@ -1,6 +1,6 @@
 package com.example.toyTeam6Airbnb.reservation.service
 
-import com.example.toyTeam6Airbnb.image.ImageService
+import com.example.toyTeam6Airbnb.image.service.ImageService
 import com.example.toyTeam6Airbnb.reservation.MaxOccupancyExceeded
 import com.example.toyTeam6Airbnb.reservation.ReservationNotFound
 import com.example.toyTeam6Airbnb.reservation.ReservationPermissionDenied
@@ -19,6 +19,8 @@ import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import com.example.toyTeam6Airbnb.validatePageable
+import com.example.toyTeam6Airbnb.validateSortedPageable
 import jakarta.persistence.EntityManager
 import jakarta.persistence.LockModeType
 import org.springframework.data.domain.Page
@@ -136,10 +138,7 @@ class ReservationServiceImpl(
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
         if (reservationEntity.user.id != userId) throw ReservationPermissionDenied()
 
-        // 예약이 어떤 방에대한건지 찾기
-        // 방 id를 이용해서 ImageService의 generateRoomImageDownloadUrl을 호출해서 imageUrl을 가져오기 (first로 첫번쨰 것만)
-        val roomId = reservationEntity.room.id!!
-        val imageUrl = imageService.generateRoomImageDownloadUrls(roomId).first()
+        val imageUrl = imageService.generateRoomImageDownloadUrl(reservationEntity.room.id!!)
         return ReservationDetails.fromEntity(reservationEntity, imageUrl)
     }
 
@@ -147,11 +146,9 @@ class ReservationServiceImpl(
     override fun getReservationsByUser(viewerId: Long?, userId: Long, pageable: Pageable): Page<ReservationDTO> {
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         if (viewerId != userId && userEntity.profile?.showMyReservations != true) throw ReservationPermissionDenied()
-        // 예약이 어떤 방에대한건지 찾기
-        // 방 id를 이용해서 ImageService의 generateRoomImageDownloadUrl을 호출해서 imageUrl을 가져오기 (first로 첫번쨰 것만)
-        return reservationRepository.findAllByUser(userEntity, pageable).map { reservation ->
-            val roomId = reservation.room.id!!
-            val imageUrl = imageService.generateRoomImageDownloadUrls(roomId).first()
+
+        return reservationRepository.findAllByUser(userEntity, validateSortedPageable(pageable)).map { reservation ->
+            val imageUrl = imageService.generateRoomImageDownloadUrl(reservation.room.id!!)
             ReservationDTO.fromEntity(reservation, imageUrl)
         }
     }

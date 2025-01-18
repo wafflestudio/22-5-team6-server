@@ -1,6 +1,6 @@
 package com.example.toyTeam6Airbnb.room.service
 
-import com.example.toyTeam6Airbnb.image.ImageService
+import com.example.toyTeam6Airbnb.image.service.ImageService
 import com.example.toyTeam6Airbnb.room.DuplicateRoomException
 import com.example.toyTeam6Airbnb.room.InvalidAddressException
 import com.example.toyTeam6Airbnb.room.InvalidDescriptionException

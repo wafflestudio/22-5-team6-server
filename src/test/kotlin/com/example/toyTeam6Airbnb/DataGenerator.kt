@@ -1,5 +1,8 @@
 package com.example.toyTeam6Airbnb
 
+import com.example.toyTeam6Airbnb.image.persistence.ImageRepository
+import com.example.toyTeam6Airbnb.image.persistence.ImageEntity
+import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileRepository
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
@@ -26,20 +29,46 @@ class DataGenerator(
     private val reviewRepository: ReviewRepository,
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
+    private val imageRepository: ImageRepository,
     private val jwtTokenProvider: JwtTokenProvider
 ) {
     fun clearAll() {
         profileRepository.deleteAll()
+        imageRepository.deleteAll()
         reservationRepository.deleteAll()
         reviewRepository.deleteAll()
         roomRepository.deleteAll()
         userRepository.deleteAll()
     }
 
+    fun generateImage(): ImageEntity {
+        return imageRepository.save(ImageEntity())
+    }
+
+    fun generateProfile(
+        user: UserEntity? = null,
+        nickname: String? = null,
+        bio: String? = null,
+        showMyReviews: Boolean? = null,
+        showMyReservations: Boolean? = null
+    ) : ProfileEntity {
+        val userEntity = user ?: generateUserAndToken().first
+        return profileRepository.save(
+            ProfileEntity(
+                user = userEntity,
+                nickname = nickname ?: "nickname-${(0..10000).random()}",
+                bio = bio ?: "bio-${(0..10000).random()}",
+                showMyReviews = (showMyReviews ?: (0..1).random()) == 1,
+                showMyReservations = (showMyReservations ?: (0..1).random()) == 1
+            )
+        )
+    }
+
     fun generateUserAndToken(
         username: String? = null,
         provider: AuthProvider = AuthProvider.LOCAL
     ): Pair<UserEntity, String> {
+
         val userEntity = userRepository.save(
             UserEntity(
                 username = username ?: "user-${(0..10000).random()}",
@@ -47,6 +76,13 @@ class DataGenerator(
                 provider = provider
             )
         )
+
+        val image = generateImage()
+        userEntity.image = image
+
+        val profile = generateProfile(userEntity)
+        userEntity.profile = profile
+
         return userEntity to jwtTokenProvider.generateToken(userEntity.username)
     }
 

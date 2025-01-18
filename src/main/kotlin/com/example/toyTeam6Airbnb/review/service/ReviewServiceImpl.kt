@@ -42,7 +42,6 @@ class ReviewServiceImpl(
         content: String,
         rating: Int
     ): ReviewIdWithImage {
-        // 1. userEntity, roomEntity, reservationEntity 가져오기 (없으면 예외처리)
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
         if (reservationEntity.user.id != user.id) throw ReviewPermissionDeniedException()
@@ -53,8 +52,7 @@ class ReviewServiceImpl(
                 room = reservationEntity.room,
                 content = content,
                 rating = rating,
-                // 예약에 대해서는 리뷰가 있어야함. 예약 번호도 가져와야할듯.
-                reservation = reservationEntity, // or provide a valid reservation
+                reservation = reservationEntity,
                 createdAt = Instant.now(),
                 updatedAt = Instant.now()
             ).let {
@@ -81,7 +79,7 @@ class ReviewServiceImpl(
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         if (viewerId != userId && userEntity.profile?.showMyReviews != true) throw ReviewPermissionDeniedException()
 
-        val reviewEntities = reviewRepository.findAllByUserId(userId, validatePageable(pageable))
+        val reviewEntities = reviewRepository.findAllByUserId(userId, validateSortedPageable(pageable))
 
         val reviews = reviewEntities.map { ReviewByUserDTO.fromEntity(it) }
         return reviews
