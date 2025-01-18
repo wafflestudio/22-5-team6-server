@@ -35,7 +35,7 @@ class UserEntity(
     @Column
     var oAuthId: String? = null,
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     var image: ImageEntity? = null,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
