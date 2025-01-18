@@ -35,7 +35,8 @@ jobs:
           echo "${{ secrets.P12_BASE64 }}" | base64 --decode > ./src/main/resources/test.p12
 
       - name: Build with Gradle
-        run: ./gradlew build -x test
+        run: |
+          ./gradlew build -x test
 
 
       - name: Log in to Docker Hub
