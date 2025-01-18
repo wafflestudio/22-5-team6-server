@@ -62,5 +62,5 @@ data class RedirectResponse(
 )
 
 data class UrlResponse(
-    val url: String
+    val imageUploadurl: String
 )
