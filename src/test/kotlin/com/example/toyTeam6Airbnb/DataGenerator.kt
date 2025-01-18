@@ -41,10 +41,6 @@ class DataGenerator(
         userRepository.deleteAll()
     }
 
-    fun generateImage(): ImageEntity {
-        return imageRepository.save(ImageEntity())
-    }
-
     fun generateProfile(
         user: UserEntity? = null,
         nickname: String? = null,
@@ -58,8 +54,8 @@ class DataGenerator(
                 user = userEntity,
                 nickname = nickname ?: "nickname-${(0..10000).random()}",
                 bio = bio ?: "bio-${(0..10000).random()}",
-                showMyReviews = (showMyReviews ?: (0..1).random()) == 1,
-                showMyReservations = (showMyReservations ?: (0..1).random()) == 1
+                showMyReviews = showMyReviews ?: false,
+                showMyReservations = showMyReservations ?: false
             )
         )
     }
@@ -76,8 +72,7 @@ class DataGenerator(
             )
         )
 
-        val image = generateImage()
-        userEntity.image = image
+        imageRepository.save(ImageEntity(user = userEntity))
 
         val profile = generateProfile(userEntity)
         userEntity.profile = profile
