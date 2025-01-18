@@ -28,7 +28,7 @@ class UserController(
     }
 
     @PostMapping("/api/auth/register")
-    @Operation(summary = "회원가입", description = "유저 생성 및 프로필 이미지 업로드 URL 제공", hidden = true)
+    @Operation(summary = "회원가입", description = "유저 생성 및 프로필 이미지 업로드 URL 제공")
     fun register(
         @RequestBody request: RegisterRequest
     ): ResponseEntity<UrlResponse> {
