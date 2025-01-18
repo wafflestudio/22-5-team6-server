@@ -1,6 +1,6 @@
 package com.example.toyTeam6Airbnb.user.service
 
-import com.example.toyTeam6Airbnb.image.ImageService
+import com.example.toyTeam6Airbnb.image.service.ImageService
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileRepository
 import com.example.toyTeam6Airbnb.user.SignUpBadUsernameException
