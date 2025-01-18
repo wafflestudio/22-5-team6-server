@@ -5,7 +5,6 @@ import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import com.example.toyTeam6Airbnb.user.persistence.AuthProvider
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
-import com.example.toyTeam6Airbnb.image.persistence.ImageEntity
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest

@@ -1,7 +1,7 @@
 package com.example.toyTeam6Airbnb
 
-import com.example.toyTeam6Airbnb.image.persistence.ImageRepository
 import com.example.toyTeam6Airbnb.image.persistence.ImageEntity
+import com.example.toyTeam6Airbnb.image.persistence.ImageRepository
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileRepository
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
@@ -51,7 +51,7 @@ class DataGenerator(
         bio: String? = null,
         showMyReviews: Boolean? = null,
         showMyReservations: Boolean? = null
-    ) : ProfileEntity {
+    ): ProfileEntity {
         val userEntity = user ?: generateUserAndToken().first
         return profileRepository.save(
             ProfileEntity(
@@ -68,7 +68,6 @@ class DataGenerator(
         username: String? = null,
         provider: AuthProvider = AuthProvider.LOCAL
     ): Pair<UserEntity, String> {
-
         val userEntity = userRepository.save(
             UserEntity(
                 username = username ?: "user-${(0..10000).random()}",
