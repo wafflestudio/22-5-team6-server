@@ -56,6 +56,8 @@ class RoomEntity(
     val reviews: List<ReviewEntity> = mutableListOf(),
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     val images: List<ImageEntity> = mutableListOf(),
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    var roomLikes: MutableList<RoomLikeEntity> = mutableListOf(), // 직접적 삭제, 추가를 하므로 Mutable로 수정
     @Column(nullable = false)
     var createdAt: Instant = Instant.now(),
     @Column(nullable = false)
