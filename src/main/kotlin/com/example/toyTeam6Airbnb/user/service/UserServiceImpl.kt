@@ -10,16 +10,21 @@ import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.AuthProvider
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.room.persistence.RoomLikeRepository
 import jakarta.transaction.Transactional
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.data.repository.findByIdOrNull
+import com.example.toyTeam6Airbnb.user.AuthenticateException
 
 @Service
 class UserServiceImpl(
     private val userRepository: UserRepository,
     private val profileRepository: ProfileRepository,
     private val imageService: ImageService,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val roomLikeRepository: RoomLikeRepository
 ) : UserService {
     @Transactional
     override fun register(
@@ -51,5 +56,16 @@ class UserServiceImpl(
     ): Boolean {
         userRepository.findByUsername(username)?.profile ?: return false
         return true
+    }
+
+    @Transactional
+    override fun getLikedRooms(
+        userId: Long
+    ): List<Room> {
+        val likedRooms = roomLikeRepository.findRoomsLikedByUser(userId)
+        return likedRooms.map { roomEntity ->
+            val imageUrl = imageService.generateRoomImageDownloadUrl(roomEntity.id!!)
+            Room.fromEntity(roomEntity, imageUrl)
+        }
     }
 }
