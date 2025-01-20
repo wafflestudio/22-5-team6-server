@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import com.example.toyTeam6Airbnb.room.controller.Room
 @RestController
 @Tag(name = "User Controller", description = "User Controller API")
 class UserController(
@@ -44,6 +45,16 @@ class UserController(
     @GetMapping("/redirect")
     fun redirect(@RequestParam token: String, @RequestParam userid: Long): ResponseEntity<RedirectResponse> {
         return ResponseEntity.ok(RedirectResponse(token, userid))
+    }
+
+    @GetMapping("/users/liked-rooms")
+    @Operation(summary = "사용자가 좋아요한 방 리스트(위시리스트) 얻기", description = "사용자가 좋아요를 누른 위시리스트를 받아옵니다. 페이지네이션 없이 통채로 가져옵니다.")
+    fun getLikedRooms(
+        @AuthenticationPrincipal principalDetails: PrincipalDetails
+    ): ResponseEntity<List<Room>> {
+        val userId = User.fromEntity(principalDetails.getUser()).id
+        val likedRooms = userService.getLikedRooms(userId)
+        return ResponseEntity.ok(likedRooms)
     }
 }
 
