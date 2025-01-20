@@ -165,7 +165,7 @@ class RoomServiceImpl(
     }
 
     @Transactional
-    fun likeRoom(
+    override fun likeRoom(
         userId: Long,
         roomId: Long
     ) {
@@ -182,7 +182,7 @@ class RoomServiceImpl(
     }
 
     @Transactional
-    fun unlikeRoom(
+    override fun unlikeRoom(
         userId: Long,
         roomId: Long
     ) {
@@ -194,7 +194,7 @@ class RoomServiceImpl(
         roomLikeRepository.delete(roomLikeToDelete)
         roomRepository.save(roomEntity)
     }
-    )
+
 
     private fun validateRoomInfo(
         name: String,
