@@ -1,26 +1,12 @@
 package com.example.toyTeam6Airbnb.room.service
 
 import com.example.toyTeam6Airbnb.image.service.ImageService
-import com.example.toyTeam6Airbnb.room.DuplicateRoomException
-import com.example.toyTeam6Airbnb.room.InvalidAddressException
-import com.example.toyTeam6Airbnb.room.InvalidDescriptionException
-import com.example.toyTeam6Airbnb.room.InvalidMaxOccupancyException
-import com.example.toyTeam6Airbnb.room.InvalidNameException
-import com.example.toyTeam6Airbnb.room.InvalidPriceException
-import com.example.toyTeam6Airbnb.room.InvalidRoomTypeException
-import com.example.toyTeam6Airbnb.room.RoomNotFoundException
-import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
+import com.example.toyTeam6Airbnb.room.*
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
 import com.example.toyTeam6Airbnb.room.controller.RoomDetailsDTO
 import com.example.toyTeam6Airbnb.room.controller.RoomShortDTO
-import com.example.toyTeam6Airbnb.room.persistence.Address
-import com.example.toyTeam6Airbnb.room.persistence.Price
-import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
-import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
-import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
-import com.example.toyTeam6Airbnb.room.persistence.RoomSpecifications
-import com.example.toyTeam6Airbnb.room.persistence.RoomType
+import com.example.toyTeam6Airbnb.room.persistence.*
 import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import com.example.toyTeam6Airbnb.validatePageable
@@ -37,7 +23,8 @@ import java.time.LocalDate
 class RoomServiceImpl(
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
-    private val imageService: ImageService
+    private val imageService: ImageService,
+    private val roomLikeRepository: RoomLikeRepository
 ) : RoomService {
 
     @Transactional
@@ -176,6 +163,38 @@ class RoomServiceImpl(
             Room.fromEntity(it, imageUrl)
         }
     }
+
+    @Transactional
+    fun likeRoom(
+        userId: Long,
+        roomId: Long
+    ) {
+        val userEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
+
+        if(roomEntity.roomLikes.any { it.user.id == userId }) {
+            throw RoomAlreadyLikedException()
+        }
+
+        val roomLikeEntity = RoomLikeEntity(user = userEntity, room = roomEntity)
+        roomEntity.roomLikes += roomLikeEntity
+        roomRepository.save(roomEntity)
+    }
+
+    @Transactional
+    fun unlikeRoom(
+        userId: Long,
+        roomId: Long
+    ) {
+        val userEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
+
+        val roomLikeToDelete = roomEntity.roomLikes.find { it.user.id == userId } ?: throw RoomLikeNotFoundException()
+        roomEntity.roomLikes -= roomLikeToDelete
+        roomLikeRepository.delete(roomLikeToDelete)
+        roomRepository.save(roomEntity)
+    }
+    )
 
     private fun validateRoomInfo(
         name: String,
