@@ -64,3 +64,15 @@ class DuplicateRoomException : RoomException(
     httpStatusCode = HttpStatus.CONFLICT,
     msg = "Room already exists"
 )
+
+class RoomAlreadyLikedException : RoomException(
+    errorCode = 2010,
+    httpStatusCode = HttpStatus.CONFLICT,
+    msg = "Room already liked, 중복된 좋아요 요청이 넘어옴"
+)
+
+class RoomLikeNotFoundException : RoomException(
+    errorCode = 2011,
+    httpStatusCode = HttpStatus.NOT_FOUND,
+    msg = "Room like not found, 좋아요가 이미 없는데 취소요청이 넘어옴"
+)
