@@ -153,7 +153,6 @@ class RoomController(
         )
         return ResponseEntity.noContent().build()
     }
-
 }
 
 data class AddressSearchDTO(
