@@ -190,11 +190,12 @@ class RoomServiceImpl(
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
-        if (roomEntity.roomLikes.any { it.user.id == userId }) {
+        if (userEntity.roomLikes.any { it.user.id == userId }) {
             throw RoomAlreadyLikedException()
         }
 
         val roomLikeEntity = RoomLikeEntity(user = userEntity, room = roomEntity)
+        userEntity.roomLikes.add(roomLikeEntity)
         roomLikeRepository.save(roomLikeEntity)
     }
 
@@ -206,9 +207,9 @@ class RoomServiceImpl(
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
-        val roomLikeToDelete = roomEntity.roomLikes.find { it.user.id == userId } ?: throw RoomLikeNotFoundException()
-        roomEntity.roomLikes -= roomLikeToDelete // 컬렉션에서 제거하면 JPA가 자동으로 삭제
-        roomRepository.save(roomEntity) // 필요 시 호출
+        val roomLikeToDelete = userEntity.roomLikes.find { it.room.id == roomId } ?: throw RoomLikeNotFoundException()
+        userEntity.roomLikes.remove(roomLikeToDelete)
+        roomLikeRepository.delete(roomLikeToDelete)
     }
 
     private fun validateRoomInfo(

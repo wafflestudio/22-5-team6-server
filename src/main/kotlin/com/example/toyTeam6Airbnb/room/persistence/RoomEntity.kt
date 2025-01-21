@@ -4,7 +4,6 @@ import com.example.toyTeam6Airbnb.image.persistence.ImageEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
-import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
@@ -57,8 +56,6 @@ class RoomEntity(
     val reviews: List<ReviewEntity> = mutableListOf(),
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     val images: List<ImageEntity> = mutableListOf(),
-    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
-    var roomLikes: MutableList<RoomLikeEntity> = mutableListOf(), // 직접적 삭제, 추가를 하므로 Mutable로 수정
     @Column(nullable = false)
     var createdAt: Instant = Instant.now(),
     @Column(nullable = false)
