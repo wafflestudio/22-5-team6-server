@@ -50,7 +50,7 @@ class UserController(
         return ResponseEntity.ok(RedirectResponse(token, userid))
     }
 
-    @GetMapping("/users/{userId}/liked-rooms")
+    @GetMapping("/api/v1/users/{userId}/liked-rooms")
     @Operation(summary = "사용자가 좋아요한 방 리스트(위시리스트) 얻기", description = "특정 사용자가 좋아요를 누른 위시리스트를 받아옵니다. 페이지네이션 O")
     fun getLikedRooms(
         @PathVariable userId: Long,
