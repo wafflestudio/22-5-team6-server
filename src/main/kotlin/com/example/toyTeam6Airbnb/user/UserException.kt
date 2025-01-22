@@ -72,3 +72,9 @@ class JWTException : UserException(
     httpStatusCode = HttpStatus.UNAUTHORIZED,
     msg = "JWT Token error"
 )
+
+class likedRoomsPermissionDenied : UserException(
+    errorCode = 1011,
+    httpStatusCode = HttpStatus.FORBIDDEN,
+    msg = "Permission Denied"
+)
