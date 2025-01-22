@@ -195,7 +195,6 @@ class RoomServiceImpl(
         }
 
         val roomLikeEntity = RoomLikeEntity(user = userEntity, room = roomEntity)
-        userEntity.roomLikes.add(roomLikeEntity)
         roomLikeRepository.save(roomLikeEntity)
     }
 
@@ -208,7 +207,6 @@ class RoomServiceImpl(
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
         val roomLikeToDelete = userEntity.roomLikes.find { it.room.id == roomId } ?: throw RoomLikeNotFoundException()
-        userEntity.roomLikes.remove(roomLikeToDelete)
         roomLikeRepository.delete(roomLikeToDelete)
     }
 
