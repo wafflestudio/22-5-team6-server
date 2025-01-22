@@ -35,5 +35,8 @@ class ProfileEntity(
     var showMyReviews: Boolean = false,
 
     @Column(nullable = false)
-    var showMyReservations: Boolean = false
+    var showMyReservations: Boolean = false,
+
+    @Column(nullable = false)
+    var showMyWishlist: Boolean = false
 )
