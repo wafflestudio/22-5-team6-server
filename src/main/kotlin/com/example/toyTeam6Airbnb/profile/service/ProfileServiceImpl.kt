@@ -52,6 +52,7 @@ class ProfileServiceImpl(
         profile.bio = request.bio
         profile.showMyReviews = request.showMyReviews
         profile.showMyReservations = request.showMyReservations
+        profile.showMyWishlist = request.showMyWishlist
         updateSuperHostStatus(profile)
         profileRepository.save(profile)
 
@@ -70,7 +71,8 @@ class ProfileServiceImpl(
             nickname = request.nickname,
             bio = request.bio,
             showMyReviews = request.showMyReviews,
-            showMyReservations = request.showMyReservations
+            showMyReservations = request.showMyReservations,
+            showMyWishlist = request.showMyWishlist
         )
         updateSuperHostStatus(profile)
         profileRepository.save(profile)

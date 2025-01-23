@@ -5,6 +5,7 @@ import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
+import com.example.toyTeam6Airbnb.room.persistence.RoomLikeEntity
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -47,8 +48,11 @@ class UserEntity(
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val reviews: List<ReviewEntity> = mutableListOf(),
 
-    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var profile: ProfileEntity? = null
+    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var profile: ProfileEntity? = null,
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    var roomLikes: MutableList<RoomLikeEntity> = mutableListOf()
 ) {
     fun isSuperhost(): Boolean {
         return profile?.isSuperHost == true
