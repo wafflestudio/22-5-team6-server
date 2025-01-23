@@ -47,7 +47,7 @@ class UserEntity(
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val reviews: List<ReviewEntity> = mutableListOf(),
 
-    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     var profile: ProfileEntity? = null
 ) {
     fun isSuperhost(): Boolean {
