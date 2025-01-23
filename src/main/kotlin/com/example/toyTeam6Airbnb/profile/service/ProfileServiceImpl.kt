@@ -75,6 +75,7 @@ class ProfileServiceImpl(
             showMyWishlist = request.showMyWishlist
         )
         updateSuperHostStatus(profile)
+        profileRepository.save(profile)
 
         return UrlResponse(imageService.generateProfileImageUploadUrl(user.id!!))
     }

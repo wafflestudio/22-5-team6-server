@@ -2,7 +2,6 @@ package com.example.toyTeam6Airbnb.config
 
 import com.example.toyTeam6Airbnb.user.JwtTokenProvider
 import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
-import com.example.toyTeam6Airbnb.user.persistence.AuthProvider
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
@@ -26,6 +25,6 @@ class CustomAuthenticationSuccessHandler(
 
         val principal = authentication.principal as PrincipalDetails
 
-        response.sendRedirect("/redirect?token=$token&userid=${principal.getId()}&complete-profile=${principal.getUser().provider != AuthProvider.LOCAL}")
+        response.sendRedirect("/redirect?token=$token&userid=${principal.getId()}&complete-profile=${principal.getUser().profile == null}")
     }
 }
