@@ -12,21 +12,29 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import java.time.Instant
 
 @Entity
-@Table(name = "room_likes")
+@Table(
+    name = "room_likes",
+    uniqueConstraints = [
+        UniqueConstraint(
+            columnNames = ["user_id", "room_id"]
+        )
+    ]
+)
 class RoomLikeEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false, unique = true)
+    @JoinColumn(name = "room_id", nullable = false)
     val room: RoomEntity,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false)
     val user: UserEntity,
 
     @Column(nullable = false)
