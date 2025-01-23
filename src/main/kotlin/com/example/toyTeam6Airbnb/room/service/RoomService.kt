@@ -59,4 +59,14 @@ interface RoomService {
         endDate: LocalDate?,
         pageable: Pageable
     ): Page<Room>
+
+    fun likeRoom(
+        userId: Long,
+        roomId: Long
+    )
+
+    fun unlikeRoom(
+        userId: Long,
+        roomId: Long
+    )
 }

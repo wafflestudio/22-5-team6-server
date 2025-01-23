@@ -8,6 +8,8 @@ import com.example.toyTeam6Airbnb.room.InvalidMaxOccupancyException
 import com.example.toyTeam6Airbnb.room.InvalidNameException
 import com.example.toyTeam6Airbnb.room.InvalidPriceException
 import com.example.toyTeam6Airbnb.room.InvalidRoomTypeException
+import com.example.toyTeam6Airbnb.room.RoomAlreadyLikedException
+import com.example.toyTeam6Airbnb.room.RoomLikeNotFoundException
 import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
@@ -18,6 +20,8 @@ import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
+import com.example.toyTeam6Airbnb.room.persistence.RoomLikeEntity
+import com.example.toyTeam6Airbnb.room.persistence.RoomLikeRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomSpecifications
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
@@ -37,7 +41,8 @@ import java.time.LocalDate
 class RoomServiceImpl(
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
-    private val imageService: ImageService
+    private val imageService: ImageService,
+    private val roomLikeRepository: RoomLikeRepository
 ) : RoomService {
 
     @Transactional
@@ -175,6 +180,34 @@ class RoomServiceImpl(
             val imageUrl = imageService.generateRoomImageDownloadUrl(it.id!!)
             Room.fromEntity(it, imageUrl)
         }
+    }
+
+    @Transactional
+    override fun likeRoom(
+        userId: Long,
+        roomId: Long
+    ) {
+        val userEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
+
+        if (userEntity.roomLikes.any { it.user.id == userId }) {
+            throw RoomAlreadyLikedException()
+        }
+
+        val roomLikeEntity = RoomLikeEntity(user = userEntity, room = roomEntity)
+        roomLikeRepository.save(roomLikeEntity)
+    }
+
+    @Transactional
+    override fun unlikeRoom(
+        userId: Long,
+        roomId: Long
+    ) {
+        val userEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
+
+        val roomLikeToDelete = userEntity.roomLikes.find { it.room.id == roomId } ?: throw RoomLikeNotFoundException()
+        roomLikeRepository.delete(roomLikeToDelete)
     }
 
     private fun validateRoomInfo(

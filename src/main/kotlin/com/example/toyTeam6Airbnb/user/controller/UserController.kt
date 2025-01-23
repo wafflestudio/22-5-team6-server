@@ -1,16 +1,20 @@
 package com.example.toyTeam6Airbnb.user.controller
 
+import com.example.toyTeam6Airbnb.room.controller.Room
 import com.example.toyTeam6Airbnb.user.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-
 @RestController
 @Tag(name = "User Controller", description = "User Controller API")
 class UserController(
@@ -54,6 +58,25 @@ class UserController(
     fun redirect(@RequestParam token: String, @RequestParam userid: Long): ResponseEntity<RedirectResponse> {
         return ResponseEntity.ok(RedirectResponse(token, userid))
     }
+
+    @GetMapping("/api/v1/users/{userId}/liked-rooms")
+    @Operation(summary = "사용자가 좋아요한 방 리스트(위시리스트) 얻기", description = "특정 사용자가 좋아요를 누른 위시리스트를 받아옵니다. 페이지네이션 O")
+    fun getLikedRooms(
+        @PathVariable userId: Long,
+        pageable: Pageable
+    ): ResponseEntity<Page<Room>> {
+        val viewerId =
+            try {
+                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
+                principalDetails.getUser().id
+                // logic for when the user is logged in
+            } catch (e: ClassCastException) {
+                // logic for when the user is not logged in
+                null
+            }
+        val likedRooms = userService.getLikedRooms(viewerId, userId, pageable)
+        return ResponseEntity.ok(likedRooms)
+    }
 }
 
 data class LoginRequest(
@@ -67,7 +90,8 @@ data class RegisterRequest(
     val nickname: String,
     val bio: String,
     val showMyReviews: Boolean,
-    val showMyReservations: Boolean
+    val showMyReservations: Boolean,
+    val showMyWishlist: Boolean
 )
 
 data class RedirectResponse(
