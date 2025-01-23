@@ -61,6 +61,6 @@ class InvalidRoomTypeException : RoomException(
 
 class DuplicateRoomException : RoomException(
     errorCode = 2009,
-    httpStatusCode = HttpStatus.BAD_REQUEST,
+    httpStatusCode = HttpStatus.CONFLICT,
     msg = "Room already exists"
 )

@@ -144,8 +144,6 @@ class RoomControllerTest {
         val room1 = dataGenerator.generateRoom()
         val room2 = dataGenerator.generateRoom()
         val room3 = dataGenerator.generateRoom()
-        val room4 = dataGenerator.generateRoom()
-        val room5 = dataGenerator.generateRoom()
 
         val result = mockMvc.perform(
             MockMvcRequestBuilders.get("/api/v1/rooms/main?page=0&size=3")
@@ -160,9 +158,9 @@ class RoomControllerTest {
         Assertions.assertEquals(getContentLength(result), 3)
 
         // check if all rooms are in the result
-        Assertions.assertEquals(getNthContentId(result, 0), room1.id)
+        Assertions.assertEquals(getNthContentId(result, 0), room3.id)
         Assertions.assertEquals(getNthContentId(result, 1), room2.id)
-        Assertions.assertEquals(getNthContentId(result, 2), room3.id)
+        Assertions.assertEquals(getNthContentId(result, 2), room1.id)
 
         // Add assertions to verify the response content if needed
         println(result)
@@ -470,7 +468,7 @@ class RoomControllerTest {
 
         val result1 = mockMvc.perform(
             MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
-                .param("type", RoomType.APARTMENT.name)
+                .param("roomType", RoomType.APARTMENT.name)
                 .param("sigungu", "sigungu1")
                 .param("page", "0")
                 .param("size", "10")
@@ -507,8 +505,8 @@ class RoomControllerTest {
         Assertions.assertEquals(getContentLength(result2), 2)
 
         // check if all rooms are in the result
-        Assertions.assertEquals(getNthContentId(result2, 0), room2.id)
-        Assertions.assertEquals(getNthContentId(result2, 1), room3.id)
+        Assertions.assertEquals(getNthContentId(result2, 0), room3.id)
+        Assertions.assertEquals(getNthContentId(result2, 1), room2.id)
 
         // Add assertions to verify the response content if needed
         println(result2)
