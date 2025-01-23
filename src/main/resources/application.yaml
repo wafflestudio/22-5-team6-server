@@ -65,4 +65,3 @@ springdoc:
     oauth2RedirectUrl: '/api/oauth2/callback/google'
     oauth:
       use-pkce-with-authorization-code-grant: true
-  show-login-endpoint: true

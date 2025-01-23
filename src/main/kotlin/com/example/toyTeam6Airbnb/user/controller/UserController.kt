@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
@@ -41,6 +42,14 @@ class UserController(
         return ResponseEntity.ok(UrlResponse(url))
     }
 
+    @PostMapping("/api/auth/login", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
+    @Operation(summary = "로그인", description = "유저 로그인")
+    fun fakeLogin(
+        @RequestBody request: LoginRequest
+    ): ResponseEntity<String> {
+        return ResponseEntity.ok("Fake endpoint to bypass Swagger login endpoint bug. This method shouldn't be called. It must be shadowed by Spring Security login endpoint.")
+    }
+
     // a mapping just for swagger testing
     // token parameter is passed as a query parameter
     // just return the token parameter in body
@@ -70,6 +79,11 @@ class UserController(
     }
 }
 
+data class LoginRequest(
+    val username: String,
+    val password: String
+)
+
 data class RegisterRequest(
     val username: String,
     val password: String,
@@ -86,5 +100,5 @@ data class RedirectResponse(
 )
 
 data class UrlResponse(
-    val imageUploadurl: String
+    val imageUploadUrl: String
 )
