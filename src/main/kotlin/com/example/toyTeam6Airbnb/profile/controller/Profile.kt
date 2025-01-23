@@ -9,6 +9,7 @@ data class Profile(
     val isSuperHost: Boolean,
     val showMyReviews: Boolean,
     val showMyReservations: Boolean,
+    val showMyWishlist: Boolean,
     val imageUrl: String // 대표이미지 다운로드 URL
 ) {
     companion object {
@@ -20,6 +21,7 @@ data class Profile(
                 isSuperHost = profileEntity.isSuperHost,
                 showMyReviews = profileEntity.showMyReviews,
                 showMyReservations = profileEntity.showMyReservations,
+                showMyWishlist = profileEntity.showMyWishlist,
                 imageUrl = imageUrl // 대표이미지 다운로드 URL
             )
         }

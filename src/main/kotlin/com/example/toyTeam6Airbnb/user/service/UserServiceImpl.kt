@@ -3,14 +3,22 @@ package com.example.toyTeam6Airbnb.user.service
 import com.example.toyTeam6Airbnb.image.service.ImageService
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileRepository
+import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.room.persistence.RoomLikeRepository
 import com.example.toyTeam6Airbnb.user.SignUpBadUsernameException
 import com.example.toyTeam6Airbnb.user.SignUpUsernameConflictException
+import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.RegisterRequest
 import com.example.toyTeam6Airbnb.user.controller.User
+import com.example.toyTeam6Airbnb.user.likedRoomsPermissionDenied
 import com.example.toyTeam6Airbnb.user.persistence.AuthProvider
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import com.example.toyTeam6Airbnb.validateSortedPageable
 import jakarta.transaction.Transactional
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -19,7 +27,8 @@ class UserServiceImpl(
     private val userRepository: UserRepository,
     private val profileRepository: ProfileRepository,
     private val imageService: ImageService,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val roomLikeRepository: RoomLikeRepository
 ) : UserService {
     @Transactional
     override fun register(
@@ -39,7 +48,8 @@ class UserServiceImpl(
             nickname = request.nickname,
             bio = request.bio,
             showMyReviews = request.showMyReviews,
-            showMyReservations = request.showMyReservations
+            showMyReservations = request.showMyReservations,
+            showMyWishlist = request.showMyWishlist // wishList 추가
         ).let { profileRepository.save(it) }
         val imageUploadUrl = imageService.generateProfileImageUploadUrl(userEntity.id!!)
         return User.fromEntity(userEntity) to imageUploadUrl
@@ -51,5 +61,20 @@ class UserServiceImpl(
     ): Boolean {
         userRepository.findByUsername(username)?.profile ?: return false
         return true
+    }
+
+    @Transactional
+    override fun getLikedRooms(
+        viewerId: Long?,
+        userId: Long,
+        pageable: Pageable
+    ): Page<Room> {
+        val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
+        if (viewerId != userId && userEntity.profile?.showMyWishlist != true) throw likedRoomsPermissionDenied()
+        // 요청을 보낸 사용자가 본인이 아니고, 위시리스트 공개를 안한 경우에는 Permission Denied
+        return roomLikeRepository.findRoomsLikedByUser(userEntity, validateSortedPageable(pageable)).map { roomEntity ->
+            val imageUrl = imageService.generateRoomImageDownloadUrl(roomEntity.id!!)
+            Room.fromEntity(roomEntity, imageUrl)
+        }
     }
 }
