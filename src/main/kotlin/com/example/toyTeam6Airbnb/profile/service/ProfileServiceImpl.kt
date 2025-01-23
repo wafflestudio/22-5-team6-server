@@ -73,6 +73,7 @@ class ProfileServiceImpl(
             showMyReservations = request.showMyReservations
         )
         updateSuperHostStatus(profile)
+        profileRepository.save(profile)
 
         return UrlResponse(imageService.generateProfileImageUploadUrl(user.id!!))
     }
