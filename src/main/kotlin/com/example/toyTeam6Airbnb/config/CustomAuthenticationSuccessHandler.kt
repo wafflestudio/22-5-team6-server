@@ -2,7 +2,6 @@ package com.example.toyTeam6Airbnb.config
 
 import com.example.toyTeam6Airbnb.user.JwtTokenProvider
 import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
-import com.example.toyTeam6Airbnb.user.persistence.AuthProvider
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
