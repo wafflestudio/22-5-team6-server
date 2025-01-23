@@ -81,7 +81,8 @@ def register_user(username, password, nickname, bio):
         "nickname": nickname,
         "bio": bio,
         "showMyReviews": True,
-        "showMyReservations": True
+        "showMyReservations": True,
+        "showMyWishlist": True
     }
     
     headers = {
