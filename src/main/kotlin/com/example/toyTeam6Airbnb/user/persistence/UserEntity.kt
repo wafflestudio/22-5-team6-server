@@ -51,6 +51,9 @@ class UserEntity(
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     var profile: ProfileEntity? = null,
 
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY, orphanRemoval = true)
+    var refreshTokens: MutableList<RefreshTokenEntity> = mutableListOf(),
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
     var roomLikes: MutableList<RoomLikeEntity> = mutableListOf()
 ) {

@@ -32,6 +32,6 @@ class CustomAuthenticationSuccessHandler(
 
         val principal = authentication.principal as PrincipalDetails
 
-        response.sendRedirect("/redirect?token=$token&userid=${principal.getId()}&complete-profile=${!userService.hasProfile(authentication.name)}")
+        response.sendRedirect("/redirect?token=${token.accessToken}&refreshToken=${token.refreshToken}&userid=${principal.getId()}&complete-profile=${!userService.hasProfile(authentication.name)}")
     }
 }

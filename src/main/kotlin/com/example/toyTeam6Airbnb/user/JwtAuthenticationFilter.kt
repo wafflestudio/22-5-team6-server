@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.user
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.jsonwebtoken.ExpiredJwtException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -23,6 +24,10 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        if (request.requestURI.endsWith("/api/auth/reissueToken") && request.method == "POST") {
+            filterChain.doFilter(request, response)
+            return
+        }
         try {
             val jwt = getJwtFromRequest(request)
             if (jwt != null && jwtTokenProvider.validateToken(jwt)) {
@@ -36,20 +41,21 @@ class JwtAuthenticationFilter(
                 authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
                 SecurityContextHolder.getContext().authentication = authentication
             }
+            filterChain.doFilter(request, response)
         } catch (ex: Exception) {
-            logger.error("Could not set user authentication in security context", ex)
             // return 401
             response.status = HttpStatus.UNAUTHORIZED.value()
             response.contentType = "application/json"
-            val ex = JWTException()
+            val ex2 = when (ex) {
+                is ExpiredJwtException -> JwtExpiredException()
+                else -> JWTUnknownException()
+            }
             response.writer.write(
                 ObjectMapper().writeValueAsString(
-                    mapOf("error" to ex.msg, "errorCode" to ex.errorCode)
+                    mapOf("error" to ex2.msg, "errorCode" to ex2.errorCode)
                 )
             )
         }
-
-        filterChain.doFilter(request, response)
     }
 
     private fun getJwtFromRequest(request: HttpServletRequest): String? {
