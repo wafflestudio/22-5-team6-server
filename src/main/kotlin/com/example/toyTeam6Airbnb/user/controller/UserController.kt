@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.user.controller
 
 import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.user.JwtTokenProvider
 import com.example.toyTeam6Airbnb.user.TokenDto
 import com.example.toyTeam6Airbnb.user.service.UserService
 import io.swagger.v3.oas.annotations.Operation
@@ -19,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @Tag(name = "User Controller", description = "User Controller API")
 class UserController(
-    private val userService: UserService
+    private val userService: UserService,
+    private val jwtTokenProvider: JwtTokenProvider
 ) {
 
     @PostMapping("/api/v1/ping")
@@ -56,7 +58,7 @@ class UserController(
     fun refreshToken(
         @RequestParam refreshToken: String
     ): ResponseEntity<TokenDto> {
-        return ResponseEntity.ok(userService.reissueToken(refreshToken))
+        return ResponseEntity.ok(jwtTokenProvider.reissueToken(refreshToken))
     }
 
     // a mapping just for swagger testing

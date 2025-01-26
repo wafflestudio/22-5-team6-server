@@ -19,6 +19,6 @@ class RefreshTokenEntity(
     var token: String,
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false)
     var user: UserEntity
 )

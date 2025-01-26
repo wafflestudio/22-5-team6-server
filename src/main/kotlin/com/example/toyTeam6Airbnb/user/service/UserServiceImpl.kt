@@ -5,13 +5,10 @@ import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileRepository
 import com.example.toyTeam6Airbnb.room.controller.Room
 import com.example.toyTeam6Airbnb.room.persistence.RoomLikeRepository
-import com.example.toyTeam6Airbnb.user.JWTUnknownException
-import com.example.toyTeam6Airbnb.user.JwtExpiredException
 import com.example.toyTeam6Airbnb.user.JwtTokenProvider
 import com.example.toyTeam6Airbnb.user.LikedRoomsPermissionDenied
 import com.example.toyTeam6Airbnb.user.SignUpBadUsernameException
 import com.example.toyTeam6Airbnb.user.SignUpUsernameConflictException
-import com.example.toyTeam6Airbnb.user.TokenDto
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.RegisterRequest
 import com.example.toyTeam6Airbnb.user.controller.User
@@ -20,7 +17,6 @@ import com.example.toyTeam6Airbnb.user.persistence.RefreshTokenRepository
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import com.example.toyTeam6Airbnb.validateSortedPageable
-import io.jsonwebtoken.ExpiredJwtException
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -69,23 +65,6 @@ class UserServiceImpl(
     ): Boolean {
         userRepository.findByUsername(username)?.profile ?: return false
         return true
-    }
-
-    override fun reissueToken(
-        refreshToken: String
-    ): TokenDto {
-        try {
-            val username = jwtTokenProvider.getUsernameFromToken(refreshToken)
-            refreshTokenRepository.findByToken(refreshToken) ?: throw JWTUnknownException()
-            val tokens = jwtTokenProvider.generateToken(username)
-            return tokens
-        } catch (e: Exception) {
-            if (e is ExpiredJwtException) {
-                throw JwtExpiredException()
-            } else {
-                throw JWTUnknownException()
-            }
-        }
     }
 
     @Transactional

@@ -1,7 +1,6 @@
 package com.example.toyTeam6Airbnb.user.service
 
 import com.example.toyTeam6Airbnb.room.controller.Room
-import com.example.toyTeam6Airbnb.user.TokenDto
 import com.example.toyTeam6Airbnb.user.controller.RegisterRequest
 import com.example.toyTeam6Airbnb.user.controller.User
 import org.springframework.data.domain.Page
@@ -16,10 +15,6 @@ interface UserService {
     fun hasProfile(
         username: String
     ): Boolean
-
-    fun reissueToken(
-        refreshToken: String
-    ): TokenDto
 
     // 사용자가 좋아요 누른 방 리스트 조회
     fun getLikedRooms(

@@ -3,6 +3,7 @@ package com.example.toyTeam6Airbnb.user
 import com.example.toyTeam6Airbnb.user.persistence.RefreshTokenEntity
 import com.example.toyTeam6Airbnb.user.persistence.RefreshTokenRepository
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
+import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
@@ -23,6 +24,47 @@ class JwtTokenProvider(
 
     @Transactional
     fun generateToken(username: String): TokenDto {
+        val tokenDto = getTokenDto(username)
+
+        val userEntity = userRepository.findByUsername(username)!!
+        refreshTokenRepository.save(RefreshTokenEntity(token = tokenDto.refreshToken, user = userEntity))
+
+        return tokenDto
+    }
+
+    fun validateToken(token: String): Boolean {
+        Jwts.parserBuilder()
+            .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.toByteArray()))
+            .build()
+            .parseClaimsJws(token)
+        return true
+    }
+
+    @Transactional
+    fun reissueToken(refreshToken: String): TokenDto {
+        try {
+            val username = getUsernameFromToken(refreshToken)
+            val refreshTokenEntity = refreshTokenRepository.findByToken(refreshToken)
+                ?: throw JWTUnknownException()
+            if (username != refreshTokenEntity.user.username) {
+                throw JWTUnknownException()
+            }
+
+            val tokenDto = getTokenDto(username)
+
+            refreshTokenEntity.token = tokenDto.refreshToken
+            refreshTokenRepository.save(refreshTokenEntity)
+            return tokenDto
+        } catch (e: Exception) {
+            if (e is ExpiredJwtException) {
+                throw JwtExpiredException()
+            } else {
+                throw JWTUnknownException()
+            }
+        }
+    }
+
+    fun getTokenDto(username: String): TokenDto {
         val now = Date()
         val accessToken = Jwts.builder()
             .setSubject(username)
@@ -36,24 +78,7 @@ class JwtTokenProvider(
             .setExpiration(Date(now.time + jwtRefreshExpirationMs))
             .signWith(Keys.hmacShaKeyFor(jwtSecret.toByteArray()), SignatureAlgorithm.HS512)
             .compact()
-
-        val userEntity = userRepository.findByUsername(username)!!
-        refreshTokenRepository.deleteByUser(userEntity)
-        refreshTokenRepository.flush()
-        refreshTokenRepository.save(RefreshTokenEntity(token = refreshToken, user = userEntity))
-
-        return TokenDto(
-            accessToken = accessToken,
-            refreshToken = refreshToken
-        )
-    }
-
-    fun validateToken(token: String): Boolean {
-        Jwts.parserBuilder()
-            .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.toByteArray()))
-            .build()
-            .parseClaimsJws(token)
-        return true
+        return TokenDto(accessToken, refreshToken)
     }
 
     fun getUsernameFromToken(token: String): String {
