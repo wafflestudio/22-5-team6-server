@@ -13,7 +13,6 @@ import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
 import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
-import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
@@ -41,7 +40,7 @@ class ReviewServiceImpl(
         content: String,
         rating: Int
     ): ReviewIdWithImage {
-        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
         if (reservationEntity.user.id != user.id) throw ReviewPermissionDeniedException()
 
@@ -97,7 +96,7 @@ class ReviewServiceImpl(
         content: String?,
         rating: Int?
     ): ReviewIdWithImage {
-        userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
         val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFoundException()
         if (reviewEntity.user.id != user.id) throw ReviewPermissionDeniedException()
 
@@ -110,7 +109,7 @@ class ReviewServiceImpl(
 
     @Transactional
     override fun deleteReview(user: User, reviewId: Long) {
-        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
         val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFoundException()
 
         if (reviewEntity.user != userEntity) throw ReviewPermissionDeniedException()

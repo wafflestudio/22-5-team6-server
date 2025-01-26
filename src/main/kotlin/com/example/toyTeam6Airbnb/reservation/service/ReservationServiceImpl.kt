@@ -15,7 +15,6 @@ import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
 import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
-import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
@@ -49,7 +48,7 @@ class ReservationServiceImpl(
         endDate: LocalDate,
         numberOfGuests: Int
     ): Reservation {
-        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
         // lock room entity to prevent the room from being deleted while creating a reservation
         // also, prevent other transactions from creating a reservation for the same room at the same time
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
@@ -91,7 +90,7 @@ class ReservationServiceImpl(
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     override fun deleteReservation(user: User, reservationId: Long) {
-        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
         val reservationEntity = reservationRepository.findByIdOrNullForUpdate(reservationId) ?: throw ReservationNotFound()
 
         if (reservationEntity.user != userEntity) throw ReservationPermissionDenied()
@@ -107,7 +106,7 @@ class ReservationServiceImpl(
         endDate: LocalDate,
         numberOfGuests: Int
     ): Reservation {
-        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
         val reservationEntity = reservationRepository.findByIdOrNullForUpdate(reservationId) ?: throw ReservationNotFound()
         val roomEntity = reservationEntity.room
         // lock room entity to prevent concurrent reservation updates
