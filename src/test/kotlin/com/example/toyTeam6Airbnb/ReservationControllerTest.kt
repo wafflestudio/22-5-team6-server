@@ -36,8 +36,8 @@ class ReservationControllerTest {
         val requestBody = """
             {
                 "roomId": $roomId,
-                "startDate": "2023-12-01",
-                "endDate": "2023-12-10",
+                "startDate": "2026-12-01",
+                "endDate": "2026-12-10",
                 "numberOfGuests": 2
             }
         """.trimIndent()
@@ -60,7 +60,7 @@ class ReservationControllerTest {
     fun `특정 ID의 예약 조회 성공시 200 응답 반환`() {
         val (user, token) = dataGenerator.generateUserAndToken()
         val room = dataGenerator.generateRoom(maxOccupancy = 10)
-        val reservation = dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2023, 12, 1), endDate = LocalDate.of(2023, 12, 10), numberOfGuests = 2)
+        val reservation = dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2026, 12, 1), endDate = LocalDate.of(2026, 12, 10), numberOfGuests = 2)
 
         val result = mockMvc.perform(
             MockMvcRequestBuilders.get("/api/v1/reservations/${reservation.id}")
@@ -79,12 +79,12 @@ class ReservationControllerTest {
     fun `예약 수정하였을때 응답으로 200이 나와야한다`() {
         val (user, token) = dataGenerator.generateUserAndToken()
         val room = dataGenerator.generateRoom(maxOccupancy = 10)
-        val reservation = dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2023, 12, 1), endDate = LocalDate.of(2023, 12, 10), numberOfGuests = 2)
+        val reservation = dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2026, 12, 1), endDate = LocalDate.of(2026, 12, 10), numberOfGuests = 2)
 
         val updateRequestBody = """
             {
-                "startDate": "2023-12-01",
-                "endDate": "2024-01-05",
+                "startDate": "2026-12-01",
+                "endDate": "2027-01-05",
                 "numberOfGuests": 2
             }
         """.trimIndent()
@@ -108,12 +108,12 @@ class ReservationControllerTest {
         val (user1, token1) = dataGenerator.generateUserAndToken()
         val (user2, token2) = dataGenerator.generateUserAndToken()
         val room = dataGenerator.generateRoom(maxOccupancy = 10)
-        val reservation = dataGenerator.generateReservation(user1, room, startDate = LocalDate.of(2023, 12, 1), endDate = LocalDate.of(2023, 12, 10), numberOfGuests = 2)
+        val reservation = dataGenerator.generateReservation(user1, room, startDate = LocalDate.of(2026, 12, 1), endDate = LocalDate.of(2026, 12, 10), numberOfGuests = 2)
 
         // 다른 유저가 예약 수정 시 403 반환
         val updateRequestBody = """
             {
-                "startDate": "2023-12-01",
+                "startDate": "2026-12-01",
                 "endDate": "2024-01-05",
                 "numberOfGuests": 2
             }
@@ -138,7 +138,7 @@ class ReservationControllerTest {
         val (user, token) = dataGenerator.generateUserAndToken()
         val (user2, token2) = dataGenerator.generateUserAndToken()
         val room = dataGenerator.generateRoom(maxOccupancy = 10)
-        val reservation = dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2023, 12, 1), endDate = LocalDate.of(2023, 12, 10), numberOfGuests = 2)
+        val reservation = dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2026, 12, 1), endDate = LocalDate.of(2026, 12, 10), numberOfGuests = 2)
 
         val result = mockMvc.perform(
             MockMvcRequestBuilders.delete("/api/v1/reservations/${reservation.id}")
@@ -149,7 +149,7 @@ class ReservationControllerTest {
             .andReturn()
         println(result.response.contentAsString)
 
-        val reservation2 = dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2023, 12, 1), endDate = LocalDate.of(2023, 12, 10), numberOfGuests = 2)
+        val reservation2 = dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2026, 12, 1), endDate = LocalDate.of(2026, 12, 10), numberOfGuests = 2)
         val reservationId2 = reservation2.id
 
         // 다른 유저(user2)가 삭제시 403 반환
@@ -245,8 +245,8 @@ class ReservationControllerTest {
         val requestBody = """
         {
             "roomId": $roomId,
-            "startDate": "2023-12-01",
-            "endDate": "2023-12-10",
+            "startDate": "2026-12-01",
+            "endDate": "2026-12-10",
             "numberOfGuests": 0
         }
         """.trimIndent()

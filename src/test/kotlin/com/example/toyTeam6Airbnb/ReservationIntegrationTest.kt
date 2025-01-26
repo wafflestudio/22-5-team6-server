@@ -50,8 +50,8 @@ class ReservationIntegrationTest {
         val (user, token) = dataGenerator.generateUserAndToken()
         val room = dataGenerator.generateRoom(maxOccupancy = 2)
 
-        val startDate = LocalDate.of(2023, 12, 1)
-        val endDate = LocalDate.of(2023, 12, 10)
+        val startDate = LocalDate.of(2026, 12, 1)
+        val endDate = LocalDate.of(2026, 12, 10)
 
         val latch = CountDownLatch(2)
         val executor = Executors.newFixedThreadPool(2)
@@ -109,8 +109,8 @@ class ReservationIntegrationTest {
         val (user2, token2) = dataGenerator.generateUserAndToken()
         val room = dataGenerator.generateRoom(maxOccupancy = 2)
 
-        val startDate = LocalDate.of(2023, 12, 1)
-        val endDate = LocalDate.of(2023, 12, 10)
+        val startDate = LocalDate.of(2026, 12, 1)
+        val endDate = LocalDate.of(2026, 12, 10)
 
         val latch = CountDownLatch(2)
         val executor = Executors.newFixedThreadPool(2)
@@ -168,10 +168,10 @@ class ReservationIntegrationTest {
         val (user2, token2) = dataGenerator.generateUserAndToken()
         val room = dataGenerator.generateRoom(maxOccupancy = 2)
 
-        val startDate1 = LocalDate.of(2023, 12, 1)
-        val endDate1 = LocalDate.of(2023, 12, 5)
-        val startDate2 = LocalDate.of(2023, 12, 6)
-        val endDate2 = LocalDate.of(2023, 12, 10)
+        val startDate1 = LocalDate.of(2026, 12, 1)
+        val endDate1 = LocalDate.of(2026, 12, 5)
+        val startDate2 = LocalDate.of(2026, 12, 6)
+        val endDate2 = LocalDate.of(2026, 12, 10)
 
         val latch = CountDownLatch(2)
         val executor = Executors.newFixedThreadPool(2)
@@ -238,10 +238,10 @@ class ReservationIntegrationTest {
         val (user2, token2) = dataGenerator.generateUserAndToken()
         val room = dataGenerator.generateRoom(maxOccupancy = 2)
 
-        val startDate1 = LocalDate.of(2023, 5, 10)
-        val endDate1 = LocalDate.of(2023, 5, 15)
-        val startDate2 = LocalDate.of(2023, 5, 12)
-        val endDate2 = LocalDate.of(2023, 5, 17)
+        val startDate1 = LocalDate.of(2026, 5, 10)
+        val endDate1 = LocalDate.of(2026, 5, 15)
+        val startDate2 = LocalDate.of(2026, 5, 12)
+        val endDate2 = LocalDate.of(2026, 5, 17)
 
         val latch = CountDownLatch(2)
         val executor = Executors.newFixedThreadPool(2)
