@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.review.service
 
+import com.example.toyTeam6Airbnb.image.service.ImageService
 import com.example.toyTeam6Airbnb.reservation.ReservationNotFound
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
 import com.example.toyTeam6Airbnb.review.DuplicateReviewException
@@ -30,7 +31,8 @@ class ReviewServiceImpl(
     private val reservationRepository: ReservationRepository,
     private val userRepository: UserRepository,
     private val roomRepository: RoomRepository,
-    private val reviewRepository: ReviewRepository
+    private val reviewRepository: ReviewRepository,
+    private val imageService: ImageService
 ) : ReviewService {
 
     @Transactional
@@ -79,7 +81,10 @@ class ReviewServiceImpl(
 
         val reviewEntities = reviewRepository.findAllByUserId(userId, validateSortedPageable(pageable))
 
-        val reviews = reviewEntities.map { ReviewByUserDTO.fromEntity(it) }
+        val reviews = reviewEntities.map { review ->
+            val imageUrl = imageService.generateRoomImageDownloadUrl(review.room.id!!)
+            ReviewByUserDTO.fromEntity(review, imageUrl)
+        }
         return reviews
     }
 
