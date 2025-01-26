@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.user.controller
 
 import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.user.TokenDto
 import com.example.toyTeam6Airbnb.user.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -50,13 +51,25 @@ class UserController(
         return ResponseEntity.ok("Fake endpoint to bypass Swagger login endpoint bug. This method shouldn't be called. It must be shadowed by Spring Security login endpoint.")
     }
 
+    @PostMapping("/api/auth/reissueToken")
+    @Operation(summary = "토큰 재발급", description = "리프레시 토큰을 이용하여 엑세스 토큰 재발급")
+    fun refreshToken(
+        @RequestParam refreshToken: String
+    ): ResponseEntity<TokenDto> {
+        return ResponseEntity.ok(userService.reissueToken(refreshToken))
+    }
+
     // a mapping just for swagger testing
     // token parameter is passed as a query parameter
     // just return the token parameter in body
     @Operation(summary = "Redirect", description = "Redirect to the token", hidden = true)
     @GetMapping("/redirect")
-    fun redirect(@RequestParam token: String, @RequestParam userid: Long): ResponseEntity<RedirectResponse> {
-        return ResponseEntity.ok(RedirectResponse(token, userid))
+    fun redirect(
+        @RequestParam token: String,
+        @RequestParam refreshToken: String,
+        @RequestParam userid: Long
+    ): ResponseEntity<RedirectResponse> {
+        return ResponseEntity.ok(RedirectResponse(token, refreshToken, userid))
     }
 
     @GetMapping("/api/v1/users/{userId}/liked-rooms")
@@ -96,6 +109,7 @@ data class RegisterRequest(
 
 data class RedirectResponse(
     val token: String,
+    val refreshToken: String,
     val userId: Long
 )
 

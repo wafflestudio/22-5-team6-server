@@ -77,7 +77,7 @@ class DataGenerator(
         val profile = generateProfile(userEntity)
         userEntity.profile = profile
 
-        return userEntity to jwtTokenProvider.generateToken(userEntity.username)
+        return userEntity to jwtTokenProvider.generateToken(userEntity.username).accessToken
     }
 
     fun generateReview(
