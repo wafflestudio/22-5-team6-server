@@ -33,16 +33,18 @@ data class ReviewByUserDTO(
     val rating: Int,
     val place: String,
     val startDate: LocalDate,
-    val endDate: LocalDate
+    val endDate: LocalDate,
+    val imageUrl: String // 대표이미지 다운로드 URL
 ) {
     companion object {
-        fun fromEntity(entity: ReviewEntity): ReviewByUserDTO {
+        fun fromEntity(entity: ReviewEntity, imageUrl: String): ReviewByUserDTO {
             return ReviewByUserDTO(
                 content = entity.content,
                 rating = entity.rating,
                 place = entity.room.address.sido,
                 startDate = entity.reservation.startDate,
-                endDate = entity.reservation.endDate
+                endDate = entity.reservation.endDate,
+                imageUrl = imageUrl
             )
         }
     }

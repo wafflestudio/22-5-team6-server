@@ -63,7 +63,7 @@ class ReviewController(
     }
 
     @GetMapping("/user/{userId}")
-    @Operation(summary = "특정 유저의 리뷰 조회", description = "특정 유저의 모든 리뷰를 조회합니다.")
+    @Operation(summary = "특정 유저의 리뷰 조회", description = "특정 유저의 모든 리뷰를 조회합니다. 숙소에 대한 이미지도 함께 제공")
     fun getReviewsByUser(
         @PathVariable userId: Long,
         pageable: Pageable
