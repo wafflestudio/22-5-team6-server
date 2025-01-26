@@ -79,6 +79,7 @@ class ReservationServiceImpl(
 
     fun isAvailable(room: RoomEntity, startDate: LocalDate, endDate: LocalDate, currentReservationId: Long? = null): Boolean {
         // exception 발생도 함께 처리
+        if (startDate <= LocalDate.now()) throw ReservationUnavailable()
         if (startDate >= endDate) throw ReservationUnavailable()
         val reservations = reservationRepository.findAllByRoom(room)
 
