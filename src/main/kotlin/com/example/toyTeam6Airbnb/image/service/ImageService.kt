@@ -43,6 +43,7 @@ class ImageService(
         val putObjectRequest = PutObjectRequest.builder()
             .bucket(bucketName)
             .key(filePath)
+            .cacheControl("no-cache, no-store, must-revalidate")
             .build()
 
         val presignRequest = PutObjectPresignRequest.builder()
