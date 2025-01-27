@@ -1,5 +1,6 @@
 package com.example.toyTeam6Airbnb.review.service
 
+import com.example.toyTeam6Airbnb.image.service.ImageService
 import com.example.toyTeam6Airbnb.reservation.ReservationNotFound
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
 import com.example.toyTeam6Airbnb.review.DuplicateReviewException
@@ -13,7 +14,6 @@ import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewRepository
 import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
-import com.example.toyTeam6Airbnb.user.AuthenticateException
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
@@ -31,7 +31,8 @@ class ReviewServiceImpl(
     private val reservationRepository: ReservationRepository,
     private val userRepository: UserRepository,
     private val roomRepository: RoomRepository,
-    private val reviewRepository: ReviewRepository
+    private val reviewRepository: ReviewRepository,
+    private val imageService: ImageService
 ) : ReviewService {
 
     @Transactional
@@ -41,7 +42,7 @@ class ReviewServiceImpl(
         content: String,
         rating: Int
     ): ReviewIdWithImage {
-        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
         if (reservationEntity.user.id != user.id) throw ReviewPermissionDeniedException()
 
@@ -80,7 +81,10 @@ class ReviewServiceImpl(
 
         val reviewEntities = reviewRepository.findAllByUserId(userId, validateSortedPageable(pageable))
 
-        val reviews = reviewEntities.map { ReviewByUserDTO.fromEntity(it) }
+        val reviews = reviewEntities.map { review ->
+            val imageUrl = imageService.generateRoomImageDownloadUrl(review.room.id!!)
+            ReviewByUserDTO.fromEntity(review, imageUrl)
+        }
         return reviews
     }
 
@@ -97,7 +101,7 @@ class ReviewServiceImpl(
         content: String?,
         rating: Int?
     ): ReviewIdWithImage {
-        userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
         val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFoundException()
         if (reviewEntity.user.id != user.id) throw ReviewPermissionDeniedException()
 
@@ -110,7 +114,7 @@ class ReviewServiceImpl(
 
     @Transactional
     override fun deleteReview(user: User, reviewId: Long) {
-        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw AuthenticateException()
+        val userEntity = userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
         val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFoundException()
 
         if (reviewEntity.user != userEntity) throw ReviewPermissionDeniedException()

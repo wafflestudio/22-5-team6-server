@@ -5,13 +5,15 @@ import com.example.toyTeam6Airbnb.profile.persistence.ProfileEntity
 import com.example.toyTeam6Airbnb.profile.persistence.ProfileRepository
 import com.example.toyTeam6Airbnb.room.controller.Room
 import com.example.toyTeam6Airbnb.room.persistence.RoomLikeRepository
+import com.example.toyTeam6Airbnb.user.JwtTokenProvider
+import com.example.toyTeam6Airbnb.user.LikedRoomsPermissionDenied
 import com.example.toyTeam6Airbnb.user.SignUpBadUsernameException
 import com.example.toyTeam6Airbnb.user.SignUpUsernameConflictException
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.RegisterRequest
 import com.example.toyTeam6Airbnb.user.controller.User
-import com.example.toyTeam6Airbnb.user.likedRoomsPermissionDenied
 import com.example.toyTeam6Airbnb.user.persistence.AuthProvider
+import com.example.toyTeam6Airbnb.user.persistence.RefreshTokenRepository
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import com.example.toyTeam6Airbnb.validateSortedPageable
@@ -28,7 +30,9 @@ class UserServiceImpl(
     private val profileRepository: ProfileRepository,
     private val imageService: ImageService,
     private val passwordEncoder: PasswordEncoder,
-    private val roomLikeRepository: RoomLikeRepository
+    private val roomLikeRepository: RoomLikeRepository,
+    private val refreshTokenRepository: RefreshTokenRepository,
+    private val jwtTokenProvider: JwtTokenProvider
 ) : UserService {
     @Transactional
     override fun register(
@@ -70,7 +74,7 @@ class UserServiceImpl(
         pageable: Pageable
     ): Page<Room> {
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
-        if (viewerId != userId && userEntity.profile?.showMyWishlist != true) throw likedRoomsPermissionDenied()
+        if (viewerId != userId && userEntity.profile?.showMyWishlist != true) throw LikedRoomsPermissionDenied()
         // 요청을 보낸 사용자가 본인이 아니고, 위시리스트 공개를 안한 경우에는 Permission Denied
         return roomLikeRepository.findRoomsLikedByUser(userEntity, validateSortedPageable(pageable)).map { roomEntity ->
             val imageUrl = imageService.generateRoomImageDownloadUrl(roomEntity.id!!)

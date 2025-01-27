@@ -22,7 +22,7 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomLikeRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomSpecifications
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
-import com.example.toyTeam6Airbnb.user.AuthenticateException
+import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import com.example.toyTeam6Airbnb.validatePageable
 import org.springframework.dao.DataIntegrityViolationException
@@ -54,7 +54,7 @@ class RoomServiceImpl(
         maxOccupancy: Int,
         imageSlot: Int // imageSlot Request Body에 추가
     ): RoomShortDTO {
-        val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
+        val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw UserNotFoundException()
 
         validateRoomInfo(name, description, type, address, price, maxOccupancy)
 
@@ -112,7 +112,7 @@ class RoomServiceImpl(
         maxOccupancy: Int,
         imageSlot: Int
     ): RoomShortDTO {
-        val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
+        val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw UserNotFoundException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
         if (roomEntity.host.id != hostEntity.id) throw RoomPermissionDeniedException()
@@ -143,7 +143,7 @@ class RoomServiceImpl(
         userId: Long,
         roomId: Long
     ) {
-        val hostEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
+        val hostEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
         if (roomEntity.host.id != hostEntity.id) throw RoomPermissionDeniedException()
@@ -163,7 +163,6 @@ class RoomServiceImpl(
         rating: Double?,
         startDate: LocalDate?,
         endDate: LocalDate?,
-        roomDetails: RoomDetailSearchDTO?,
         pageable: Pageable
     ): Page<Room> {
         val spec = Specification.where(RoomSpecifications.hasName(name))
@@ -202,8 +201,8 @@ class RoomServiceImpl(
         userId: Long,
         roomId: Long
     ) {
-        val userEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
-        roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
+        val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
         val roomLikeToDelete = userEntity.roomLikes.find { it.room.id == roomId } ?: throw RoomLikeNotFoundException()
         roomLikeRepository.delete(roomLikeToDelete)
