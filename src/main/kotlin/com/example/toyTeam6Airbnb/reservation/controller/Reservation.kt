@@ -1,7 +1,6 @@
 package com.example.toyTeam6Airbnb.reservation.controller
 
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
-import com.example.toyTeam6Airbnb.room.persistence.Price
 import java.time.LocalDate
 
 data class Reservation(
@@ -36,7 +35,7 @@ data class ReservationDetails(
                 startDate = entity.startDate,
                 endDate = entity.endDate,
                 place = entity.room.address.sido,
-                price = entity.room.price.total, // 숙소 가격
+                price = entity.room.price.total,
                 numberOfGuests = entity.numberOfGuests,
                 imageUrl = imageUrl // 대표이미지 다운로드 URL
             )
