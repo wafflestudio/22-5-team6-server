@@ -1,9 +1,6 @@
 package com.example.toyTeam6Airbnb.room.service
 
-import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
-import com.example.toyTeam6Airbnb.room.controller.Room
-import com.example.toyTeam6Airbnb.room.controller.RoomDetailsDTO
-import com.example.toyTeam6Airbnb.room.controller.RoomShortDTO
+import com.example.toyTeam6Airbnb.room.controller.*
 import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
@@ -57,6 +54,7 @@ interface RoomService {
         rating: Double?,
         startDate: LocalDate?,
         endDate: LocalDate?,
+        roomDetails: RoomDetailSearchDTO?,
         pageable: Pageable
     ): Page<Room>
 

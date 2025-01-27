@@ -12,10 +12,7 @@ import com.example.toyTeam6Airbnb.room.RoomAlreadyLikedException
 import com.example.toyTeam6Airbnb.room.RoomLikeNotFoundException
 import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
-import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
-import com.example.toyTeam6Airbnb.room.controller.Room
-import com.example.toyTeam6Airbnb.room.controller.RoomDetailsDTO
-import com.example.toyTeam6Airbnb.room.controller.RoomShortDTO
+import com.example.toyTeam6Airbnb.room.controller.*
 import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
@@ -113,7 +110,7 @@ class RoomServiceImpl(
         roomDetails: RoomDetails,
         price: Price,
         maxOccupancy: Int,
-        imageSlot: Int // imageSlot Request Body에 추가
+        imageSlot: Int
     ): RoomShortDTO {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw AuthenticateException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
@@ -166,6 +163,7 @@ class RoomServiceImpl(
         rating: Double?,
         startDate: LocalDate?,
         endDate: LocalDate?,
+        roomDetails: RoomDetailSearchDTO?,
         pageable: Pageable
     ): Page<Room> {
         val spec = Specification.where(RoomSpecifications.hasName(name))
@@ -173,7 +171,8 @@ class RoomServiceImpl(
             .and(RoomSpecifications.hasPriceBetween(minPrice, maxPrice))
             .and(RoomSpecifications.hasMaxOccupancy(maxOccupancy))
             .and(RoomSpecifications.isAvailable(startDate, endDate))
-            .and(RoomSpecifications.hasAddress(address?.sido, address?.sigungu, address?.street, address?.detail))
+            .and(RoomSpecifications.hasAddress(address))
+            .and(RoomSpecifications.hasRoomDetails(roomDetails))
             .and(RoomSpecifications.hasRating(rating))
 
         return roomRepository.findAll(spec, validatePageable(pageable)).map {
@@ -204,7 +203,7 @@ class RoomServiceImpl(
         roomId: Long
     ) {
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
-        val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
+        roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
         val roomLikeToDelete = userEntity.roomLikes.find { it.room.id == roomId } ?: throw RoomLikeNotFoundException()
         roomLikeRepository.delete(roomLikeToDelete)
