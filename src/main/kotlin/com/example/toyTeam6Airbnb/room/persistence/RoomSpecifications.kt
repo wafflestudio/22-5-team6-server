@@ -90,11 +90,11 @@ class RoomSpecifications {
             }
         }
 
-
         fun hasAddress(address: AddressSearchDTO?): Specification<RoomEntity> {
             return Specification { root, _, cb ->
-                if (address == null) cb.conjunction()
-                else {
+                if (address == null) {
+                    cb.conjunction()
+                } else {
                     if (address.sido == null && address.sigungu == null && address.street == null && address.detail == null) {
                         cb.conjunction()
                     } else {
@@ -131,8 +131,9 @@ class RoomSpecifications {
 
         fun hasRoomDetails(roomDetails: RoomDetailSearchDTO?): Specification<RoomEntity> {
             return Specification { root, _, cb ->
-                if (roomDetails == null) cb.conjunction()
-                else {
+                if (roomDetails == null) {
+                    cb.conjunction()
+                } else {
                     val roomDetailsJoin = root.join<RoomEntity, RoomDetails>("roomDetails", jakarta.persistence.criteria.JoinType.LEFT)
                     val predicates = mutableListOf<Predicate>()
                     if (roomDetails.wifi != null) {

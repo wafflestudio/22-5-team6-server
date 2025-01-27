@@ -12,7 +12,11 @@ import com.example.toyTeam6Airbnb.room.RoomAlreadyLikedException
 import com.example.toyTeam6Airbnb.room.RoomLikeNotFoundException
 import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
-import com.example.toyTeam6Airbnb.room.controller.*
+import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
+import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.room.controller.RoomDetailSearchDTO
+import com.example.toyTeam6Airbnb.room.controller.RoomDetailsDTO
+import com.example.toyTeam6Airbnb.room.controller.RoomShortDTO
 import com.example.toyTeam6Airbnb.room.persistence.Address
 import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
@@ -24,7 +28,7 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomSpecifications
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
-import com.example.toyTeam6Airbnb.validatePageable
+import com.example.toyTeam6Airbnb.validatePageableForRoom
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -86,7 +90,7 @@ class RoomServiceImpl(
 
     @Transactional
     override fun getRooms(pageable: Pageable): Page<Room> {
-        return roomRepository.findAll(validatePageable(pageable)).map {
+        return roomRepository.findAll(validatePageableForRoom(pageable)).map {
             val imageUrl = imageService.generateRoomImageDownloadUrl(it.id!!)
             Room.fromEntity(it, imageUrl)
         }
@@ -177,7 +181,7 @@ class RoomServiceImpl(
             .and(RoomSpecifications.hasRoomDetails(roomDetails))
             .and(RoomSpecifications.hasRating(rating))
 
-        return roomRepository.findAll(spec, validatePageable(pageable)).map {
+        return roomRepository.findAll(spec, validatePageableForRoom(pageable)).map {
             val imageUrl = imageService.generateRoomImageDownloadUrl(it.id!!)
             Room.fromEntity(it, imageUrl)
         }
