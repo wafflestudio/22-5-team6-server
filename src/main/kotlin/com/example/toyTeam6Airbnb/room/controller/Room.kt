@@ -19,9 +19,6 @@ data class Room(
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity, imageUrl: String): Room {
-            var averageRating = entity.reviews.map { it.rating }.average()
-            if (averageRating.isNaN()) averageRating = 0.0
-
             return Room(
                 roomId = entity.id!!,
                 roomName = entity.name,
@@ -29,7 +26,7 @@ data class Room(
                 sido = entity.address.sido,
                 sigungu = entity.address.sigungu,
                 price = entity.price.perNight,
-                averageRating = averageRating,
+                averageRating = entity.ratingStatistics.averageRating,
                 imageUrl = imageUrl // imageService에서 대표 이미지 url 가져오기, list<String>의 첫번째 값"
             )
         }
@@ -56,9 +53,6 @@ data class RoomDetailsDTO(
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity, imageUrlList: List<String>): RoomDetailsDTO {
-            var averageRating = entity.reviews.map { it.rating }.average()
-            if (averageRating.isNaN()) averageRating = 0.0
-
             return RoomDetailsDTO(
                 roomId = entity.id!!,
                 hostId = entity.host.id!!,
@@ -70,7 +64,7 @@ data class RoomDetailsDTO(
                 roomDetails = entity.roomDetails,
                 price = entity.price,
                 maxOccupancy = entity.maxOccupancy,
-                averageRating = averageRating,
+                averageRating = entity.ratingStatistics.averageRating,
                 reviewCount = entity.reviews.size,
                 isSuperHost = entity.host.isSuperhost(),
                 createdAt = entity.createdAt,
