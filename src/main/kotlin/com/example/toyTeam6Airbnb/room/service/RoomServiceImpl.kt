@@ -163,13 +163,16 @@ class RoomServiceImpl(
         rating: Double?,
         startDate: LocalDate?,
         endDate: LocalDate?,
+        roomDetails: RoomDetailSearchDTO?,
         pageable: Pageable
     ): Page<Room> {
+        val (valStartDate, valEndDate) = validateDates(startDate, endDate)
+
         val spec = Specification.where(RoomSpecifications.hasName(name))
             .and(RoomSpecifications.hasType(type))
             .and(RoomSpecifications.hasPriceBetween(minPrice, maxPrice))
             .and(RoomSpecifications.hasMaxOccupancy(maxOccupancy))
-            .and(RoomSpecifications.isAvailable(startDate, endDate))
+            .and(RoomSpecifications.isAvailable(valStartDate, valEndDate))
             .and(RoomSpecifications.hasAddress(address))
             .and(RoomSpecifications.hasRoomDetails(roomDetails))
             .and(RoomSpecifications.hasRating(rating))
@@ -180,12 +183,26 @@ class RoomServiceImpl(
         }
     }
 
+    fun validateDates(startDate: LocalDate?, endDate: LocalDate?): Pair<LocalDate?, LocalDate?> {
+        return when {
+            startDate != null && endDate == null -> {
+                Pair(startDate, startDate.plusDays(1))
+            }
+            endDate != null && startDate == null -> {
+                Pair(endDate.minusDays(1), endDate)
+            }
+            else -> {
+                Pair(startDate, endDate)
+            }
+        }
+    }
+
     @Transactional
     override fun likeRoom(
         userId: Long,
         roomId: Long
     ) {
-        val userEntity = userRepository.findByIdOrNull(userId) ?: throw AuthenticateException()
+        val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
         if (userEntity.roomLikes.any { it.user.id == userId }) {
@@ -202,7 +219,7 @@ class RoomServiceImpl(
         roomId: Long
     ) {
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
-        val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
+        roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
         val roomLikeToDelete = userEntity.roomLikes.find { it.room.id == roomId } ?: throw RoomLikeNotFoundException()
         roomLikeRepository.delete(roomLikeToDelete)
