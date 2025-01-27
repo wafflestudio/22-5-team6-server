@@ -39,13 +39,13 @@ class UserEntity(
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     var image: ImageEntity? = null,
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     val reservations: List<ReservationEntity> = mutableListOf(),
 
-    @OneToMany(mappedBy = "host", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "host", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     val rooms: List<RoomEntity> = mutableListOf(),
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     val reviews: List<ReviewEntity> = mutableListOf(),
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)

@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.user
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.jsonwebtoken.ExpiredJwtException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -18,6 +19,8 @@ class JwtAuthenticationFilter(
     private val jwtTokenProvider: JwtTokenProvider,
     private val userDetailsService: UserDetailsService
 ) : OncePerRequestFilter() {
+
+    val klogger = KotlinLogging.logger {}
 
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -41,8 +44,9 @@ class JwtAuthenticationFilter(
                 authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
                 SecurityContextHolder.getContext().authentication = authentication
             }
-            filterChain.doFilter(request, response)
         } catch (ex: Exception) {
+            klogger.error { "Could not set user authentication in security context: $ex" }
+
             // return 401
             response.status = HttpStatus.UNAUTHORIZED.value()
             response.contentType = "application/json"
@@ -55,7 +59,9 @@ class JwtAuthenticationFilter(
                     mapOf("error" to ex2.msg, "errorCode" to ex2.errorCode)
                 )
             )
+            return
         }
+        filterChain.doFilter(request, response)
     }
 
     private fun getJwtFromRequest(request: HttpServletRequest): String? {
