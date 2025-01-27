@@ -17,7 +17,7 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
-import com.example.toyTeam6Airbnb.validateSortedPageable
+import com.example.toyTeam6Airbnb.validatePageableForReview
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -44,6 +44,7 @@ class ReviewServiceImpl(
     ): ReviewIdWithImage {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(reservationEntity.room.id!!) ?: throw RoomNotFoundException()
         if (reservationEntity.user.id != user.id) throw ReviewPermissionDeniedException()
 
         try {
@@ -58,6 +59,9 @@ class ReviewServiceImpl(
             ).let {
                 reviewRepository.save(it)
             }
+            roomEntity.ratingStatistics.incrementRating(rating)
+            roomRepository.save(roomEntity)
+
             return ReviewIdWithImage.fromEntity(reviewEntity)
         } catch (e: DataIntegrityViolationException) {
             throw DuplicateReviewException()
@@ -68,7 +72,7 @@ class ReviewServiceImpl(
     override fun getReviewsByRoom(roomId: Long, pageable: Pageable): Page<ReviewByRoomDTO> {
         roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
 
-        val reviewEntities = reviewRepository.findAllByRoomId(roomId, validateSortedPageable(pageable))
+        val reviewEntities = reviewRepository.findAllByRoomId(roomId, validatePageableForReview(pageable))
 
         val reviews = reviewEntities.map { ReviewByRoomDTO.fromEntity(it) }
         return reviews
@@ -79,7 +83,7 @@ class ReviewServiceImpl(
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         if (viewerId != userId && userEntity.profile?.showMyReviews != true) throw ReviewPermissionDeniedException()
 
-        val reviewEntities = reviewRepository.findAllByUserId(userId, validateSortedPageable(pageable))
+        val reviewEntities = reviewRepository.findAllByUserId(userId, validatePageableForReview(pageable))
 
         val reviews = reviewEntities.map { review ->
             val imageUrl = imageService.generateRoomImageDownloadUrl(review.room.id!!)
@@ -102,23 +106,54 @@ class ReviewServiceImpl(
         rating: Int?
     ): ReviewIdWithImage {
         userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
+        // First get the review to get the room ID
         val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFoundException()
         if (reviewEntity.user.id != user.id) throw ReviewPermissionDeniedException()
+
+        // Lock the room first
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(reviewEntity.room.id!!)
+            ?: throw RoomNotFoundException()
+
+        // Now get review with lock
+        val lockedReviewEntity = reviewRepository.findByIdOrNullForUpdate(reviewId)
+            ?: throw ReviewNotFoundException()
+        val previousRating = lockedReviewEntity.rating
 
         reviewEntity.content = content ?: reviewEntity.content
         reviewEntity.rating = rating ?: reviewEntity.rating
 
-        reviewRepository.save(reviewEntity)
-        return ReviewIdWithImage.fromEntity(reviewEntity)
+        // Update ratings directly on the locked room entity
+        if (previousRating != lockedReviewEntity.rating) {
+            roomEntity.ratingStatistics.decrementRating(previousRating)
+            roomEntity.ratingStatistics.incrementRating(lockedReviewEntity.rating)
+            roomRepository.save(roomEntity)
+        }
+
+        reviewRepository.save(lockedReviewEntity)
+        return ReviewIdWithImage.fromEntity(lockedReviewEntity)
     }
 
     @Transactional
     override fun deleteReview(user: User, reviewId: Long) {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
-        val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFoundException()
 
+        // First get the review to get the room ID
+        val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFoundException()
         if (reviewEntity.user != userEntity) throw ReviewPermissionDeniedException()
 
-        reviewRepository.delete(reviewEntity)
+        // Lock the room first
+        val roomEntity = roomRepository.findByIdOrNullForUpdate(reviewEntity.room.id!!)
+            ?: throw RoomNotFoundException()
+
+        // Now get review with lock
+        val lockedReviewEntity = reviewRepository.findByIdOrNullForUpdate(reviewId)
+            ?: throw ReviewNotFoundException()
+        val previousRating = lockedReviewEntity.rating
+
+        // Update ratings directly on the locked room entity
+        roomEntity.ratingStatistics.decrementRating(previousRating)
+        roomRepository.save(roomEntity)
+
+        reviewRepository.delete(lockedReviewEntity)
     }
 }

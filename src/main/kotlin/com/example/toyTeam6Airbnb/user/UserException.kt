@@ -67,14 +67,20 @@ class UserWithNoProfileException : UserException(
     msg = "User with no profile"
 )
 
-class JWTException : UserException(
+class JWTUnknownException : UserException(
     errorCode = 1010,
     httpStatusCode = HttpStatus.UNAUTHORIZED,
-    msg = "JWT Token error"
+    msg = "Unknown JWT Token error"
 )
 
-class likedRoomsPermissionDenied : UserException(
+class LikedRoomsPermissionDenied : UserException(
     errorCode = 1011,
     httpStatusCode = HttpStatus.FORBIDDEN,
     msg = "Permission Denied"
+)
+
+class JwtExpiredException : UserException(
+    errorCode = 1012,
+    httpStatusCode = HttpStatus.UNAUTHORIZED,
+    msg = "JWT Token expired"
 )

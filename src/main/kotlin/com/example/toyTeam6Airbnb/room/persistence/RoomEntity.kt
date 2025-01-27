@@ -45,6 +45,8 @@ class RoomEntity(
     @Embedded
     var address: Address,
     @Embedded
+    var ratingStatistics: RatingStatistics = RatingStatistics(),
+    @Embedded
     var roomDetails: RoomDetails,
     @Embedded
     var price: Price,

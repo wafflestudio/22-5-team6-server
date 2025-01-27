@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb
 
 import com.example.toyTeam6Airbnb.room.persistence.Address
+import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.fasterxml.jackson.databind.JsonNode
@@ -15,6 +16,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import java.time.LocalDate
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -146,7 +148,7 @@ class RoomControllerTest {
         val room3 = dataGenerator.generateRoom()
 
         val result = mockMvc.perform(
-            MockMvcRequestBuilders.get("/api/v1/rooms/main?page=0&size=3")
+            MockMvcRequestBuilders.get("/api/v1/rooms/main?page=0&size=3&sort=id,desc")
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
@@ -182,6 +184,12 @@ class RoomControllerTest {
         val rootNode: JsonNode = objectMapper.readTree(jsonString)
         val contentNode: JsonNode = rootNode.path("content")
         return if (contentNode.isArray) contentNode.size() else 0
+    }
+
+    fun getContent(jsonString: String): JsonNode {
+        val objectMapper = ObjectMapper()
+        val rootNode = objectMapper.readTree(jsonString)
+        return rootNode.path("content")
     }
 
     @Test
@@ -371,9 +379,6 @@ class RoomControllerTest {
     fun `should search rooms by name`() {
         val room1 = dataGenerator.generateRoom(name = "Room1")
         val room2 = dataGenerator.generateRoom(name = "Room2")
-        val room3 = dataGenerator.generateRoom(name = "Room3")
-        val room4 = dataGenerator.generateRoom(name = "Room4")
-        val room5 = dataGenerator.generateRoom(name = "Room5")
 
         val result = mockMvc.perform(
             MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
@@ -401,10 +406,8 @@ class RoomControllerTest {
     fun `should search rooms by address`() {
         val address = Address("Seoul", "ad", "ad", "ad")
         val room1 = dataGenerator.generateRoom(name = "Room1")
-        val room2 = dataGenerator.generateRoom(name = "Room2")
-        val room3 = dataGenerator.generateRoom(name = "Room3", address = address)
-        val room4 = dataGenerator.generateRoom(name = "Room4")
-        val room5 = dataGenerator.generateRoom(name = "Room5")
+        val room2 = dataGenerator.generateRoom(name = "Room2", address = address)
+        val room3 = dataGenerator.generateRoom(name = "Room3")
 
         val result = mockMvc.perform(
             MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
@@ -422,7 +425,7 @@ class RoomControllerTest {
         Assertions.assertEquals(getContentLength(result), 1)
 
         // check if all rooms are in the result
-        Assertions.assertEquals(getNthContentId(result, 0), room3.id)
+        Assertions.assertEquals(getNthContentId(result, 0), room2.id)
 
         // Add assertions to verify the response content if needed
         println(result)
@@ -449,23 +452,25 @@ class RoomControllerTest {
         val room6 = dataGenerator.generateRoom(name = "Room6", type = RoomType.HOTEL, address = address6)
 
         val address7 = Address(sido = "sido3", sigungu = "sigungu3", street = "street1", detail = "detail7")
-        val room7 = dataGenerator.generateRoom(name = "Room7", type = RoomType.APARTMENT, address = address7)
+        val roomDetails7 = RoomDetails(wifi = true, selfCheckin = false, luggage = false, tv = true, bedroom = 1, bathroom = 2, bed = 2)
+        dataGenerator.generateRoom(name = "Room7", type = RoomType.APARTMENT, address = address7, roomDetails = roomDetails7)
 
         val address8 = Address(sido = "sido3", sigungu = "sigungu3", street = "street2", detail = "detail8")
         val room8 = dataGenerator.generateRoom(name = "Room8", type = RoomType.VILLA, address = address8)
 
         val address9 = Address(sido = "sido3", sigungu = "sigungu3", street = "street3", detail = "detail9")
-        val room9 = dataGenerator.generateRoom(name = "Room9", type = RoomType.HOTEL, address = address9)
+        dataGenerator.generateRoom(name = "Room9", type = RoomType.HOTEL, address = address9)
 
         val address10 = Address(sido = "sido4", sigungu = "sigungu4", street = "street1", detail = "detail10")
-        val room10 = dataGenerator.generateRoom(name = "Room10", type = RoomType.APARTMENT, address = address10)
+        dataGenerator.generateRoom(name = "Room10", type = RoomType.APARTMENT, address = address10)
 
         val address11 = Address(sido = "sido4", sigungu = "sigungu4", street = "street2", detail = "detail11")
         val room11 = dataGenerator.generateRoom(name = "Room11", type = RoomType.VILLA, address = address11)
 
         val address12 = Address(sido = "sido4", sigungu = "sigungu4", street = "street3", detail = "detail12")
-        val room12 = dataGenerator.generateRoom(name = "Room12", type = RoomType.HOTEL, address = address12)
+        dataGenerator.generateRoom(name = "Room12", type = RoomType.HOTEL, address = address12)
 
+        // RoomType + Address
         val result1 = mockMvc.perform(
             MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
                 .param("roomType", RoomType.APARTMENT.name)
@@ -479,21 +484,18 @@ class RoomControllerTest {
             .response
             .contentAsString
 
-        // check result length
         Assertions.assertEquals(getContentLength(result1), 1)
-
-        // check if all rooms are in the result
         Assertions.assertEquals(getNthContentId(result1, 0), room1.id)
-
-        // Add assertions to verify the response content if needed
         println(result1)
 
+        // Address (sido + sigungu), price.perNight,desc sort
         val result2 = mockMvc.perform(
             MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
-                .param("sigungu", "sigungu1")
-                .param("street", "street2")
+                .param("sido", "sido2")
+                .param("sigungu", "sigungu2")
                 .param("page", "0")
                 .param("size", "10")
+                .param("sort", "price.perNight,desc")
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
@@ -501,15 +503,121 @@ class RoomControllerTest {
             .response
             .contentAsString
 
-        // check result length
-        Assertions.assertEquals(getContentLength(result2), 2)
+        Assertions.assertEquals(getContentLength(result2), 3)
 
-        // check if all rooms are in the result
-        Assertions.assertEquals(getNthContentId(result2, 0), room3.id)
-        Assertions.assertEquals(getNthContentId(result2, 1), room2.id)
-
-        // Add assertions to verify the response content if needed
+        val contentNode = getContent(result2)
+        val prices = contentNode.map { it.path("price").path("perNight").asDouble() }
+        for (i in 0 until prices.size - 1) {
+            Assertions.assertTrue(prices[i] >= prices[i + 1], "Prices are not sorted in descending order")
+        }
         println(result2)
+
+        // RoomType, createdAt,desc sort
+        val result3 = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
+                .param("roomType", RoomType.VILLA.name)
+                .param("page", "0")
+                .param("size", "10")
+                .param("sort", "createdAt,desc")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        Assertions.assertEquals(getContentLength(result3), 4)
+        Assertions.assertEquals(getNthContentId(result3, 0), room11.id)
+        Assertions.assertEquals(getNthContentId(result3, 1), room8.id)
+        Assertions.assertEquals(getNthContentId(result3, 2), room5.id)
+        Assertions.assertEquals(getNthContentId(result3, 3), room2.id)
+        println(result2)
+
+        // RoomDetails, name,desc sort
+        val result4 = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
+                .param("wifi", "true")
+                .param("selfCheckin", "false")
+                .param("luggage", "false")
+                .param("tv", "true")
+                .param("bedroom", "1")
+                .param("bathroom", "2")
+                .param("bed", "2")
+                .param("page", "0")
+                .param("size", "10")
+                .param("sort", "name,desc")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        println(result4)
+
+        // startDate, endDate, id,desc
+        val startDate = LocalDate.of(2025, 12, 1)
+        val endDate = startDate.plusDays(3)
+        val rooms = listOf(room1, room2, room3, room4, room5, room6)
+
+        rooms.forEach { room ->
+            dataGenerator.generateReservation(room = room, startDate = startDate, endDate = endDate)
+        }
+
+        val result5 = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
+                .param("startDate", "2025-12-01")
+                .param("endDate", "2026-12-02")
+                .param("page", "0")
+                .param("size", "10")
+                .param("sort", "id,desc")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        Assertions.assertEquals(getContentLength(result5), 6)
+
+        // startDate
+        val startDate2 = LocalDate.of(2026, 1, 1)
+        val endDate2 = LocalDate.of(2026, 1, 5)
+        val rooms2 = listOf(room1, room2, room3, room4, room5, room6)
+
+        rooms2.forEach { room ->
+            dataGenerator.generateReservation(room = room, startDate = startDate2, endDate = endDate2)
+        }
+
+        val result6 = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
+                .param("startDate", "2026-01-05")
+                .param("page", "0")
+                .param("size", "10")
+                .param("sort", "id,desc")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        Assertions.assertEquals(getContentLength(result6), 10)
+
+        val result7 = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
+                .param("endDate", "2026-01-05")
+                .param("page", "0")
+                .param("size", "10")
+                .param("sort", "id,desc")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        Assertions.assertEquals(getContentLength(result7), 6)
     }
 
     @BeforeEach

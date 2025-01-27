@@ -39,17 +39,20 @@ class UserEntity(
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     var image: ImageEntity? = null,
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     val reservations: List<ReservationEntity> = mutableListOf(),
 
-    @OneToMany(mappedBy = "host", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "host", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     val rooms: List<RoomEntity> = mutableListOf(),
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     val reviews: List<ReviewEntity> = mutableListOf(),
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     var profile: ProfileEntity? = null,
+
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY, orphanRemoval = true)
+    var refreshTokens: MutableList<RefreshTokenEntity> = mutableListOf(),
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
     var roomLikes: MutableList<RoomLikeEntity> = mutableListOf()

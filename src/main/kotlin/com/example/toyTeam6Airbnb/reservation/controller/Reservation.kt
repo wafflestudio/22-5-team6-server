@@ -18,9 +18,11 @@ data class Reservation(
 data class ReservationDetails(
     val reservationId: Long,
     val roomId: Long,
+    val roomName: String,
     val startDate: LocalDate,
     val endDate: LocalDate,
     val place: String,
+    val price: Double,
     val numberOfGuests: Int,
     val imageUrl: String // 대표이미지 다운로드 URL
 ) {
@@ -29,9 +31,11 @@ data class ReservationDetails(
             return ReservationDetails(
                 reservationId = entity.id!!,
                 roomId = entity.room.id!!,
+                roomName = entity.room.name,
                 startDate = entity.startDate,
                 endDate = entity.endDate,
                 place = entity.room.address.sido,
+                price = entity.room.price.total,
                 numberOfGuests = entity.numberOfGuests,
                 imageUrl = imageUrl // 대표이미지 다운로드 URL
             )
@@ -50,7 +54,7 @@ data class ReservationDTO(
         fun fromEntity(entity: ReservationEntity, imageUrl: String): ReservationDTO {
             return ReservationDTO(
                 reservationId = entity.id!!,
-                place = entity.room.address.sido,
+                place = entity.room.address.sigungu,
                 startDate = entity.startDate,
                 endDate = entity.endDate,
                 imageUrl = imageUrl // 대표이미지 다운로드 url, 이렇게하는 이유가 Reservation entity에 연결된 Room은 Entity인데 이거에 연결되있는건 Image엔티티들이라 Url을 가져오기 위해 service를 또 불러야만함

@@ -121,10 +121,18 @@ class RoomController(
         @RequestParam(required = false) rating: Double?,
         @RequestParam(required = false) startDate: LocalDate?,
         @RequestParam(required = false) endDate: LocalDate?,
+        @RequestParam(required = false) wifi: Boolean?,
+        @RequestParam(required = false) selfCheckin: Boolean?,
+        @RequestParam(required = false) luggage: Boolean?,
+        @RequestParam(required = false) tv: Boolean?,
+        @RequestParam(required = false) bedRoom: Int?,
+        @RequestParam(required = false) bathRoom: Int?,
+        @RequestParam(required = false) bed: Int?,
         pageable: Pageable
     ): ResponseEntity<Page<Room>> {
         val address = AddressSearchDTO(sido, sigungu, street, detail)
-        val rooms = roomService.searchRooms(roomName, roomType, minPrice, maxPrice, address, maxOccupancy, rating, startDate, endDate, pageable)
+        val roomDetails = RoomDetailSearchDTO(wifi, selfCheckin, luggage, tv, bedRoom, bathRoom, bed)
+        val rooms = roomService.searchRooms(roomName, roomType, minPrice, maxPrice, address, maxOccupancy, rating, startDate, endDate, roomDetails, pageable)
         return ResponseEntity.ok(rooms)
     }
 
@@ -160,6 +168,16 @@ data class AddressSearchDTO(
     val sigungu: String? = null,
     val street: String? = null,
     val detail: String? = null
+)
+
+data class RoomDetailSearchDTO(
+    val wifi: Boolean? = null,
+    val selfCheckin: Boolean? = null,
+    val luggage: Boolean? = null,
+    val tv: Boolean? = null,
+    val bedRoom: Int? = null,
+    val bathRoom: Int? = null,
+    val bed: Int? = null
 )
 
 data class CreateRoomRequest(
