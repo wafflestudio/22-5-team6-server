@@ -2,6 +2,8 @@ package com.example.toyTeam6Airbnb.room.persistence
 
 import com.example.toyTeam6Airbnb.reservation.persistence.ReservationEntity
 import com.example.toyTeam6Airbnb.review.persistence.ReviewEntity
+import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
+import com.example.toyTeam6Airbnb.room.controller.RoomDetailSearchDTO
 import jakarta.persistence.criteria.Predicate
 import org.springframework.data.jpa.domain.Specification
 import java.time.LocalDate
@@ -69,43 +71,91 @@ class RoomSpecifications {
 
         fun isAvailable(startDate: LocalDate?, endDate: LocalDate?): Specification<RoomEntity> {
             return Specification { root, query, cb ->
-                if (startDate == null || endDate == null) {
-                    // startDate와 endDate 중 하나라도 null인 경우, 예약 가능 여부 필터링을 적용하지 않음
-                    cb.conjunction()
-                } else {
-                    // startDate와 endDate가 모두 제공된 경우, 겹치는 예약이 없는 방을 필터링
-                    // 서브쿼리를 사용하여 NOT EXISTS 조건을 구현
-                    val subquery = query!!.subquery(Long::class.java)
-                    val reservation = subquery.from(ReservationEntity::class.java)
-                    subquery.select(cb.literal(1))
-                        .where(
-                            cb.equal(reservation.get<RoomEntity>("room"), root),
-                            cb.lessThan(reservation.get<LocalDate>("startDate"), endDate),
-                            cb.greaterThan(reservation.get<LocalDate>("endDate"), startDate)
-                        )
-                    cb.not(cb.exists(subquery))
+                when {
+                    startDate == null || endDate == null -> {
+                        cb.conjunction()
+                    }
+                    else -> {
+                        val subquery = query!!.subquery(Long::class.java)
+                        val reservation = subquery.from(ReservationEntity::class.java)
+                        subquery.select(cb.literal(1))
+                            .where(
+                                cb.equal(reservation.get<RoomEntity>("room"), root),
+                                cb.lessThan(reservation.get<LocalDate>("startDate"), endDate),
+                                cb.greaterThan(reservation.get<LocalDate>("endDate"), startDate)
+                            )
+                        cb.not(cb.exists(subquery))
+                    }
                 }
             }
         }
 
-        fun hasAddress(sido: String?, sigungu: String?, street: String?, detail: String?): Specification<RoomEntity> {
+        fun hasAddress(address: AddressSearchDTO?): Specification<RoomEntity> {
             return Specification { root, _, cb ->
-                if (sido == null && sigungu == null && street == null && detail == null) {
+                if (address == null) {
                     cb.conjunction()
                 } else {
-                    val addressJoin = root.join<RoomEntity, Address>("address", jakarta.persistence.criteria.JoinType.LEFT)
+                    if (address.sido == null && address.sigungu == null && address.street == null && address.detail == null) {
+                        cb.conjunction()
+                    } else {
+                        val addressJoin =
+                            root.join<RoomEntity, Address>("address", jakarta.persistence.criteria.JoinType.LEFT)
+                        val predicates = mutableListOf<Predicate>()
+                        if (address.sido != null) {
+                            predicates.add(cb.equal(cb.lower(addressJoin.get<String>("sido")), address.sido.lowercase()))
+                        }
+                        if (address.sigungu != null) {
+                            predicates.add(cb.equal(cb.lower(addressJoin.get<String>("sigungu")), address.sigungu.lowercase()))
+                        }
+                        if (address.street != null) {
+                            predicates.add(
+                                cb.like(
+                                    cb.lower(addressJoin.get<String>("street")),
+                                    "%${address.street.lowercase()}%"
+                                )
+                            )
+                        }
+                        if (address.detail != null) {
+                            predicates.add(
+                                cb.like(
+                                    cb.lower(addressJoin.get<String>("detail")),
+                                    "%${address.detail.lowercase()}%"
+                                )
+                            )
+                        }
+                        cb.and(*predicates.toTypedArray())
+                    }
+                }
+            }
+        }
+
+        fun hasRoomDetails(roomDetails: RoomDetailSearchDTO?): Specification<RoomEntity> {
+            return Specification { root, _, cb ->
+                if (roomDetails == null) {
+                    cb.conjunction()
+                } else {
+                    val roomDetailsJoin = root.join<RoomEntity, RoomDetails>("roomDetails", jakarta.persistence.criteria.JoinType.LEFT)
                     val predicates = mutableListOf<Predicate>()
-                    if (sido != null) {
-                        predicates.add(cb.equal(cb.lower(addressJoin.get<String>("sido")), sido.lowercase()))
+                    if (roomDetails.wifi != null) {
+                        predicates.add(cb.equal(roomDetailsJoin.get<Boolean>("wifi"), roomDetails.wifi))
                     }
-                    if (sigungu != null) {
-                        predicates.add(cb.equal(cb.lower(addressJoin.get<String>("sigungu")), sigungu.lowercase()))
+                    if (roomDetails.selfCheckin != null) {
+                        predicates.add(cb.equal(roomDetailsJoin.get<Boolean>("selfCheckin"), roomDetails.selfCheckin))
                     }
-                    if (street != null) {
-                        predicates.add(cb.like(cb.lower(addressJoin.get<String>("street")), "%${street.lowercase()}%"))
+                    if (roomDetails.luggage != null) {
+                        predicates.add(cb.equal(roomDetailsJoin.get<Boolean>("luggage"), roomDetails.luggage))
                     }
-                    if (detail != null) {
-                        predicates.add(cb.like(cb.lower(addressJoin.get<String>("detail")), "%${detail.lowercase()}%"))
+                    if (roomDetails.tv != null) {
+                        predicates.add(cb.equal(roomDetailsJoin.get<Boolean>("tv"), roomDetails.tv))
+                    }
+                    if (roomDetails.bedRoom != null) {
+                        predicates.add(cb.ge(roomDetailsJoin.get<Int>("bedRoom"), roomDetails.bedRoom))
+                    }
+                    if (roomDetails.bathRoom != null) {
+                        predicates.add(cb.ge(roomDetailsJoin.get<Int>("bathRoom"), roomDetails.bathRoom))
+                    }
+                    if (roomDetails.bed != null) {
+                        predicates.add(cb.ge(roomDetailsJoin.get<Int>("bed"), roomDetails.bed))
                     }
                     cb.and(*predicates.toTypedArray())
                 }

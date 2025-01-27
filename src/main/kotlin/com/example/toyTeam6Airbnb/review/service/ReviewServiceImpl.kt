@@ -17,7 +17,7 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
-import com.example.toyTeam6Airbnb.validateSortedPageable
+import com.example.toyTeam6Airbnb.validatePageableForReview
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -72,7 +72,7 @@ class ReviewServiceImpl(
     override fun getReviewsByRoom(roomId: Long, pageable: Pageable): Page<ReviewByRoomDTO> {
         roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
 
-        val reviewEntities = reviewRepository.findAllByRoomId(roomId, validateSortedPageable(pageable))
+        val reviewEntities = reviewRepository.findAllByRoomId(roomId, validatePageableForReview(pageable))
 
         val reviews = reviewEntities.map { ReviewByRoomDTO.fromEntity(it) }
         return reviews
@@ -83,7 +83,7 @@ class ReviewServiceImpl(
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         if (viewerId != userId && userEntity.profile?.showMyReviews != true) throw ReviewPermissionDeniedException()
 
-        val reviewEntities = reviewRepository.findAllByUserId(userId, validateSortedPageable(pageable))
+        val reviewEntities = reviewRepository.findAllByUserId(userId, validatePageableForReview(pageable))
 
         val reviews = reviewEntities.map { review ->
             val imageUrl = imageService.generateRoomImageDownloadUrl(review.room.id!!)

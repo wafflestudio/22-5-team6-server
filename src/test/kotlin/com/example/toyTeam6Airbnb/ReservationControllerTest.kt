@@ -265,11 +265,11 @@ class ReservationControllerTest {
     fun `should get reservations by user`() {
         val (user, token) = dataGenerator.generateUserAndToken()
         val room = dataGenerator.generateRoom()
-        val reservation1 = dataGenerator.generateReservation(user, room)
-        val reservation2 = dataGenerator.generateReservation(user, room)
+        val reservation1 = dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2026, 1, 1), endDate = LocalDate.of(2026, 1, 3))
+        val reservation2 = dataGenerator.generateReservation(user, room, startDate = LocalDate.of(2026, 1, 4), endDate = LocalDate.of(2026, 1, 6))
 
         val result = mockMvc.perform(
-            MockMvcRequestBuilders.get("/api/v1/reservations/user/${user.id}?page=0&size=3")
+            MockMvcRequestBuilders.get("/api/v1/reservations/user/${user.id}?page=0&size=3&sort=startDate,desc")
                 .header("Authorization", "Bearer $token")
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
@@ -282,8 +282,8 @@ class ReservationControllerTest {
         Assertions.assertEquals(getContentLength(result), 2)
 
         // check if all reviews are in the result
-        Assertions.assertEquals(getNthContentId(result, 0), reservation1.id)
-        Assertions.assertEquals(getNthContentId(result, 1), reservation2.id)
+        Assertions.assertEquals(getNthContentId(result, 0), reservation2.id)
+        Assertions.assertEquals(getNthContentId(result, 1), reservation1.id)
 
         // another user should not be able to see the reservations
         val (user2, token2) = dataGenerator.generateUserAndToken()

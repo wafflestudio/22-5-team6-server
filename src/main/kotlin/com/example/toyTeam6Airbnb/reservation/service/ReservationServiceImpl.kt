@@ -18,7 +18,7 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
-import com.example.toyTeam6Airbnb.validateSortedPageable
+import com.example.toyTeam6Airbnb.validatePageableForReservation
 import jakarta.persistence.EntityManager
 import jakarta.persistence.LockModeType
 import org.springframework.beans.factory.getBean
@@ -148,7 +148,7 @@ class ReservationServiceImpl(
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         if (viewerId != userId && userEntity.profile?.showMyReservations != true) throw ReservationPermissionDenied()
 
-        return reservationRepository.findAllByUser(userEntity, validateSortedPageable(pageable)).map { reservation ->
+        return reservationRepository.findAllByUser(userEntity, validatePageableForReservation(pageable)).map { reservation ->
             val imageUrl = imageService.generateRoomImageDownloadUrl(reservation.room.id!!)
             ReservationDTO.fromEntity(reservation, imageUrl)
         }

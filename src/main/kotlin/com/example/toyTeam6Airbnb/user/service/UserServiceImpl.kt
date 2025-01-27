@@ -16,7 +16,7 @@ import com.example.toyTeam6Airbnb.user.persistence.AuthProvider
 import com.example.toyTeam6Airbnb.user.persistence.RefreshTokenRepository
 import com.example.toyTeam6Airbnb.user.persistence.UserEntity
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
-import com.example.toyTeam6Airbnb.validateSortedPageable
+import com.example.toyTeam6Airbnb.validatePageableForRoom
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -76,7 +76,7 @@ class UserServiceImpl(
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         if (viewerId != userId && userEntity.profile?.showMyWishlist != true) throw LikedRoomsPermissionDenied()
         // 요청을 보낸 사용자가 본인이 아니고, 위시리스트 공개를 안한 경우에는 Permission Denied
-        return roomLikeRepository.findRoomsLikedByUser(userEntity, validateSortedPageable(pageable)).map { roomEntity ->
+        return roomLikeRepository.findRoomsLikedByUser(userEntity, validatePageableForRoom(pageable)).map { roomEntity ->
             val imageUrl = imageService.generateRoomImageDownloadUrl(roomEntity.id!!)
             Room.fromEntity(roomEntity, imageUrl)
         }
