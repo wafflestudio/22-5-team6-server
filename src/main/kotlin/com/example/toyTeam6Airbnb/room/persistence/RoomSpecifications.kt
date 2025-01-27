@@ -72,10 +72,10 @@ class RoomSpecifications {
         fun isAvailable(startDate: LocalDate?, endDate: LocalDate?): Specification<RoomEntity> {
             return Specification { root, query, cb ->
                 when {
-                    startDate == null && endDate == null -> {
+                    startDate == null || endDate == null -> {
                         cb.conjunction()
                     }
-                    startDate != null && endDate != null -> {
+                    else -> {
                         val subquery = query!!.subquery(Long::class.java)
                         val reservation = subquery.from(ReservationEntity::class.java)
                         subquery.select(cb.literal(1))
@@ -86,27 +86,6 @@ class RoomSpecifications {
                             )
                         cb.not(cb.exists(subquery))
                     }
-                    startDate != null -> {
-                        val subquery = query!!.subquery(Long::class.java)
-                        val reservation = subquery.from(ReservationEntity::class.java)
-                        subquery.select(cb.literal(1))
-                            .where(
-                                cb.equal(reservation.get<RoomEntity>("room"), root),
-                                cb.greaterThan(reservation.get<LocalDate>("endDate"), startDate)
-                            )
-                        cb.not(cb.exists(subquery))
-                    }
-                    endDate != null -> {
-                        val subquery = query!!.subquery(Long::class.java)
-                        val reservation = subquery.from(ReservationEntity::class.java)
-                        subquery.select(cb.literal(1))
-                            .where(
-                                cb.equal(reservation.get<RoomEntity>("room"), root),
-                                cb.lessThan(reservation.get<LocalDate>("startDate"), endDate)
-                            )
-                        cb.not(cb.exists(subquery))
-                    }
-                    else -> cb.conjunction()
                 }
             }
         }
