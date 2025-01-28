@@ -1,12 +1,14 @@
 package com.example.toyTeam6Airbnb.room.service
 
 import com.example.toyTeam6Airbnb.image.service.ImageService
+import com.example.toyTeam6Airbnb.reservation.persistence.ReservationRepository
 import com.example.toyTeam6Airbnb.room.DuplicateRoomException
 import com.example.toyTeam6Airbnb.room.InvalidAddressException
 import com.example.toyTeam6Airbnb.room.InvalidDescriptionException
 import com.example.toyTeam6Airbnb.room.InvalidMaxOccupancyException
 import com.example.toyTeam6Airbnb.room.InvalidNameException
 import com.example.toyTeam6Airbnb.room.InvalidPriceException
+import com.example.toyTeam6Airbnb.room.InvalidRoomDetailsException
 import com.example.toyTeam6Airbnb.room.InvalidRoomTypeException
 import com.example.toyTeam6Airbnb.room.RoomAlreadyLikedException
 import com.example.toyTeam6Airbnb.room.RoomLikeNotFoundException
@@ -44,6 +46,7 @@ class RoomServiceImpl(
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
     private val imageService: ImageService,
+    private val reservationRepository: ReservationRepository,
     private val roomLikeRepository: RoomLikeRepository
 ) : RoomService {
 
@@ -61,7 +64,7 @@ class RoomServiceImpl(
     ): RoomShortDTO {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw UserNotFoundException()
 
-        validateRoomInfo(name, description, type, address, price, maxOccupancy)
+        validateRoomInfo(name, description, type, address, price, maxOccupancy, roomDetails)
 
         if (roomRepository.existsByAddress(address)) throw DuplicateRoomException()
 
@@ -90,18 +93,31 @@ class RoomServiceImpl(
     }
 
     @Transactional
-    override fun getRooms(pageable: Pageable): Page<Room> {
-        return roomRepository.findAll(validatePageableForRoom(pageable)).map {
-            val imageUrl = imageService.generateRoomImageDownloadUrl(it.id!!)
-            Room.fromEntity(it, imageUrl)
+    override fun getRooms(viewerId: Long?, pageable: Pageable): Page<Room> {
+        val roomEntities = roomRepository.findAll(validatePageableForRoom(pageable))
+
+        val roomIds = roomEntities.mapNotNull { it.id }
+
+        val likedRoomIds = if (viewerId != null && roomIds.isNotEmpty()) {
+            roomLikeRepository.findByUserIdAndRoomIdIn(viewerId, roomIds).map { it.room.id }.toSet()
+        } else {
+            emptySet()
+        }
+
+        return roomEntities.map { roomEntity ->
+            val roomId = roomEntity.id!!
+            val isLiked = likedRoomIds.contains(roomId)
+            val imageUrl = imageService.generateRoomImageDownloadUrl(roomId)
+            Room.fromEntity(roomEntity, imageUrl, isLiked)
         }
     }
 
     @Transactional
-    override fun getRoomDetails(roomId: Long): RoomDetailsDTO {
+    override fun getRoomDetails(viewerId: Long?, roomId: Long): RoomDetailsDTO {
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
         val imageUrlList = imageService.generateRoomImageDownloadUrls(roomEntity.id!!)
-        return RoomDetailsDTO.fromEntity(roomEntity, imageUrlList)
+        val isLiked = viewerId?.let { roomLikeRepository.existsByUserIdAndRoomId(it, roomId) } ?: false
+        return RoomDetailsDTO.fromEntity(roomEntity, imageUrlList, isLiked)
     }
 
     @Transactional
@@ -133,7 +149,7 @@ class RoomServiceImpl(
 
         if (roomEntity.host.id != hostEntity.id) throw RoomPermissionDeniedException()
 
-        validateRoomInfo(name, description, type, address, price, maxOccupancy)
+        validateRoomInfo(name, description, type, address, price, maxOccupancy, roomDetails)
 
         if (roomRepository.existsByAddress(address) &&
             (roomEntity.address != address)
@@ -180,6 +196,7 @@ class RoomServiceImpl(
         startDate: LocalDate?,
         endDate: LocalDate?,
         roomDetails: RoomDetailSearchDTO?,
+        viewerId: Long?,
         pageable: Pageable
     ): Page<Room> {
         val (valStartDate, valEndDate) = validateDates(startDate, endDate)
@@ -193,9 +210,21 @@ class RoomServiceImpl(
             .and(RoomSpecifications.hasRoomDetails(roomDetails))
             .and(RoomSpecifications.hasRating(rating))
 
-        return roomRepository.findAll(spec, validatePageableForRoom(pageable)).map {
-            val imageUrl = imageService.generateRoomImageDownloadUrl(it.id!!)
-            Room.fromEntity(it, imageUrl)
+        val roomEntities = roomRepository.findAll(spec, validatePageableForRoom(pageable))
+
+        val roomIds = roomEntities.mapNotNull { it.id }
+
+        val likedRoomIds = if (viewerId != null && roomIds.isNotEmpty()) {
+            roomLikeRepository.findByUserIdAndRoomIdIn(viewerId, roomIds).map { it.room.id }.toSet()
+        } else {
+            emptySet()
+        }
+
+        return roomEntities.map { roomEntity ->
+            val roomId = roomEntity.id!!
+            val isLiked = likedRoomIds.contains(roomId)
+            val imageUrl = imageService.generateRoomImageDownloadUrl(roomId)
+            Room.fromEntity(roomEntity, imageUrl, isLiked)
         }
     }
 
@@ -241,13 +270,43 @@ class RoomServiceImpl(
         roomLikeRepository.delete(roomLikeToDelete)
     }
 
+    @Transactional
+    override fun getHotPlacesByDate(viewerId: Long?, startDate: LocalDate, endDate: LocalDate): Page<Room> {
+        val reservations = reservationRepository.findReservationsByDateRange(startDate, endDate)
+
+        if (reservations.isEmpty()) return Page.empty()
+
+        val sigunguReservationCounts = reservations.groupingBy { it.room.address.sigungu }
+            .eachCount()
+
+        val mostReservedSigungu = sigunguReservationCounts.maxByOrNull { it.value }!!.key
+
+        val roomEntities = roomRepository.findTopRoomsBySigungu(mostReservedSigungu, Pageable.ofSize(3))
+
+        val roomIds = roomEntities.mapNotNull { it.id }
+
+        val likedRoomIds = if (viewerId != null && roomIds.isNotEmpty()) {
+            roomLikeRepository.findByUserIdAndRoomIdIn(viewerId, roomIds).map { it.room.id }.toSet()
+        } else {
+            emptySet()
+        }
+
+        return roomEntities.map { roomEntity ->
+            val roomId = roomEntity.id!!
+            val isLiked = likedRoomIds.contains(roomId)
+            val imageUrl = imageService.generateRoomImageDownloadUrl(roomId)
+            Room.fromEntity(roomEntity, imageUrl, isLiked)
+        }
+    }
+
     private fun validateRoomInfo(
         name: String,
         description: String,
         type: RoomType,
         address: Address,
         price: Price,
-        maxOccupancy: Int
+        maxOccupancy: Int,
+        roomDetails: RoomDetails
     ) {
         if (name.isBlank()) throw InvalidNameException()
         if (description.isBlank()) throw InvalidDescriptionException()
@@ -261,6 +320,7 @@ class RoomServiceImpl(
         }
 
         validateAddress(address)
+        validateRoomDetails(roomDetails)
     }
 
     private fun validatePrice(price: Price) {
@@ -280,6 +340,15 @@ class RoomServiceImpl(
             address.detail.isBlank()
         ) {
             throw InvalidAddressException()
+        }
+    }
+
+    private fun validateRoomDetails(roomDetails: RoomDetails) {
+        if (roomDetails.bedroom <= 0 ||
+            roomDetails.bathroom <= 0 ||
+            roomDetails.bed <= 0
+        ) {
+            throw InvalidRoomDetailsException()
         }
     }
 }

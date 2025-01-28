@@ -76,3 +76,9 @@ class RoomLikeNotFoundException : RoomException(
     httpStatusCode = HttpStatus.NOT_FOUND,
     msg = "Room like not found, 좋아요가 이미 없는데 취소요청이 넘어옴"
 )
+
+class InvalidRoomDetailsException : RoomException(
+    errorCode = 2012,
+    httpStatusCode = HttpStatus.BAD_REQUEST,
+    msg = "Invalid room details"
+)
