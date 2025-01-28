@@ -29,7 +29,9 @@ data class ReviewByRoomDTO(
 }
 
 data class ReviewByUserDTO(
+    val reviewId: Long, // 리뷰 id
     val reservationId: Long,
+    val roomId: Long, // 숙소 id
     val content: String,
     val rating: Int,
     val place: String,
@@ -40,7 +42,9 @@ data class ReviewByUserDTO(
     companion object {
         fun fromEntity(entity: ReviewEntity, imageUrl: String): ReviewByUserDTO {
             return ReviewByUserDTO(
+                reviewId = entity.id!!,
                 reservationId = entity.reservation.id!!,
+                roomId = entity.room.id!!,
                 content = entity.content,
                 rating = entity.rating,
                 place = entity.room.address.sido,

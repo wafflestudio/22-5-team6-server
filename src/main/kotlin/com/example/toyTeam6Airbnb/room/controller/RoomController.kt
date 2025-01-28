@@ -70,6 +70,16 @@ class RoomController(
         return ResponseEntity.ok(room)
     }
 
+    @GetMapping("/rooms/{hostId}")
+    @Operation(summary = "호스트 방 조회", description = "특정 호스트의 방 목록을 조회합니다(페이지네이션 적용), 대표이미지 조회 URL 제공")
+    fun getRoomsByHostId(
+        @PathVariable hostId: Long,
+        pageable: Pageable
+    ): ResponseEntity<Page<RoomByUserDTO>> {
+        val rooms = roomService.getRoomsByHostId(hostId, pageable)
+        return ResponseEntity.ok(rooms)
+    }
+
     @PutMapping("/rooms/{roomId}")
     @Operation(summary = "방 정보 수정", description = "방의 정보를 수정합니다, 이미지 업로드 URL 제공")
     fun updateRoom(

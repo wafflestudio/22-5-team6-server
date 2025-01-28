@@ -88,3 +88,33 @@ data class RoomShortDTO(
         }
     }
 }
+
+// 호스트가 생성한 숙소들 목록을 제공하기 위해 만듬
+// 숙소 수정/삭제를 위해서 제공
+data class RoomByUserDTO(
+    val roomId: Long,
+    val roomName: String,
+    val description: String,
+    val address: Address,
+    val roomType: RoomType,
+    val roomDetails: RoomDetails,
+    val price: Price,
+    val maxOccupancy: Int,
+    val imageUrl: String
+) {
+    companion object {
+        fun fromEntity(entity: RoomEntity, imageUrl: String): RoomByUserDTO {
+            return RoomByUserDTO(
+                roomId = entity.id!!,
+                roomName = entity.name,
+                description = entity.description,
+                roomType = entity.type,
+                address = entity.address,
+                roomDetails = entity.roomDetails,
+                price = entity.price,
+                maxOccupancy = entity.maxOccupancy,
+                imageUrl = imageUrl
+            )
+        }
+    }
+}
