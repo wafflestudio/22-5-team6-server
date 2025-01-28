@@ -14,6 +14,7 @@ import com.example.toyTeam6Airbnb.room.RoomNotFoundException
 import com.example.toyTeam6Airbnb.room.RoomPermissionDeniedException
 import com.example.toyTeam6Airbnb.room.controller.AddressSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.room.controller.RoomByUserDTO
 import com.example.toyTeam6Airbnb.room.controller.RoomDetailSearchDTO
 import com.example.toyTeam6Airbnb.room.controller.RoomDetailsDTO
 import com.example.toyTeam6Airbnb.room.controller.RoomShortDTO
@@ -101,6 +102,17 @@ class RoomServiceImpl(
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
         val imageUrlList = imageService.generateRoomImageDownloadUrls(roomEntity.id!!)
         return RoomDetailsDTO.fromEntity(roomEntity, imageUrlList)
+    }
+
+    @Transactional
+    override fun getRoomsByHostId(hostId: Long, pageable: Pageable): Page<RoomByUserDTO> {
+        val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw UserNotFoundException()
+
+        val roomsByHost = roomRepository.findAllByHostId(hostId, validatePageableForRoom(pageable))
+        return roomsByHost.map { room ->
+            val imageUrl = imageService.generateRoomImageDownloadUrl(room.id!!)
+            RoomByUserDTO.fromEntity(room, imageUrl)
+        }
     }
 
     @Transactional
