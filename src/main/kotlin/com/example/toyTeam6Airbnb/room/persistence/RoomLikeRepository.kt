@@ -10,7 +10,10 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface RoomLikeRepository : JpaRepository<RoomLikeEntity, Long> {
-    // 특정 유저가 좋아요한 방 목록 조회
     @Query("SELECT rl.room FROM RoomLikeEntity rl WHERE rl.user.id = :userId")
     fun findRoomsLikedByUser(@Param("user") user: UserEntity, pageable: Pageable): Page<RoomEntity>
+
+    fun findByUserIdAndRoomIdIn(userId: Long, roomIds: List<Long>): List<RoomLikeEntity>
+
+    fun existsByUserIdAndRoomId(userId: Long, roomId: Long): Boolean
 }
