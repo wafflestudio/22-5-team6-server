@@ -16,7 +16,7 @@ fun validateSort(pageable: Pageable, allowedSortProperties: List<String>) {
 }
 
 fun validatePageableForRoom(pageable: Pageable): Pageable {
-    val allowedSortProperties = listOf("createdAt", "id", "name", "price.perNight")
+    val allowedSortProperties = listOf("createdAt", "id", "name", "price.perNight", "ratingStatistics.averageRating")
     validateSort(pageable, allowedSortProperties)
     return PageRequest.of(pageable.pageNumber, pageable.pageSize, pageable.sort)
 }

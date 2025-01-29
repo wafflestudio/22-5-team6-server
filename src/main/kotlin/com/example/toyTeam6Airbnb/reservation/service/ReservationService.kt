@@ -44,14 +44,5 @@ interface ReservationService {
         pageable: Pageable
     ): Page<ReservationDTO>
 
-//    fun getReservationsByRoom(
-//        roomId: Long
-//    ): List<Reservation>
-//
-//    fun getReservationsByDate(
-//        startDate: LocalDate,
-//        endDate: LocalDate
-//    ): List<Reservation>
-
     fun getAvailabilityByMonth(roomId: Long, yearMonth: YearMonth): RoomAvailabilityResponse
 }

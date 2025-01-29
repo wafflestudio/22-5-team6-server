@@ -618,6 +618,33 @@ class RoomControllerTest {
             .contentAsString
 
         Assertions.assertEquals(getContentLength(result7), 6)
+
+        // rating, name, desc sort
+        val (user8, token8) = dataGenerator.generateUserAndToken()
+        val reservation8 = dataGenerator.generateReservation(user = user8, room = room1)
+        dataGenerator.generateReview(reservation = reservation8, rating = 4, content = "good")
+        room1.ratingStatistics.incrementRating(4)
+        roomRepository.save(room1)
+
+        val result8 = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/main/search")
+                .param("rating", "4")
+                .param("page", "0")
+                .param("size", "10")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        Assertions.assertEquals(getContentLength(result8), 1)
+        val contentNode8 = getContent(result8)
+        val ratings = contentNode8.map { it.path("averageRating").asDouble() }
+        for (i in 0 until ratings.size - 1) {
+            Assertions.assertTrue(ratings[i] >= 4)
+        }
+        println(result8)
     }
 
     @BeforeEach

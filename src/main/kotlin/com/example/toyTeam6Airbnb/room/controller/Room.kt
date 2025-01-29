@@ -15,10 +15,11 @@ data class Room(
     val sigungu: String,
     val price: Double,
     val averageRating: Double,
+    val isLiked: Boolean,
     val imageUrl: String // 대표 이미지 1개만 return (downloadUrl)
 ) {
     companion object {
-        fun fromEntity(entity: RoomEntity, imageUrl: String): Room {
+        fun fromEntity(entity: RoomEntity, imageUrl: String, isLiked: Boolean): Room {
             return Room(
                 roomId = entity.id!!,
                 roomName = entity.name,
@@ -27,6 +28,7 @@ data class Room(
                 sigungu = entity.address.sigungu,
                 price = entity.price.perNight,
                 averageRating = entity.ratingStatistics.averageRating,
+                isLiked = isLiked,
                 imageUrl = imageUrl // imageService에서 대표 이미지 url 가져오기, list<String>의 첫번째 값"
             )
         }
@@ -49,10 +51,11 @@ data class RoomDetailsDTO(
     val isSuperHost: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant,
+    val isLiked: Boolean,
     val imageUrlList: List<String> // 방에 대한 모든 Download url 전달
 ) {
     companion object {
-        fun fromEntity(entity: RoomEntity, imageUrlList: List<String>): RoomDetailsDTO {
+        fun fromEntity(entity: RoomEntity, imageUrlList: List<String>, isLiked: Boolean): RoomDetailsDTO {
             return RoomDetailsDTO(
                 roomId = entity.id!!,
                 hostId = entity.host.id!!,
@@ -69,6 +72,7 @@ data class RoomDetailsDTO(
                 isSuperHost = entity.host.isSuperhost(),
                 createdAt = entity.createdAt,
                 updatedAt = entity.updatedAt,
+                isLiked = isLiked,
                 imageUrlList = imageUrlList
             )
         }
