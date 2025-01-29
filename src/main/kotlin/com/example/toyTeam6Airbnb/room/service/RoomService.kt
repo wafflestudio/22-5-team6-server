@@ -27,9 +27,9 @@ interface RoomService {
         imageSlot: Int // imageSlot Request Body에 추가
     ): RoomShortDTO
 
-    fun getRooms(pageable: Pageable): Page<Room>
+    fun getRooms(viewerId: Long?, pageable: Pageable): Page<Room>
 
-    fun getRoomDetails(roomId: Long): RoomDetailsDTO
+    fun getRoomDetails(viewerId: Long?, roomId: Long): RoomDetailsDTO
 
     fun getRoomsByHostId(hostId: Long, pageable: Pageable): Page<RoomByUserDTO>
 
@@ -62,6 +62,7 @@ interface RoomService {
         startDate: LocalDate?,
         endDate: LocalDate?,
         roomDetails: RoomDetailSearchDTO?,
+        viewerId: Long?,
         pageable: Pageable
     ): Page<Room>
 
@@ -74,4 +75,10 @@ interface RoomService {
         userId: Long,
         roomId: Long
     )
+
+    fun getHotPlacesByDate(
+        viewerId: Long?,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Page<Room>
 }

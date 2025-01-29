@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 
 interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExecutor<RoomEntity> {
     fun existsByAddress(address: Address): Boolean
@@ -22,4 +23,10 @@ interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExec
     // query for find by host
     @Query("SELECT r FROM RoomEntity r WHERE r.host = :host")
     fun findAllByHostId(hostId: Long, pageable: Pageable): Page<RoomEntity>
+
+    @Query("SELECT r FROM RoomEntity r WHERE r.address.sigungu = :sigungu ORDER BY r.ratingStatistics.averageRating DESC")
+    fun findTopRoomsBySigungu(
+        @Param("sigungu") sigungu: String,
+        pageable: Pageable
+    ): Page<RoomEntity>
 }

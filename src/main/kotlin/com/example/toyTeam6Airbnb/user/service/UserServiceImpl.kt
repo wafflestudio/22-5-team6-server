@@ -76,9 +76,13 @@ class UserServiceImpl(
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         if (viewerId != userId && userEntity.profile?.showMyWishlist != true) throw LikedRoomsPermissionDenied()
         // 요청을 보낸 사용자가 본인이 아니고, 위시리스트 공개를 안한 경우에는 Permission Denied
-        return roomLikeRepository.findRoomsLikedByUser(userEntity, validatePageableForRoom(pageable)).map { roomEntity ->
-            val imageUrl = imageService.generateRoomImageDownloadUrl(roomEntity.id!!)
-            Room.fromEntity(roomEntity, imageUrl)
+        val roomEntities = roomLikeRepository.findRoomsLikedByUser(userEntity, validatePageableForRoom(pageable))
+
+        return roomEntities.map { roomEntity ->
+            val roomId = roomEntity.id!!
+            val isLiked = true
+            val imageUrl = imageService.generateRoomImageDownloadUrl(roomId)
+            Room.fromEntity(roomEntity, imageUrl, isLiked)
         }
     }
 }

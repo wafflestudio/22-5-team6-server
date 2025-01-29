@@ -154,22 +154,6 @@ class ReservationServiceImpl(
         }
     }
 
-//    @Transactional
-//    override fun getReservationsByRoom(roomId: Long): List<Reservation> {
-//        val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
-//
-//        return reservationRepository.findAllByRoom(roomEntity).map(Reservation::fromEntity)
-//    }
-
-//    @Transactional
-//    override fun getReservationsByDate(startDate: LocalDate, endDate: LocalDate): List<Reservation> {
-//        val reservations = reservationRepository.findAll().filter { reservation ->
-//            startDate < reservation.endDate && endDate > reservation.startDate
-//        }
-//
-//        return reservations.map(Reservation::fromEntity)
-//    }
-
     // 특정 방의 해당 월의 예약 가능한 날짜와 예약 불가능한 날짜를 가져오는 API를 위한 서비스 로직
     @Transactional
     override fun getAvailabilityByMonth(roomId: Long, yearMonth: YearMonth): RoomAvailabilityResponse {
