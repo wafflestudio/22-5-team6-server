@@ -1,9 +1,9 @@
 import requests
+import sys
 import json
 import random
 
 # Base URL of the API server - replace this with actual domain
-BASE_URL = ""
 EC2_URL = ""
 
 # Sample login credentials
@@ -60,18 +60,30 @@ def getLocation():
         "sigungu": sigungu
     }
 
-loc1 = getLocation()
-loc2 = getLocation()
+def getType():
+    types = ["APARTMENT", "HOUSE", "VILLA", "HANOK", "SWIMMING_POOL", "HOTEL", "CAMPING", "FARM", "ISLAND"]
+    return random.choice(types)
 
-# Sample room data
-sample_rooms = [
-    {
-        "roomName": f"Cozy Studio in {loc1["sido"]}",
-        "description": "Modern studio apartment with city view",
-        "roomType": "APARTMENT",
+def getAdjective():
+    adjs = ["Cozy", "Comfortable", "Spacious", "Luxurious", "Modern", "Rustic", "Stylish", "Charming", "Elegant", "Sunny"]
+    return random.choice(adjs)
+
+def getSimpleDescriptions():
+    descs = ["Great PLACEHOLDER to stay", "Cozy and comfortable PLACEHOLDER", "PLACEHOLDER perfect for a weekend getaway", "PLACEHOLDER with amazing view", "PLACEHOLDER close to the city center"]
+    return random.choice(descs)
+
+def getSampleRoom():
+    loc = getLocation()
+    typ = getType()
+    adj = getAdjective()
+    desc = getSimpleDescriptions()
+    return {
+        "roomName": f"{adj} {typ.lower().capitalize()} in {loc["sido"]}",
+        "description": desc.replace("PLACEHOLDER", typ.lower()),
+        "roomType": typ,
         "address": {
-            "sido": loc1["sido"],
-            "sigungu": loc1["sigungu"],
+            "sido": loc["sido"],
+            "sigungu": loc["sigungu"],
             "street": f"공원로 {random.randint(0, 500)}",
             "detail": f"100{random.randint(0, 10)}호"
         },
@@ -91,41 +103,12 @@ sample_rooms = [
             "total": 0
         },
         "maxOccupancy": random.randint(2, 8),
-        "imageSlot": 3
-    },
-    {
-        "roomName": f"Luxury Apartment in {loc2["sido"]}",
-        "description": f"Spacious apartment near {loc2["sigungu"]}",
-        "roomType": "APARTMENT",
-        "address": {
-            "sido": loc2["sido"],
-            "sigungu": loc2["sigungu"],
-            "street": "중앙로 {random.randint(0, 500)}",
-            "detail": f"50{random.randint(0, 10)}호"
-        },
-        "roomDetails": {
-            "wifi": True if random.randint(0, 1) == 0 else False,
-            "selfCheckin": True if random.randint(0, 1) == 0 else False,
-            "luggage": True if random.randint(0, 1) == 0 else False,
-            "tv": True if random.randint(0, 1) == 0 else False,
-            "bedroom": random.randint(1, 5),
-            "bathroom": random.randint(1, 3),
-            "bed": random.randint(1, 5)
-        },
-        "price": {
-            "perNight": random.randint(50000, 80000),
-            "cleaningFee": random.randint(10000, 30000),
-            "charge": random.randint(2000, 10000),
-            "total": 0
-        },
-        "maxOccupancy": random.randint(2, 8),
-        "imageSlot": 5
+        "imageSlot": random.randint(3, 5)
     }
-]
 
 def register_user(username, password, nickname, bio):
     """Register a new user"""
-    register_url = f"{BASE_URL}/api/auth/register"
+    register_url = f"{EC2_URL}/api/auth/register"
     
     registration_data = {
         "username": username,
@@ -202,6 +185,16 @@ def get_picsum_image(width=1200, height=800):
 
 
 def create_rooms():
+    if len(sys.argv) != 2:
+        print("Usage: python generate-rooms-api-post.py <number_of_rooms>")
+        sys.exit(1)
+    
+    try:
+        num_rooms = int(sys.argv[1])
+    except ValueError:
+        print("Please provide a valid number")
+        sys.exit(1)
+
     username = "testuser"
     password = "testpass123"
     nickname = "Test User"
@@ -221,6 +214,8 @@ def create_rooms():
         'Authorization': token,
         'Content-Type': 'application/json'
     }
+
+    sample_rooms = [getSampleRoom() for _ in range(num_rooms)]
     
     # Create each room
     for room in sample_rooms:
