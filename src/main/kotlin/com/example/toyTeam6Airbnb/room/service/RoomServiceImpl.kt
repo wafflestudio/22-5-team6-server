@@ -280,7 +280,6 @@ class RoomServiceImpl(
         }
     }
 
-    @Transactional(readOnly = true)
     override fun getViewerId(): Long? {
         val viewerId =
             try {
