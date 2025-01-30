@@ -81,4 +81,6 @@ interface RoomService {
         startDate: LocalDate,
         endDate: LocalDate
     ): Page<Room>
+
+    fun getViewerId(): Long?
 }

@@ -30,6 +30,7 @@ import com.example.toyTeam6Airbnb.room.persistence.RoomRepository
 import com.example.toyTeam6Airbnb.room.persistence.RoomSpecifications
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
 import com.example.toyTeam6Airbnb.user.UserNotFoundException
+import com.example.toyTeam6Airbnb.user.controller.PrincipalDetails
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import com.example.toyTeam6Airbnb.validatePageableForRoom
 import org.springframework.dao.DataIntegrityViolationException
@@ -37,6 +38,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -95,14 +97,7 @@ class RoomServiceImpl(
     @Transactional
     override fun getRooms(viewerId: Long?, pageable: Pageable): Page<Room> {
         val roomEntities = roomRepository.findAll(validatePageableForRoom(pageable))
-
-        val roomIds = roomEntities.mapNotNull { it.id }
-
-        val likedRoomIds = if (viewerId != null && roomIds.isNotEmpty()) {
-            roomLikeRepository.findByUserIdAndRoomIdIn(viewerId, roomIds).map { it.room.id }.toSet()
-        } else {
-            emptySet()
-        }
+        val likedRoomIds = getLikedRoomIds(viewerId, roomEntities)
 
         return roomEntities.map { roomEntity ->
             val roomId = roomEntity.id!!
@@ -122,7 +117,7 @@ class RoomServiceImpl(
 
     @Transactional
     override fun getRoomsByHostId(hostId: Long, pageable: Pageable): Page<RoomByUserDTO> {
-        val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw UserNotFoundException()
+        userRepository.findByIdOrNull(hostId) ?: throw UserNotFoundException()
 
         val roomsByHost = roomRepository.findAllByHostId(hostId, validatePageableForRoom(pageable))
         return roomsByHost.map { room ->
@@ -211,14 +206,7 @@ class RoomServiceImpl(
             .and(RoomSpecifications.hasRating(rating))
 
         val roomEntities = roomRepository.findAll(spec, validatePageableForRoom(pageable))
-
-        val roomIds = roomEntities.mapNotNull { it.id }
-
-        val likedRoomIds = if (viewerId != null && roomIds.isNotEmpty()) {
-            roomLikeRepository.findByUserIdAndRoomIdIn(viewerId, roomIds).map { it.room.id }.toSet()
-        } else {
-            emptySet()
-        }
+        val likedRoomIds = getLikedRoomIds(viewerId, roomEntities)
 
         return roomEntities.map { roomEntity ->
             val roomId = roomEntity.id!!
@@ -250,12 +238,12 @@ class RoomServiceImpl(
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
-        if (userEntity.roomLikes.any { it.user.id == userId }) {
+        val roomLikeEntity = RoomLikeEntity(user = userEntity, room = roomEntity)
+        try {
+            roomLikeRepository.save(roomLikeEntity)
+        } catch (e: DataIntegrityViolationException) {
             throw RoomAlreadyLikedException()
         }
-
-        val roomLikeEntity = RoomLikeEntity(user = userEntity, room = roomEntity)
-        roomLikeRepository.save(roomLikeEntity)
     }
 
     @Transactional
@@ -282,14 +270,7 @@ class RoomServiceImpl(
         val mostReservedSigungu = sigunguReservationCounts.maxByOrNull { it.value }!!.key
 
         val roomEntities = roomRepository.findTopRoomsBySigungu(mostReservedSigungu, Pageable.ofSize(3))
-
-        val roomIds = roomEntities.mapNotNull { it.id }
-
-        val likedRoomIds = if (viewerId != null && roomIds.isNotEmpty()) {
-            roomLikeRepository.findByUserIdAndRoomIdIn(viewerId, roomIds).map { it.room.id }.toSet()
-        } else {
-            emptySet()
-        }
+        val likedRoomIds = getLikedRoomIds(viewerId, roomEntities)
 
         return roomEntities.map { roomEntity ->
             val roomId = roomEntity.id!!
@@ -297,6 +278,20 @@ class RoomServiceImpl(
             val imageUrl = imageService.generateRoomImageDownloadUrl(roomId)
             Room.fromEntity(roomEntity, imageUrl, isLiked)
         }
+    }
+
+    @Transactional(readOnly = true)
+    override fun getViewerId(): Long? {
+        val viewerId =
+            try {
+                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
+                principalDetails.getUser().id
+                // logic for when the user is logged in
+            } catch (e: ClassCastException) {
+                // logic for when the user is not logged in
+                null
+            }
+        return viewerId
     }
 
     private fun validateRoomInfo(
@@ -349,6 +344,18 @@ class RoomServiceImpl(
             roomDetails.bed <= 0
         ) {
             throw InvalidRoomDetailsException()
+        }
+    }
+
+    private fun getLikedRoomIds(viewerId: Long?, roomEntities: Page<RoomEntity>): Set<Long> {
+        val roomIds = roomEntities.content.mapNotNull { it.id }
+
+        return if (viewerId != null && roomIds.isNotEmpty()) {
+            roomLikeRepository.findByUserIdAndRoomIdIn(viewerId, roomIds)
+                .mapNotNull { it.room.id }
+                .toSet()
+        } else {
+            emptySet()
         }
     }
 }
