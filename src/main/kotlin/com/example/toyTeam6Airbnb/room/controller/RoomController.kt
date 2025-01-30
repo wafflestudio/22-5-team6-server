@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -58,15 +57,7 @@ class RoomController(
     fun getRooms(
         pageable: Pageable
     ): ResponseEntity<Page<Room>> {
-        val viewerId =
-            try {
-                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
-                principalDetails.getUser().id
-                // logic for when the user is logged in
-            } catch (e: ClassCastException) {
-                // logic for when the user is not logged in
-                null
-            }
+        val viewerId = roomService.getViewerId()
         val rooms = roomService.getRooms(viewerId, pageable)
         return ResponseEntity.ok(rooms)
     }
@@ -76,15 +67,7 @@ class RoomController(
     fun getRoomDetails(
         @PathVariable roomId: Long
     ): ResponseEntity<RoomDetailsDTO> {
-        val viewerId =
-            try {
-                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
-                principalDetails.getUser().id
-                // logic for when the user is logged in
-            } catch (e: ClassCastException) {
-                // logic for when the user is not logged in
-                null
-            }
+        val viewerId = roomService.getViewerId()
         val room = roomService.getRoomDetails(viewerId, roomId)
         return ResponseEntity.ok(room)
     }
@@ -159,16 +142,7 @@ class RoomController(
         @RequestParam(required = false) bed: Int?,
         pageable: Pageable
     ): ResponseEntity<Page<Room>> {
-        val viewerId =
-            try {
-                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
-                principalDetails.getUser().id
-                // logic for when the user is logged in
-            } catch (e: ClassCastException) {
-                // logic for when the user is not logged in
-                null
-            }
-
+        val viewerId = roomService.getViewerId()
         val address = AddressSearchDTO(sido, sigungu, street, detail)
         val roomDetails = RoomDetailSearchDTO(wifi, selfCheckin, luggage, tv, bedRoom, bathRoom, bed)
         val rooms = roomService.searchRooms(roomName, roomType, minPrice, maxPrice, address, maxOccupancy, rating, startDate, endDate, roomDetails, viewerId, pageable)
@@ -207,18 +181,8 @@ class RoomController(
         @RequestParam startDate: LocalDate,
         @RequestParam endDate: LocalDate
     ): ResponseEntity<Page<Room>> {
-        val viewerId =
-            try {
-                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
-                principalDetails.getUser().id
-                // logic for when the user is logged in
-            } catch (e: ClassCastException) {
-                // logic for when the user is not logged in
-                null
-            }
-
+        val viewerId = roomService.getViewerId()
         val hotPlaces = roomService.getHotPlacesByDate(viewerId, startDate, endDate)
-
         return ResponseEntity.ok().body(hotPlaces)
     }
 }
