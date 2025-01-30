@@ -15,5 +15,7 @@ interface RoomLikeRepository : JpaRepository<RoomLikeEntity, Long> {
 
     fun findByUserIdAndRoomIdIn(userId: Long, roomIds: List<Long>): List<RoomLikeEntity>
 
+    fun findByUserIdAndRoomId(userId: Long, roomId: Long): RoomLikeEntity?
+
     fun existsByUserIdAndRoomId(userId: Long, roomId: Long): Boolean
 }

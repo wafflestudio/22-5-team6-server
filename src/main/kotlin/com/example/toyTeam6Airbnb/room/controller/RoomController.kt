@@ -150,29 +150,16 @@ class RoomController(
     }
 
     @PostMapping("/rooms/{roomId}/like")
-    @Operation(summary = "방 좋아요(위시리스트 저장)", description = "유저가 방에대해 좋아요를 누릅니다(위시리스트 저장)")
-    fun likeRoom(
+    @Operation(summary = "방 좋아요/좋아요 취소(위시리스트 저장/취소)", description = "방에 대한 좋아요 동작(위시리스트 저장)")
+    fun toggleLike(
         @AuthenticationPrincipal principalDetails: PrincipalDetails,
         @PathVariable roomId: Long
-    ): ResponseEntity<Unit> {
-        roomService.likeRoom(
+    ): ResponseEntity<LikeResponse> {
+        val result = roomService.toggleLike(
             userId = User.fromEntity(principalDetails.getUser()).id,
             roomId = roomId
         )
-        return ResponseEntity.status(HttpStatus.CREATED).build()
-    }
-
-    @DeleteMapping("/rooms/{roomId}/like")
-    @Operation(summary = "방 좋아요 해제", description = "유저가 기존 좋아요한 방에대해 좋아요 취소(위시리스트에서 제거).")
-    fun unlikeRoom(
-        @AuthenticationPrincipal principalDetails: PrincipalDetails,
-        @PathVariable roomId: Long
-    ): ResponseEntity<Unit> {
-        roomService.unlikeRoom(
-            userId = User.fromEntity(principalDetails.getUser()).id,
-            roomId = roomId
-        )
-        return ResponseEntity.noContent().build()
+        return ResponseEntity.ok(LikeResponse(isLiked = result))
     }
 
     @GetMapping("rooms/main/hotPlaces")
@@ -186,6 +173,10 @@ class RoomController(
         return ResponseEntity.ok().body(hotPlaces)
     }
 }
+
+data class LikeResponse(
+    val isLiked: Boolean
+)
 
 data class AddressSearchDTO(
     val sido: String? = null,
