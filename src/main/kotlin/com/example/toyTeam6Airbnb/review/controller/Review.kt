@@ -14,11 +14,11 @@ data class ReviewByRoomDTO(
     val endDate: LocalDate
 ) {
     companion object {
-        fun fromEntity(entity: ReviewEntity): ReviewByRoomDTO {
+        fun fromEntity(entity: ReviewEntity, imageUrl: String): ReviewByRoomDTO {
             return ReviewByRoomDTO(
                 userId = entity.user.id!!,
                 nickname = entity.user.profile?.nickname ?: entity.user.username,
-                profileImage = "",
+                profileImage = imageUrl,
                 content = entity.content,
                 rating = entity.rating,
                 startDate = entity.reservation.startDate,
@@ -29,15 +29,15 @@ data class ReviewByRoomDTO(
 }
 
 data class ReviewByUserDTO(
-    val reviewId: Long, // 리뷰 id
+    val reviewId: Long,
     val reservationId: Long,
-    val roomId: Long, // 숙소 id
+    val roomId: Long,
     val content: String,
     val rating: Int,
     val place: String,
     val startDate: LocalDate,
     val endDate: LocalDate,
-    val imageUrl: String // 대표이미지 다운로드 URL
+    val imageUrl: String
 ) {
     companion object {
         fun fromEntity(entity: ReviewEntity, imageUrl: String): ReviewByUserDTO {
@@ -89,12 +89,14 @@ data class ReviewDTO(
 }
 
 data class ReviewIdWithImage(
-    val reviewId: Long
+    val reviewId: Long,
+    val imageUrl: String
 ) {
     companion object {
-        fun fromEntity(entity: ReviewEntity): ReviewIdWithImage {
+        fun fromEntity(entity: ReviewEntity, imageUrl: String): ReviewIdWithImage {
             return ReviewIdWithImage(
-                reviewId = entity.id!!
+                reviewId = entity.id!!,
+                imageUrl = imageUrl
             )
         }
     }

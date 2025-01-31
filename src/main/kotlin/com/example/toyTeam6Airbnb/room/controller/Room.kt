@@ -18,7 +18,7 @@ data class Room(
     val price: Double,
     val averageRating: Double,
     val isLiked: Boolean,
-    val imageUrl: String // 대표 이미지 1개만 return (downloadUrl)
+    val imageUrl: String
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity, imageUrl: String, isLiked: Boolean): Room {
@@ -29,9 +29,9 @@ data class Room(
                 sido = entity.address.sido,
                 sigungu = entity.address.sigungu,
                 price = entity.price.perNight,
-                averageRating = BigDecimal(entity.ratingStatistics.averageRating).setScale(2, RoundingMode.HALF_UP).toDouble(),
+                averageRating = BigDecimal.valueOf(entity.ratingStatistics.averageRating).setScale(2, RoundingMode.HALF_UP).toDouble(),
                 isLiked = isLiked,
-                imageUrl = imageUrl // imageService에서 대표 이미지 url 가져오기, list<String>의 첫번째 값"
+                imageUrl = imageUrl
             )
         }
     }
@@ -54,7 +54,7 @@ data class RoomDetailsDTO(
     val createdAt: Instant,
     val updatedAt: Instant,
     val isLiked: Boolean,
-    val imageUrlList: List<String> // 방에 대한 모든 Download url 전달
+    val imageUrlList: List<String>
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity, imageUrlList: List<String>, isLiked: Boolean): RoomDetailsDTO {
@@ -69,9 +69,9 @@ data class RoomDetailsDTO(
                 roomDetails = entity.roomDetails,
                 price = entity.price,
                 maxOccupancy = entity.maxOccupancy,
-                averageRating = BigDecimal(entity.ratingStatistics.averageRating).setScale(2, RoundingMode.HALF_UP).toDouble(),
+                averageRating = BigDecimal.valueOf(entity.ratingStatistics.averageRating).setScale(2, RoundingMode.HALF_UP).toDouble(),
                 reviewCount = entity.reviews.size,
-                isSuperHost = entity.host.isSuperhost(),
+                isSuperHost = entity.host.isSuperHost(),
                 createdAt = entity.createdAt,
                 updatedAt = entity.updatedAt,
                 isLiked = isLiked,
@@ -83,7 +83,7 @@ data class RoomDetailsDTO(
 
 data class RoomShortDTO(
     val roomId: Long,
-    val imageUploadUrlList: List<String> // 이미지가 여러 개면 List<String> 형태로 Upload Presigned URL 제공
+    val imageUploadUrlList: List<String>
 ) {
     companion object {
         fun fromEntity(entity: RoomEntity, imageUploadUrlList: List<String>): RoomShortDTO {
@@ -95,31 +95,35 @@ data class RoomShortDTO(
     }
 }
 
-// 호스트가 생성한 숙소들 목록을 제공하기 위해 만듬
-// 숙소 수정/삭제를 위해서 제공
 data class RoomByUserDTO(
     val roomId: Long,
     val roomName: String,
     val description: String,
-    val address: Address,
+    val sido: String,
+    val sigungu: String,
+    val averageRating: Double,
     val roomType: RoomType,
     val roomDetails: RoomDetails,
-    val price: Price,
+    val price: Double,
     val maxOccupancy: Int,
-    val imageUrl: String
+    val imageUrl: String,
+    val isLiked: Boolean
 ) {
     companion object {
-        fun fromEntity(entity: RoomEntity, imageUrl: String): RoomByUserDTO {
+        fun fromEntity(entity: RoomEntity, imageUrl: String, isLiked: Boolean): RoomByUserDTO {
             return RoomByUserDTO(
                 roomId = entity.id!!,
                 roomName = entity.name,
                 description = entity.description,
                 roomType = entity.type,
-                address = entity.address,
+                sido = entity.address.sido,
+                sigungu = entity.address.sigungu,
+                averageRating = BigDecimal.valueOf(entity.ratingStatistics.averageRating).setScale(2, RoundingMode.HALF_UP).toDouble(),
                 roomDetails = entity.roomDetails,
-                price = entity.price,
+                price = entity.price.perNight,
                 maxOccupancy = entity.maxOccupancy,
-                imageUrl = imageUrl
+                imageUrl = imageUrl,
+                isLiked = isLiked
             )
         }
     }

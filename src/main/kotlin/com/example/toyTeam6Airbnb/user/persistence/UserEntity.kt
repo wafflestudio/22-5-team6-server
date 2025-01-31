@@ -57,7 +57,7 @@ class UserEntity(
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
     var roomLikes: MutableList<RoomLikeEntity> = mutableListOf()
 ) {
-    fun isSuperhost(): Boolean {
+    fun isSuperHost(): Boolean {
         return profile?.isSuperHost == true
     }
 }

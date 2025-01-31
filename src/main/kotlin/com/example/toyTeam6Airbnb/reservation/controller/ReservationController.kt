@@ -100,16 +100,13 @@ class ReservationController(
             try {
                 val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
                 principalDetails.getUser().id
-                // logic for when the user is logged in
             } catch (e: ClassCastException) {
-                // logic for when the user is not logged in
                 null
             }
         val reservations = reservationService.getReservationsByUser(viewerId, userId, pageable)
         return ResponseEntity.ok(reservations)
     }
 
-    // 특정 room의 특정 month의 available/unavailable date를 가져오는 API
     @GetMapping("/availability/{roomId}")
     @Operation(summary = "해당 월의 예약 가능 날짜", description = "특정 방의 특정 월에 예약 가능/불가능한 모든 날짜 조회")
     fun getRoomAvailabilityByMonth(
@@ -139,7 +136,6 @@ class UpdateReservationRequest(
     val numberOfGuests: Int
 )
 
-// 특정 방의 예약 가능날짜와 불가능한 날짜 반환 DTO
 data class RoomAvailabilityResponse(
     val availableDates: List<LocalDate>,
     val unavailableDates: List<LocalDate>

@@ -647,6 +647,33 @@ class RoomControllerTest {
         println(result8)
     }
 
+    @Test
+    fun `should get liked rooms`() {
+        val (user, token) = dataGenerator.generateUserAndToken()
+        val room = dataGenerator.generateRoom()
+
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/rooms/${room.id}/like")
+                .header("Authorization", "Bearer $token")
+        )
+            .andExpect(MockMvcResultMatchers.status().isCreated)
+            .andReturn()
+            .response
+            .contentAsString
+
+        val getResult = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/main")
+                .header("Authorization", "Bearer $token")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        println(getResult)
+    }
+
     @BeforeEach
     fun setUp() {
         dataGenerator.clearAll()

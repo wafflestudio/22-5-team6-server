@@ -24,14 +24,14 @@ interface RoomService {
         roomDetails: RoomDetails,
         price: Price,
         maxOccupancy: Int,
-        imageSlot: Int // imageSlot Request Body에 추가
+        imageSlot: Int
     ): RoomShortDTO
 
     fun getRooms(viewerId: Long?, pageable: Pageable): Page<Room>
 
     fun getRoomDetails(viewerId: Long?, roomId: Long): RoomDetailsDTO
 
-    fun getRoomsByHostId(hostId: Long, pageable: Pageable): Page<RoomByUserDTO>
+    fun getRoomsByHostId(viewerId: Long?, hostId: Long, pageable: Pageable): Page<RoomByUserDTO>
 
     fun updateRoom(
         hostId: Long,
@@ -43,7 +43,7 @@ interface RoomService {
         roomDetails: RoomDetails,
         price: Price,
         maxOccupancy: Int,
-        imageSlot: Int // imageSlot Request Body에 추가
+        imageSlot: Int
     ): RoomShortDTO
 
     fun deleteRoom(

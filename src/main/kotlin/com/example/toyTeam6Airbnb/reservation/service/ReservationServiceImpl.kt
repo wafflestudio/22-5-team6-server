@@ -21,8 +21,8 @@ import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import com.example.toyTeam6Airbnb.validatePageableForReservation
 import jakarta.persistence.EntityManager
 import jakarta.persistence.LockModeType
-import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -52,16 +52,12 @@ class ReservationServiceImpl(
         numberOfGuests: Int
     ): Reservation {
         val userEntity = userRepository.findByIdOrNull(user.id) ?: throw UserNotFoundException()
-        // lock room entity to prevent the room from being deleted while creating a reservation
-        // also, prevent other transactions from creating a reservation for the same room at the same time
+
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
-        if (!applicationContext.getBean<ReservationServiceImpl>().isAvailable(roomEntity, startDate, endDate)) throw ReservationUnavailable()
+        if (!isAvailable(roomEntity, startDate, endDate)) throw ReservationUnavailable()
 
-        // 예약 인원수가 초과할 경우 예외 발생
         if (numberOfGuests > roomEntity.maxOccupancy) throw MaxOccupancyExceeded()
-
-        // 예약 인원이 0명인 경우 예외 발생
         if (numberOfGuests == 0) throw ZeroGuests()
 
         val reservationEntity = ReservationEntity(
@@ -72,15 +68,18 @@ class ReservationServiceImpl(
             endDate = endDate,
             totalPrice = roomEntity.price.total * ChronoUnit.DAYS.between(startDate, endDate),
             numberOfGuests = numberOfGuests
-        ).let {
-            reservationRepository.save(it)
+        )
+
+        try {
+            reservationRepository.save(reservationEntity)
+        } catch (e: DataIntegrityViolationException) {
+            throw ReservationUnavailable()
         }
 
         return Reservation.fromEntity(reservationEntity)
     }
 
     fun isAvailable(room: RoomEntity, startDate: LocalDate, endDate: LocalDate, currentReservationId: Long? = null): Boolean {
-        // exception 발생도 함께 처리
         if (startDate >= endDate) throw ReservationUnavailable()
         val reservations = reservationRepository.findAllByRoom(room)
 
