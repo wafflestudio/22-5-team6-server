@@ -45,7 +45,7 @@ data class ReservationDetails(
 
 data class ReservationDTO(
     val reservationId: Long,
-    val roomId : Long,
+    val roomId: Long,
     val place: String,
     val startDate: LocalDate,
     val endDate: LocalDate,
