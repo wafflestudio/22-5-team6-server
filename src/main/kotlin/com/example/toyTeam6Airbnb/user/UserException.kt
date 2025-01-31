@@ -23,12 +23,6 @@ class SignUpBadUsernameException : UserException(
     msg = "Bad username"
 )
 
-class SignUpBadPasswordException : UserException(
-    errorCode = 1003,
-    httpStatusCode = HttpStatus.BAD_REQUEST,
-    msg = "Bad password"
-)
-
 class SignInUnknownException : UserException(
     errorCode = 1004,
     httpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR,
