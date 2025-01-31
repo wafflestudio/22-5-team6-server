@@ -72,9 +72,7 @@ class ReviewController(
             try {
                 val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
                 principalDetails.getUser().id
-                // logic for when the user is logged in
             } catch (e: ClassCastException) {
-                // logic for when the user is not logged in
                 null
             }
         val reviews = reviewService.getReviewsByUser(viewerId, userId, pageable)

@@ -1,6 +1,7 @@
 package com.example.toyTeam6Airbnb.user.controller
 
 import com.example.toyTeam6Airbnb.room.controller.Room
+import com.example.toyTeam6Airbnb.room.service.RoomService
 import com.example.toyTeam6Airbnb.user.JwtTokenProvider
 import com.example.toyTeam6Airbnb.user.TokenDto
 import com.example.toyTeam6Airbnb.user.service.UserService
@@ -10,7 +11,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,26 +21,14 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "User Controller", description = "User Controller API")
 class UserController(
     private val userService: UserService,
-    private val jwtTokenProvider: JwtTokenProvider
+    private val jwtTokenProvider: JwtTokenProvider,
+    private val roomService: RoomService
 ) {
-
-    @PostMapping("/api/v1/ping")
-    @Operation(summary = "Ping pong", description = "Sample ping pong api for testing")
-    fun ping(): ResponseEntity<String> {
-        return ResponseEntity.ok("pong")
-    }
-
-    @GetMapping("/api/v1/ping")
-    fun getPing(): ResponseEntity<String> {
-        return ResponseEntity.ok("pong")
-    }
-
     @PostMapping("/api/auth/register")
     @Operation(summary = "회원가입", description = "유저 생성 및 프로필 이미지 업로드 URL 제공")
     fun register(
         @RequestBody request: RegisterRequest
     ): ResponseEntity<UrlResponse> {
-        // Url 함게 반환하도록 수정
         val (user, url) = userService.register(request)
         return ResponseEntity.ok(UrlResponse(url))
     }
@@ -80,15 +68,7 @@ class UserController(
         @PathVariable userId: Long,
         pageable: Pageable
     ): ResponseEntity<Page<Room>> {
-        val viewerId =
-            try {
-                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
-                principalDetails.getUser().id
-                // logic for when the user is logged in
-            } catch (e: ClassCastException) {
-                // logic for when the user is not logged in
-                null
-            }
+        val viewerId = roomService.getViewerId()
         val likedRooms = userService.getLikedRooms(viewerId, userId, pageable)
         return ResponseEntity.ok(likedRooms)
     }

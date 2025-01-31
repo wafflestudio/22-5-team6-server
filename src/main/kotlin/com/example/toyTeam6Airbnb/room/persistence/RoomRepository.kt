@@ -14,13 +14,11 @@ interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExec
     fun existsByAddress(address: Address): Boolean
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    // query for find by id with lock
     @Query("SELECT r FROM RoomEntity r WHERE r.id = :id")
     fun findByIdOrNullForUpdate(id: Long): RoomEntity?
 
     fun countByHost(userEntity: UserEntity): Int
 
-    // query for find by host
     @Query("SELECT r FROM RoomEntity r WHERE r.host = :host")
     fun findAllByHostId(hostId: Long, pageable: Pageable): Page<RoomEntity>
 

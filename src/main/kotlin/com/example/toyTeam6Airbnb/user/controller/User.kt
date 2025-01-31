@@ -20,16 +20,4 @@ data class User(
             )
         }
     }
-
-    fun toDTO(): UserDTO {
-        return UserDTO(
-            id = this.id,
-            username = this.username
-        )
-    }
 }
-
-data class UserDTO(
-    val id: Long,
-    val username: String
-)

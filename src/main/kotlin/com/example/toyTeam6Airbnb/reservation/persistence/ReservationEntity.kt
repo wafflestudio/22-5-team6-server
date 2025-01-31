@@ -16,11 +16,17 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import java.time.Instant
 import java.time.LocalDate
 
 @Entity
-@Table(name = "reservations")
+@Table(
+    name = "reservations",
+    uniqueConstraints = [
+        UniqueConstraint(columnNames = ["room_id", "startDate", "endDate"])
+    ]
+)
 class ReservationEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,10 +43,10 @@ class ReservationEntity(
     @OneToOne(mappedBy = "reservation", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     val review: ReviewEntity?,
 
-    @Column(nullable = false)
+    @Column(name = "startDate", nullable = false)
     var startDate: LocalDate,
 
-    @Column(nullable = false)
+    @Column(name = "endDate", nullable = false)
     var endDate: LocalDate,
 
     @Column(nullable = false)
