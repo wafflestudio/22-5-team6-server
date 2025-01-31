@@ -231,31 +231,27 @@ class RoomServiceImpl(
     }
 
     @Transactional
-    override fun likeRoom(
+    override fun toggleLike(
         userId: Long,
         roomId: Long
-    ) {
+    ): Boolean {
         val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
 
-        val roomLikeEntity = RoomLikeEntity(user = userEntity, room = roomEntity)
-        try {
-            roomLikeRepository.save(roomLikeEntity)
-        } catch (e: DataIntegrityViolationException) {
-            throw RoomAlreadyLikedException()
+        val existingLike = roomLikeRepository.findByUserIdAndRoomId(userId, roomId)
+
+        return if (existingLike != null) {
+            roomLikeRepository.delete(existingLike)
+            false
+        } else {
+            val roomLikeEntity = RoomLikeEntity(user = userEntity, room = roomEntity)
+            try {
+                roomLikeRepository.save(roomLikeEntity)
+            } catch (e: DataIntegrityViolationException) {
+                return true
+            }
+            true
         }
-    }
-
-    @Transactional
-    override fun unlikeRoom(
-        userId: Long,
-        roomId: Long
-    ) {
-        val userEntity = userRepository.findByIdOrNull(userId) ?: throw UserNotFoundException()
-        roomRepository.findByIdOrNullForUpdate(roomId) ?: throw RoomNotFoundException()
-
-        val roomLikeToDelete = userEntity.roomLikes.find { it.room.id == roomId } ?: throw RoomLikeNotFoundException()
-        roomLikeRepository.delete(roomLikeToDelete)
     }
 
     @Transactional

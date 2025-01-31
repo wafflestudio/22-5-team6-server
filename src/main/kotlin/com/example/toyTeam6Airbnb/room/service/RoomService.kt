@@ -66,15 +66,10 @@ interface RoomService {
         pageable: Pageable
     ): Page<Room>
 
-    fun likeRoom(
+    fun toggleLike(
         userId: Long,
         roomId: Long
-    )
-
-    fun unlikeRoom(
-        userId: Long,
-        roomId: Long
-    )
+    ): Boolean
 
     fun getHotPlacesByDate(
         viewerId: Long?,
