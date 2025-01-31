@@ -5,6 +5,8 @@ import com.example.toyTeam6Airbnb.room.persistence.Price
 import com.example.toyTeam6Airbnb.room.persistence.RoomDetails
 import com.example.toyTeam6Airbnb.room.persistence.RoomEntity
 import com.example.toyTeam6Airbnb.room.persistence.RoomType
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.Instant
 
 data class Room(
@@ -27,7 +29,7 @@ data class Room(
                 sido = entity.address.sido,
                 sigungu = entity.address.sigungu,
                 price = entity.price.perNight,
-                averageRating = entity.ratingStatistics.averageRating,
+                averageRating = BigDecimal(entity.ratingStatistics.averageRating).setScale(2, RoundingMode.HALF_UP).toDouble(),
                 isLiked = isLiked,
                 imageUrl = imageUrl // imageService에서 대표 이미지 url 가져오기, list<String>의 첫번째 값"
             )
@@ -67,7 +69,7 @@ data class RoomDetailsDTO(
                 roomDetails = entity.roomDetails,
                 price = entity.price,
                 maxOccupancy = entity.maxOccupancy,
-                averageRating = entity.ratingStatistics.averageRating,
+                averageRating = BigDecimal(entity.ratingStatistics.averageRating).setScale(2, RoundingMode.HALF_UP).toDouble(),
                 reviewCount = entity.reviews.size,
                 isSuperHost = entity.host.isSuperhost(),
                 createdAt = entity.createdAt,
