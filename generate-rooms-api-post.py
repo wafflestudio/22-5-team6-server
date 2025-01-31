@@ -2,6 +2,7 @@ import requests
 import sys
 import json
 import random
+from datetime import datetime, timedelta
 
 # Base URL of the API server - replace this with actual domain
 EC2_URL = ""
@@ -106,7 +107,60 @@ def getSampleRoom():
         "imageSlot": random.randint(3, 5)
     }
 
-def register_user(username, password, nickname, bio):
+def getSampleReview():
+    # Generate a random review from sample reviews list
+    reviews = [
+        {"content": "최고의 숙박이었어요! 깔끔하고 설명된 그대로였습니다.", "rating": 5},
+        {"content": "위치도 좋고 숙소도 매우 편안했어요.", "rating": 4},
+        {"content": "호스트님이 친절하시고 체류 기간 내내 빠른 응답해주셨어요.", "rating": 5},
+        {"content": "완벽한 휴가 장소네요! 다음에 또 올게요.", "rating": 5},
+        {"content": "깨끗하고 아늑하며 필요한 모든 것이 갖춰져 있었어요.", "rating": 4},
+        {"content": "아름다운 숙소에 멋진 전망까지! 강력 추천합니다!", "rating": 5},
+        {"content": "기대 이상으로 좋았습니다.", "rating": 4},
+        {"content": "편의시설도 훌륭하고 침대도 매우 편안했어요.", "rating": 4}, 
+        {"content": "가격 대비 훌륭한 숙소였습니다. 다음에 또 이용할게요!", "rating": 4},
+        {"content": "정말 평화롭고 편안한 환경이었습니다.", "rating": 5},
+        {"content": "시설이 많이 낡았어요. 기대했던 것보다 실망스러웠네요.", "rating": 2},
+        {"content": "청소상태가 좋지 않았고 냄새가 났어요.", "rating": 1},
+        {"content": "가격에 비해 서비스가 많이 부족했습니다.", "rating": 2},
+        {"content": "호스트와 연락이 잘 되지 않아 불편했어요.", "rating": 2},
+        {"content": "주변이 너무 시끄럽고 잠을 잘 수 없었어요.", "rating": 1},
+        {"content": "욕실에 문제가 있었는데 해결해주지 않았어요.", "rating": 2},
+        {"content": "사진과 실제 숙소가 많이 달랐습니다.", "rating": 1},
+        {"content": "난방이 제대로 되지 않아 추웠어요.", "rating": 2}
+    ]
+    return random.choice(reviews)
+
+def getSampleName():
+    names = ["김철수", "이영희", "박민수", "정미영", "홍길동", "최영수", "이순신", "유재석", "박명수", "강호동"]
+    return random.choice(names)
+
+def getSampleBio():
+    bios = [
+        "안녕하세요! 여행을 사랑하는 직장인입니다.",
+        "깔끔한 숙소를 운영하려 노력하고 있습니다.",
+        "좋은 추억 만드실 수 있도록 도와드리겠습니다.",
+        "반갑습니다! 여행 초보자입니다.",
+        "편안한 휴식 제공을 목표로 합니다.",
+        "여행하면서 만난 인연을 소중히 여깁니다.",
+        "차 한잔의 여유를 즐기는 호스트입니다.",
+        "맛집 탐방이 취미인 여행자입니다.",
+        "아늑한 공간을 만드는 것이 즐거워요.",
+        "여행의 즐거움을 나누고 싶습니다."
+        "여행을 통해 새로운 경험을 추구합니다.",
+        "맛있는 음식과 여행이 삶의 낙입니다.",
+        "여러분의 여행을 더욱 특별하게 만들어드립니다.",
+        "여행지의 로컬 문화를 사랑합니다.",
+        "게스트님들의 편안함을 최우선으로 생각합니다.",
+        "여행의 설렘을 함께 나누고 싶어요.",
+        "친환경적인 라이프스타일을 추구합니다.",
+        "여행으로 삶의 여유를 찾습니다.",
+        "문화와 예술을 사랑하는 호스트입니다.",
+        "소소한 일상의 행복을 나누고 싶어요."
+    ]
+    return random.choice(bios)
+
+def register_user(username, password, nickname, bio, **kwargs):
     """Register a new user"""
     register_url = f"{EC2_URL}/api/auth/register"
     
@@ -135,7 +189,13 @@ def register_user(username, password, nickname, bio):
             print("Registration successful!")
             # Get the image upload URL from response
             image_upload_url = response.json().get('imageUploadUrl')
-            return True, image_upload_url
+            # Upload image
+            requests.put(
+                image_upload_url,
+                data=get_picsum_image(),
+                headers={'Content-Type': 'image/jpeg', 'Cache-Control': 'no-cache, no-store, must-revalidate'}
+            )
+            return True
         else:
             print(f"Registration failed with status code: {response.status_code}, message: {response.content}")
             return False, None
@@ -144,7 +204,7 @@ def register_user(username, password, nickname, bio):
         print(f"Error during registration: {str(e)}")
         return False, None
 
-def login_user(username, password):
+def login_user(username, password, **kwargs):
     """Login with registered credentials"""
     login_url = f"{EC2_URL}/api/auth/login"
     
@@ -177,12 +237,79 @@ def login_user(username, password):
         print(f"Error during login: {str(e)}")
         return False, None
 
-
 def get_picsum_image(width=1200, height=800):
     """Get a random image from Lorem Picsum"""
     response = requests.get(f"https://picsum.photos/{width}/{height}", allow_redirects=True)
     return response.content
 
+def get_availabile_dates(room_id, year, month):
+    try:
+        response = requests.get(
+            f"{EC2_URL}/api/v1/reservations/availability/{room_id}",
+            params={"year": year, "month": month}
+        )
+        return response.json()['availableDates'] if response.status_code == 200 else None
+    except Exception as e:
+        print(f"Error checking availability: {str(e)}")
+        return None
+
+def create_reservation(room_id, auth_token, dt):
+    headers = {
+        "Authorization": f"{auth_token}",
+        "Content-Type": "application/json"
+    }
+    
+    d = random.randint(-5, 5)
+
+    # check availability
+    availabe_dates = get_availabile_dates(room_id, dt.year, dt.month)
+
+    start_date = random.choice(availabe_dates)
+    end_date = (datetime.strptime(start_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    
+    reservation_data = {
+        "roomId": room_id,
+        "startDate": start_date,
+        "endDate": end_date,
+        "numberOfGuests": 2
+    }
+    
+    try:
+        response = requests.post(
+            f"{EC2_URL}/api/v1/reservations",
+            headers=headers,
+            json=reservation_data
+        )
+        #print(response.status_code, response.json())
+        # print reservation info
+        if response.status_code == 201:
+            print(f"Created reservation for room {room_id} from {start_date} to {end_date}")
+        return response.json()["reservationId"] if response.status_code == 201 else None
+    except Exception as e:
+        print(f"Error creating reservation: {str(e)}")
+        return None
+
+def create_review(reservation_id, auth_token):
+    headers = {
+        "Authorization": f"{auth_token}",
+        "Content-Type": "application/json"
+    }
+    
+    review_data = {
+        "reservationId": reservation_id,
+        **getSampleReview()
+    }
+    
+    try:
+        response = requests.post(
+            f"{EC2_URL}/api/v1/reviews",
+            headers=headers,
+            json=review_data
+        )
+        return response.json()["reviewId"] if response.status_code == 201 else None
+    except Exception as e:
+        print(f"Error creating review: {str(e)}")
+        return None
 
 def create_rooms():
     if len(sys.argv) != 2:
@@ -195,23 +322,42 @@ def create_rooms():
         print("Please provide a valid number")
         sys.exit(1)
 
-    username = "testuser"
-    password = "testpass123"
-    nickname = "Test User"
-    bio = "Hello, I'm a test user"
-    token = None
+    hostuser = {
+        "username": "testuser1",
+        "password" : "testpass123",
+        "nickname" : "Test User",
+        "bio" : "Hello, I'm a test user",
+        "token" : None
+    }
+    
+    testusers = [{
+        "username": f"guestuser{i}",
+        "password" : f"testpass{i}",
+        "nickname" : getSampleName(),
+        "bio" : getSampleBio(),
+        "token" : None
+    } for i in range(10)]
     
     # First register
-    success, image_url = register_user(username, password, nickname, bio)
+    success = register_user(**hostuser)
+    for user in testusers:
+        success = register_user(**user)
     
     # Then login
-    success, token = login_user(username, password)
+    success, token = login_user(**hostuser)
     if success:
+        hostuser['token'] = token
         print(f"Authorization token: {token}")
+
+    for user in testusers:
+        success, token = login_user(**user)
+        if success:
+            user['token'] = token
+            print(f"Authorization token: {token}")
     
     # Extract token from login response
-    headers = {
-        'Authorization': token,
+    hostheaders = {
+        'Authorization': hostuser['token'],
         'Content-Type': 'application/json'
     }
 
@@ -224,7 +370,7 @@ def create_rooms():
             create_room_url = f"{EC2_URL}/api/v1/rooms"
             response = requests.post(
                 create_room_url,
-                headers=headers,
+                headers=hostheaders,
                 json=room
             )
             
@@ -255,13 +401,31 @@ def create_rooms():
                     except Exception as e:
                         print(f"Error uploading image {i+1}: {str(e)}")
                 print()
-                
-            else:
-                print(f"Failed to create room {room['roomName']}")
-                print(f"Status code: {response.status_code}. Body: {response.content}")
-                
+
+                # create reservation and review
+                selected_users = random.sample(testusers, random.randint(4, 8))
+
+                room_id = response.json()["roomId"]
+                for user in selected_users:
+                    # Create reservation
+                    reservation_id = create_reservation(room_id, user['token'], datetime.now() + timedelta(days=30))
+                    reservation_id = create_reservation(room_id, user['token'], datetime.now() + timedelta(days=-30))
+                    if reservation_id:
+                        print(f"Created reservation {reservation_id} for room {room_id}")
+                        
+                        # Create review
+                        review_id = create_review(reservation_id, user['token'])
+                        if review_id:
+                            print(f"Created review {review_id} for reservation {reservation_id}")
+                            
+                        else:
+                            print(f"Failed to create review for room {room['roomName']}")
+                    else:
+                        print(f"Failed to create reservation for room {room['roomName']}")
+
         except Exception as e:
             print(f"Error creating room {room['roomName']}: {str(e)}")
+    
 
 if __name__ == "__main__":
     create_rooms()

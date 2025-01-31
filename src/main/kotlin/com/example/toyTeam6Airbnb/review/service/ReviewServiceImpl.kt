@@ -45,6 +45,7 @@ class ReviewServiceImpl(
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(reservationEntity.room.id!!) ?: throw RoomNotFoundException()
         if (reservationEntity.user.id != user.id) throw ReviewPermissionDeniedException()
+        // if (reservationEntity.endDate.isAfter(LocalDate.now())) throw ReviewPermissionDeniedException()
 
         val reviewEntity = ReviewEntity(
             user = userEntity,
@@ -114,6 +115,7 @@ class ReviewServiceImpl(
             ?: throw ReviewNotFoundException()
 
         if (reviewEntity.user.id != user.id) throw ReviewPermissionDeniedException()
+        // if (reservationEntity.endDate.isAfter(LocalDate.now())) throw ReviewPermissionDeniedException()
 
         val roomEntity = roomRepository.findByIdOrNullForUpdate(reviewEntity.room.id!!)
             ?: throw RoomNotFoundException()
