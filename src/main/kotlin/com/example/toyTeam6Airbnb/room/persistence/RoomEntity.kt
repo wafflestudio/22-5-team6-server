@@ -52,12 +52,14 @@ class RoomEntity(
     var price: Price,
     @Column(nullable = false)
     var maxOccupancy: Int,
-    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY, orphanRemoval = true)
     val reservations: List<ReservationEntity> = mutableListOf(),
-    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY, orphanRemoval = true)
     val reviews: List<ReviewEntity> = mutableListOf(),
-    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY, orphanRemoval = true)
     val images: List<ImageEntity> = mutableListOf(),
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY, orphanRemoval = true)
+    val likes: List<RoomLikeEntity> = mutableListOf(),
     @Column(nullable = false)
     var createdAt: Instant = Instant.now(),
     @Column(nullable = false)
