@@ -25,7 +25,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
-import java.time.LocalDate
 
 @Service
 class ReviewServiceImpl(
@@ -47,7 +46,7 @@ class ReviewServiceImpl(
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(reservationEntity.room.id!!) ?: throw RoomNotFoundException()
         if (reservationEntity.user.id != user.id) throw ReviewPermissionDeniedException()
-        if (reservationEntity.endDate.isAfter(LocalDate.now())) throw ReviewPermissionDeniedException()
+        // if (reservationEntity.endDate.isAfter(LocalDate.now())) throw ReviewPermissionDeniedException()
 
         try {
             val reviewEntity = ReviewEntity(
@@ -111,6 +110,7 @@ class ReviewServiceImpl(
         // First get the review to get the room ID
         val reviewEntity = reviewRepository.findByIdOrNull(reviewId) ?: throw ReviewNotFoundException()
         if (reviewEntity.user.id != user.id) throw ReviewPermissionDeniedException()
+        // if (reservationEntity.endDate.isAfter(LocalDate.now())) throw ReviewPermissionDeniedException()
 
         // Lock the room first
         val roomEntity = roomRepository.findByIdOrNullForUpdate(reviewEntity.room.id!!)
