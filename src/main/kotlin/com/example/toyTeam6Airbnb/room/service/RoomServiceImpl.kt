@@ -62,39 +62,37 @@ class RoomServiceImpl(
         roomDetails: RoomDetails,
         price: Price,
         maxOccupancy: Int,
-        imageSlot: Int // imageSlot Request Body에 추가
+        imageSlot: Int
     ): RoomShortDTO {
         val hostEntity = userRepository.findByIdOrNull(hostId) ?: throw UserNotFoundException()
-
         validateRoomInfo(name, description, type, address, price, maxOccupancy, roomDetails)
-
         if (roomRepository.existsByAddress(address)) throw DuplicateRoomException()
 
+        val roomEntity = RoomEntity(
+            host = hostEntity,
+            name = name,
+            description = description,
+            type = type,
+            address = address,
+            roomDetails = roomDetails,
+            price = price,
+            maxOccupancy = maxOccupancy,
+            reservations = emptyList(),
+            reviews = emptyList()
+        )
+
         try {
-            val roomEntity = RoomEntity(
-                host = hostEntity,
-                name = name,
-                description = description,
-                type = type,
-                address = address,
-                roomDetails = roomDetails,
-                price = price,
-                maxOccupancy = maxOccupancy,
-                reservations = emptyList(),
-                reviews = emptyList()
-            ).let {
-                roomRepository.save(it)
-            }
-
-            val imageUploadUrls = imageService.generateRoomImageUploadUrls(roomEntity.id!!, imageSlot) // 리스트로 이미지 업로드 URL 이미지 개수만큼 생성
-
-            return RoomShortDTO.fromEntity(roomEntity, imageUploadUrls)
+            roomRepository.save(roomEntity)
         } catch (e: DataIntegrityViolationException) {
             throw DuplicateRoomException()
         }
+
+        val imageUploadUrls = imageService.generateRoomImageUploadUrls(roomEntity.id!!, imageSlot)
+
+        return RoomShortDTO.fromEntity(roomEntity, imageUploadUrls)
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     override fun getRooms(viewerId: Long?, pageable: Pageable): Page<Room> {
         val roomEntities = roomRepository.findAll(validatePageableForRoom(pageable))
         val likedRoomIds = getLikedRoomIds(viewerId, roomEntities)
@@ -107,7 +105,7 @@ class RoomServiceImpl(
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     override fun getRoomDetails(viewerId: Long?, roomId: Long): RoomDetailsDTO {
         val roomEntity = roomRepository.findByIdOrNull(roomId) ?: throw RoomNotFoundException()
         val imageUrlList = imageService.generateRoomImageDownloadUrls(roomEntity.id!!)
@@ -115,14 +113,18 @@ class RoomServiceImpl(
         return RoomDetailsDTO.fromEntity(roomEntity, imageUrlList, isLiked)
     }
 
-    @Transactional
-    override fun getRoomsByHostId(hostId: Long, pageable: Pageable): Page<RoomByUserDTO> {
+    @Transactional(readOnly = true)
+    override fun getRoomsByHostId(viewerId: Long?, hostId: Long, pageable: Pageable): Page<RoomByUserDTO> {
         userRepository.findByIdOrNull(hostId) ?: throw UserNotFoundException()
 
         val roomsByHost = roomRepository.findAllByHostId(hostId, validatePageableForRoom(pageable))
-        return roomsByHost.map { room ->
-            val imageUrl = imageService.generateRoomImageDownloadUrl(room.id!!)
-            RoomByUserDTO.fromEntity(room, imageUrl)
+        val likedRoomIds = getLikedRoomIds(viewerId, roomsByHost)
+
+        return roomsByHost.map { roomEntity ->
+            val roomId = roomEntity.id!!
+            val isLiked = likedRoomIds.contains(roomId)
+            val imageUrl = imageService.generateRoomImageDownloadUrl(roomId)
+            RoomByUserDTO.fromEntity(roomEntity, imageUrl, isLiked)
         }
     }
 
@@ -146,9 +148,7 @@ class RoomServiceImpl(
 
         validateRoomInfo(name, description, type, address, price, maxOccupancy, roomDetails)
 
-        if (roomRepository.existsByAddress(address) &&
-            (roomEntity.address != address)
-        ) {
+        if (roomRepository.existsByAddress(address) && (roomEntity.address != address)) {
             throw DuplicateRoomException()
         }
 
@@ -158,7 +158,7 @@ class RoomServiceImpl(
         roomEntity.address = address
         roomEntity.price = price
         roomEntity.maxOccupancy = maxOccupancy
-
+        roomEntity.roomDetails = roomDetails
         roomRepository.save(roomEntity)
 
         val imageUploadUrls = imageService.generateRoomImageUploadUrls(roomEntity.id!!, imageSlot)
@@ -216,20 +216,6 @@ class RoomServiceImpl(
         }
     }
 
-    fun validateDates(startDate: LocalDate?, endDate: LocalDate?): Pair<LocalDate?, LocalDate?> {
-        return when {
-            startDate != null && endDate == null -> {
-                Pair(startDate, startDate.plusDays(1))
-            }
-            endDate != null && startDate == null -> {
-                Pair(endDate.minusDays(1), endDate)
-            }
-            else -> {
-                Pair(startDate, endDate)
-            }
-        }
-    }
-
     @Transactional
     override fun likeRoom(
         userId: Long,
@@ -259,7 +245,11 @@ class RoomServiceImpl(
     }
 
     @Transactional
-    override fun getHotPlacesByDate(viewerId: Long?, startDate: LocalDate, endDate: LocalDate): Page<Room> {
+    override fun getHotPlacesByDate(
+        viewerId: Long?,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Page<Room> {
         val reservations = reservationRepository.findReservationsByDateRange(startDate, endDate)
 
         if (reservations.isEmpty()) return Page.empty()
@@ -281,16 +271,12 @@ class RoomServiceImpl(
     }
 
     override fun getViewerId(): Long? {
-        val viewerId =
-            try {
-                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
-                principalDetails.getUser().id
-                // logic for when the user is logged in
-            } catch (e: ClassCastException) {
-                // logic for when the user is not logged in
-                null
-            }
-        return viewerId
+        return try {
+            val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
+            principalDetails.getUser().id
+        } catch (e: ClassCastException) {
+            null
+        }
     }
 
     private fun validateRoomInfo(
@@ -340,7 +326,7 @@ class RoomServiceImpl(
     private fun validateRoomDetails(roomDetails: RoomDetails) {
         if (roomDetails.bedroom <= 0 ||
             roomDetails.bathroom <= 0 ||
-            roomDetails.bed <= 0
+            roomDetails.bed < 0
         ) {
             throw InvalidRoomDetailsException()
         }
@@ -355,6 +341,16 @@ class RoomServiceImpl(
                 .toSet()
         } else {
             emptySet()
+        }
+    }
+
+    private fun validateDates(startDate: LocalDate?, endDate: LocalDate?): Pair<LocalDate?, LocalDate?> {
+        return when {
+            startDate != null && endDate == null -> Pair(startDate, startDate.plusDays(1))
+
+            endDate != null && startDate == null -> Pair(endDate.minusDays(1), endDate)
+
+            else -> Pair(startDate, endDate)
         }
     }
 }

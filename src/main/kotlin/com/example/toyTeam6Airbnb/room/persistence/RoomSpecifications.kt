@@ -121,7 +121,6 @@ class RoomSpecifications {
             }
         }
 
-        // Private helper functions to check if DTOs have any non-null fields
         private fun AddressSearchDTO.hasAnyField(): Boolean =
             listOf(sido, sigungu, street, detail).any { it != null }
 
