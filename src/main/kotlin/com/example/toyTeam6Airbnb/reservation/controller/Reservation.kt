@@ -34,7 +34,7 @@ data class ReservationDetails(
                 roomName = entity.room.name,
                 startDate = entity.startDate,
                 endDate = entity.endDate,
-                place = entity.room.address.sido,
+                place = entity.room.address.sigungu,
                 price = entity.room.price.total,
                 numberOfGuests = entity.numberOfGuests,
                 imageUrl = imageUrl // 대표이미지 다운로드 URL
@@ -45,6 +45,7 @@ data class ReservationDetails(
 
 data class ReservationDTO(
     val reservationId: Long,
+    val roomId : Long,
     val place: String,
     val startDate: LocalDate,
     val endDate: LocalDate,
@@ -54,6 +55,7 @@ data class ReservationDTO(
         fun fromEntity(entity: ReservationEntity, imageUrl: String): ReservationDTO {
             return ReservationDTO(
                 reservationId = entity.id!!,
+                roomId = entity.room.id!!,
                 place = entity.room.address.sigungu,
                 startDate = entity.startDate,
                 endDate = entity.endDate,
