@@ -18,6 +18,7 @@ import com.example.toyTeam6Airbnb.user.UserNotFoundException
 import com.example.toyTeam6Airbnb.user.controller.User
 import com.example.toyTeam6Airbnb.user.persistence.UserRepository
 import com.example.toyTeam6Airbnb.validatePageableForReview
+import java.time.LocalDate
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -25,6 +26,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+
 
 @Service
 class ReviewServiceImpl(
@@ -46,6 +48,7 @@ class ReviewServiceImpl(
         val reservationEntity = reservationRepository.findByIdOrNull(reservationId) ?: throw ReservationNotFound()
         val roomEntity = roomRepository.findByIdOrNullForUpdate(reservationEntity.room.id!!) ?: throw RoomNotFoundException()
         if (reservationEntity.user.id != user.id) throw ReviewPermissionDeniedException()
+        if (reservationEntity.endDate.isAfter(LocalDate.now())) throw ReviewPermissionDeniedException()
 
         try {
             val reviewEntity = ReviewEntity(

@@ -281,16 +281,12 @@ class RoomServiceImpl(
     }
 
     override fun getViewerId(): Long? {
-        val viewerId =
-            try {
-                val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
-                principalDetails.getUser().id
-                // logic for when the user is logged in
-            } catch (e: ClassCastException) {
-                // logic for when the user is not logged in
-                null
-            }
-        return viewerId
+        return try {
+            val principalDetails = SecurityContextHolder.getContext().authentication.principal as PrincipalDetails
+            principalDetails.getUser().id
+        } catch (e: ClassCastException) {
+            null
+        }
     }
 
     private fun validateRoomInfo(
