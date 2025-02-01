@@ -79,7 +79,7 @@ def getSampleRoom(room_type):
     adj = getAdjective()
     desc = getSimpleDescriptions()
     return {
-        "roomName": f"{adj} {room_type.lower().capitalize()} in {loc["sido"]}",
+        "roomName": f"{adj} {room_type.lower().capitalize()} in {loc['sido']}",
         "description": desc.replace("PLACEHOLDER", room_type.lower()),
         "roomType": room_type, # 입력받게 변경
         "address": {
@@ -253,6 +253,7 @@ def get_picsum_image(width=1200, height=800):
 #         print(f"Error checking availability: {str(e)}")
 #         return None
 
+
 def get_availabile_dates(room_id, year, month):
     try:
         response = requests.get(
@@ -268,47 +269,62 @@ def get_availabile_dates(room_id, year, month):
         print(f"Error checking availability: {str(e)}")
         return []
 
-def create_reservation(room_id, auth_token, dt):
+def create_reservation(room_id, auth_token, month):
     headers = {
         "Authorization": f"{auth_token}",
         "Content-Type": "application/json"
     }
-    
-    d = random.randint(-5, 5)
 
-    # check availability
-    availabe_dates = get_availabile_dates(room_id, dt.year, dt.month)
-    if not available_dates:
-        print(f"No available dates for room {room_id} in {dt.year}-{dt.month}")
+    now = datetime.now()
+    start_date = None
+    end_date = None
+
+    # Calculate the range of months to check
+    if month >= 0:
+        start_dt = now
+        end_dt = now + timedelta(days=month * 30)
+    else:
+        start_dt = now + timedelta(days=month * 30)
+        end_dt = now
+
+    # Check availability within the specified range
+    current_dt = start_dt
+    while current_dt <= end_dt:
+        available_dates = get_availabile_dates(room_id, current_dt.year, current_dt.month)
+        if available_dates:
+            start_date = random.choice(available_dates)
+            end_date = (datetime.strptime(start_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+            break
+        current_dt += timedelta(days=30)
+
+    if not start_date:
+        print(f"No available dates for room {room_id} within the specified range")
         return None
 
-    start_date = random.choice(availabe_dates)
-    end_date = (datetime.strptime(start_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
-    
     reservation_data = {
         "roomId": room_id,
         "startDate": start_date,
         "endDate": end_date,
         "numberOfGuests": 2
     }
-    
+
     try:
         response = requests.post(
             f"{EC2_URL}/api/v1/reservations",
             headers=headers,
             json=reservation_data
         )
-        #print(response.status_code, response.json())
-        # print reservation info
         if response.status_code == 201:
             print(f"Created reservation for room {room_id} from {start_date} to {end_date}")
-        return response.json()["reservationId"] if response.status_code == 201 else None
+            return response.json()["reservationId"]
+        else:
+            print(f"Failed to create reservation. Status code: {response.status_code}")
+            return None
     except Exception as e:
         print(f"Error creating reservation: {str(e)}")
         return None
 
-
-def create_past_reservation(room_id, auth_token, start_date, end_date):
+def create_reservation_withDate(room_id, auth_token, start_date, end_date):
     headers = {
         "Authorization": f"{auth_token}",
         "Content-Type": "application/json"
@@ -354,11 +370,18 @@ def create_review(reservation_id, auth_token):
             headers=headers,
             json=review_data
         )
-        return response.json()["reviewId"] if response.status_code == 201 else None
+        if response.status_code == 201:
+            review_id = response.json()["reviewId"]
+            print(f"Review created successfully with ID: {review_id}")
+            return review_id
+        else:
+            print(f"Failed to create review, status code: {response.status_code}")
+            return None
     except Exception as e:
         print(f"Error creating review: {str(e)}")
         return None
-
+    
+# 미사용중
 def create_rooms():
     if len(sys.argv) != 2:
         print("Usage: python generate-rooms-api-post.py <number_of_rooms>")
@@ -565,14 +588,12 @@ def test1():
                     room_id = room_data["roomId"]
                     # 유저 6명이 각각 예약 6개씩 생성함. (과거 예약 3개, 미래 예약 3개)
                     for user in selected_users:
+                        past_reservations = []
                         for _ in range(3):
-                            create_reservation(room_id, user['token'], datetime.now() + timedelta(days=random.randint(1, 90)))
-                            create_reservation(room_id, user['token'], datetime.now() - timedelta(days=random.randint(1, 90)))
-
-                        # 변수명은 과거 예약이지만, 가능한 날짜에 대해서 그냥 예약 만드는거임
-                        past_reservations = get_availabile_dates(room_id, datetime.now().year, datetime.now().month - 1)
-                        for date in past_reservations:
-                            create_past_reservation(room_id, user['token'], date, (datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d"))
+                            create_reservation(room_id, user['token'], 3)  # Future reservations within 3 months
+                            past_reservation_id = create_reservation(room_id, user['token'], -3)  # Past reservations within 3 months
+                            if past_reservation_id:
+                                past_reservations.append(past_reservation_id)
 
                         for reservation in past_reservations:
                             create_review(reservation, user['token'])
