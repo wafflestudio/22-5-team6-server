@@ -100,10 +100,10 @@ class RoomSpecifications {
                     predicates.add(cb.equal(detailsJoin.get<Boolean>("tv"), tv))
                 }
                 it.bedRoom?.let { bedRoom ->
-                    predicates.add(cb.ge(detailsJoin.get<Int>("bedRoom"), bedRoom))
+                    predicates.add(cb.ge(detailsJoin.get<Int>("bedroom"), bedRoom))
                 }
                 it.bathRoom?.let { bathRoom ->
-                    predicates.add(cb.ge(detailsJoin.get<Int>("bathRoom"), bathRoom))
+                    predicates.add(cb.ge(detailsJoin.get<Int>("bathroom"), bathRoom))
                 }
                 it.bed?.let { bed ->
                     predicates.add(cb.ge(detailsJoin.get<Int>("bed"), bed))
