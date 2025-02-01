@@ -674,6 +674,37 @@ class RoomControllerTest {
         println(getResult)
     }
 
+    @Test
+    fun `should get hosting rooms of a user`() {
+        val (user, token) = dataGenerator.generateUserAndToken()
+        val room1 = dataGenerator.generateRoom(host = user)
+        val room2 = dataGenerator.generateRoom(host = user)
+        val room3 = dataGenerator.generateRoom()
+
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/rooms/hosting/${user.id}")
+                .header("Authorization", "Bearer $token")
+                .accept(MediaType.APPLICATION_JSON)
+                .param("page", "0")
+                .param("size", "10")
+                .param("sort", "id,desc")
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+            .response
+            .contentAsString
+
+        // check result length
+        Assertions.assertEquals(getContentLength(result), 2)
+
+        // check if all rooms are in the result
+        Assertions.assertEquals(getNthContentId(result, 0), room2.id)
+        Assertions.assertEquals(getNthContentId(result, 1), room1.id)
+
+        // Add assertions to verify the response content if needed
+        println(result)
+    }
+
     @BeforeEach
     fun setUp() {
         dataGenerator.clearAll()
