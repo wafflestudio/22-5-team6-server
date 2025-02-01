@@ -137,15 +137,15 @@ class RoomController(
         @RequestParam(required = false) wifi: Boolean?,
         @RequestParam(required = false) selfCheckin: Boolean?,
         @RequestParam(required = false) luggage: Boolean?,
-        @RequestParam(required = false) tv: Boolean?,
-        @RequestParam(required = false) bedRoom: Int?,
-        @RequestParam(required = false) bathRoom: Int?,
+        @RequestParam(required = false) TV: Boolean?,
+        @RequestParam(required = false) bedroom: Int?,
+        @RequestParam(required = false) bathroom: Int?,
         @RequestParam(required = false) bed: Int?,
         pageable: Pageable
     ): ResponseEntity<Page<Room>> {
         val viewerId = roomService.getViewerId()
         val address = AddressSearchDTO(sido, sigungu, street, detail)
-        val roomDetails = RoomDetailSearchDTO(wifi, selfCheckin, luggage, tv, bedRoom, bathRoom, bed)
+        val roomDetails = RoomDetailSearchDTO(wifi, selfCheckin, luggage, TV, bedroom, bathroom, bed)
         val rooms = roomService.searchRooms(roomName, roomType, minPrice, maxPrice, address, maxOccupancy, rating, startDate, endDate, roomDetails, viewerId, pageable)
         return ResponseEntity.ok(rooms)
     }

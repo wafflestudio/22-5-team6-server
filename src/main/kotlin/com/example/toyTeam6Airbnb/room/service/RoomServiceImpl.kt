@@ -254,12 +254,14 @@ class RoomServiceImpl(
 
         if (reservations.isEmpty()) return Page.empty()
 
-        val sigunguReservationCounts = reservations.groupingBy { it.room.address.sigungu }
-            .eachCount()
+        val areaReservationCounts = reservations.groupingBy {
+            it.room.address.sido to it.room.address.sigungu
+        }.eachCount()
 
-        val mostReservedSigungu = sigunguReservationCounts.maxByOrNull { it.value }!!.key
+        val (mostReservedSido, mostReservedSigungu) = areaReservationCounts.maxByOrNull { it.value }!!.key
 
-        val roomEntities = roomRepository.findTopRoomsBySigungu(mostReservedSigungu, Pageable.ofSize(3))
+        val roomEntities = roomRepository.findTopRoomsByArea(mostReservedSido, mostReservedSigungu, Pageable.ofSize(3))
+
         val likedRoomIds = getLikedRoomIds(viewerId, roomEntities)
 
         return roomEntities.map { roomEntity ->

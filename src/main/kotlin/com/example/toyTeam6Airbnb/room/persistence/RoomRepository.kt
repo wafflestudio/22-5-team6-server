@@ -22,8 +22,9 @@ interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExec
     @Query("SELECT r FROM RoomEntity r WHERE r.host = :host")
     fun findAllByHostId(hostId: Long, pageable: Pageable): Page<RoomEntity>
 
-    @Query("SELECT r FROM RoomEntity r WHERE r.address.sigungu = :sigungu ORDER BY r.ratingStatistics.averageRating DESC")
-    fun findTopRoomsBySigungu(
+    @Query("SELECT r FROM RoomEntity r WHERE r.address.sido = :sido and r.address.sigungu = :sigungu ORDER BY r.ratingStatistics.averageRating DESC")
+    fun findTopRoomsByArea(
+        @Param("sido") sido: String,
         @Param("sigungu") sigungu: String,
         pageable: Pageable
     ): Page<RoomEntity>
