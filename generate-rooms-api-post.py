@@ -2,10 +2,11 @@ import requests
 import sys
 import json
 import random
+import os
 from datetime import datetime, timedelta
 
 # Base URL of the API server - replace this with actual domain
-EC2_URL = ""
+EC2_URL = "http://ec2-15-165-159-152.ap-northeast-2.compute.amazonaws.com:8080/"
 
 # Sample login credentials
 credentials = {
@@ -73,15 +74,14 @@ def getSimpleDescriptions():
     descs = ["Great PLACEHOLDER to stay", "Cozy and comfortable PLACEHOLDER", "PLACEHOLDER perfect for a weekend getaway", "PLACEHOLDER with amazing view", "PLACEHOLDER close to the city center"]
     return random.choice(descs)
 
-def getSampleRoom():
+def getSampleRoom(room_type):
     loc = getLocation()
-    typ = getType()
     adj = getAdjective()
     desc = getSimpleDescriptions()
     return {
-        "roomName": f"{adj} {typ.lower().capitalize()} in {loc["sido"]}",
-        "description": desc.replace("PLACEHOLDER", typ.lower()),
-        "roomType": typ,
+        "roomName": f"{adj} {room_type.lower().capitalize()} in {loc["sido"]}",
+        "description": desc.replace("PLACEHOLDER", room_type.lower()),
+        "roomType": room_type, # 입력받게 변경
         "address": {
             "sido": loc["sido"],
             "sigungu": loc["sigungu"],
@@ -104,7 +104,7 @@ def getSampleRoom():
             "total": 0
         },
         "maxOccupancy": random.randint(2, 8),
-        "imageSlot": random.randint(3, 5)
+        "imageSlot": 5 # 5개로 고정 시킴
     }
 
 def getSampleReview():
@@ -242,16 +242,31 @@ def get_picsum_image(width=1200, height=800):
     response = requests.get(f"https://picsum.photos/{width}/{height}", allow_redirects=True)
     return response.content
 
+# def get_availabile_dates(room_id, year, month):
+#     try:
+#         response = requests.get(
+#             f"{EC2_URL}/api/v1/reservations/availability/{room_id}",
+#             params={"year": year, "month": month}
+#         )
+#         return response.json()['availableDates'] if response.status_code == 200 else None
+#     except Exception as e:
+#         print(f"Error checking availability: {str(e)}")
+#         return None
+
 def get_availabile_dates(room_id, year, month):
     try:
         response = requests.get(
             f"{EC2_URL}/api/v1/reservations/availability/{room_id}",
             params={"year": year, "month": month}
         )
-        return response.json()['availableDates'] if response.status_code == 200 else None
+        if response.status_code == 200:
+            return response.json().get('availableDates', [])
+        else:
+            print(f"Error checking availability: Status code {response.status_code}")
+            return []
     except Exception as e:
         print(f"Error checking availability: {str(e)}")
-        return None
+        return []
 
 def create_reservation(room_id, auth_token, dt):
     headers = {
@@ -263,6 +278,9 @@ def create_reservation(room_id, auth_token, dt):
 
     # check availability
     availabe_dates = get_availabile_dates(room_id, dt.year, dt.month)
+    if not available_dates:
+        print(f"No available dates for room {room_id} in {dt.year}-{dt.month}")
+        return None
 
     start_date = random.choice(availabe_dates)
     end_date = (datetime.strptime(start_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
@@ -285,6 +303,36 @@ def create_reservation(room_id, auth_token, dt):
         if response.status_code == 201:
             print(f"Created reservation for room {room_id} from {start_date} to {end_date}")
         return response.json()["reservationId"] if response.status_code == 201 else None
+    except Exception as e:
+        print(f"Error creating reservation: {str(e)}")
+        return None
+
+
+def create_past_reservation(room_id, auth_token, start_date, end_date):
+    headers = {
+        "Authorization": f"{auth_token}",
+        "Content-Type": "application/json"
+    }
+
+    reservation_data = {
+        "roomId": room_id,
+        "startDate": start_date,
+        "endDate": end_date,
+        "numberOfGuests": 2
+    }
+
+    try:
+        response = requests.post(
+            f"{EC2_URL}/api/v1/reservations",
+            headers=headers,
+            json=reservation_data
+        )
+        if response.status_code == 201:
+            print(f"Created reservation for room {room_id} from {start_date} to {end_date}")
+            return response.json()["reservationId"]
+        else:
+            print(f"Failed to create reservation. Status code: {response.status_code}")
+            return None
     except Exception as e:
         print(f"Error creating reservation: {str(e)}")
         return None
@@ -425,8 +473,116 @@ def create_rooms():
 
         except Exception as e:
             print(f"Error creating room {room['roomName']}: {str(e)}")
-    
+
+# Test Code 1 : 숙소 48개 등록 (이미지 240개) / 각각 예약 5개, 리뷰는 과거에 해당하는 것만
+def test1():
+    room_types = ["APARTMENT", "HOUSE", "VILLA", "HANOK", "SWIMMING_POOL", "HOTEL", "CAMPING", "FARM", "COUNTRY_SIDE", "RIVER_SIDE", "ISLAND", "SKI"]
+    num_rooms_per_type = 4
+    total_rooms = num_rooms_per_type * len(room_types)
+
+    hostuser = {
+        "username": "testuser2",
+        "password": "testpass1234",
+        "nickname": "Test User",
+        "bio": "Hello, I'm a test user",
+        "token": None
+    }
+
+    testusers = [{
+        "username": f"guestuser{i}",
+        "password": f"testpass{i}",
+        "nickname": getSampleName(),
+        "bio": getSampleBio(),
+        "token": None
+    } for i in range(10)]
+
+    # Register and login users
+    register_user(**hostuser)
+    for user in testusers:
+        register_user(**user)
+
+    success, token = login_user(**hostuser)
+    if success:
+        hostuser['token'] = token
+
+    for user in testusers:
+        success, token = login_user(**user)
+        if success:
+            user['token'] = token
+
+    hostheaders = {
+        'Authorization': hostuser['token'],
+        'Content-Type': 'application/json'
+    }
+
+    image_files = [f"images/{img}" for img in os.listdir("images") if img.endswith(".jpg")]
+    image_index = 0
+
+    for room_type in room_types:
+        for _ in range(num_rooms_per_type):
+            # room_type에 따라 다른 room 생성
+            room = getSampleRoom(room_type)
+            try:
+                create_room_url = f"{EC2_URL}/api/v1/rooms"
+                response = requests.post(
+                    create_room_url,
+                    headers=hostheaders,
+                    json=room
+                )
+
+                if response.status_code == 201:
+                    room_data = response.json()
+                    print(f"Successfully created room: {room['roomName']}")
+                    print(f"Room ID: {room_data['roomId']}")
+                    print("Uploading images...")
+
+                    # 이미지 업로드 - images 폴더내에 있는 파일들로
+                    for i in range(5):
+                        try:
+                            image_path = image_files[image_index % len(image_files)]
+                            with open(image_path, 'rb') as img_file:
+                                image_data = img_file.read()
+
+                            upload_url = room_data['imageUploadUrlList'][i]
+                            upload_response = requests.put(
+                                upload_url,
+                                data=image_data,
+                                headers={'Content-Type': 'image/jpeg', 'Cache-Control': 'no-cache, no-store, must-revalidate'}
+                            )
+
+                            if upload_response.status_code == 200:
+                                print(f"Successfully uploaded image {i + 1}")
+                            else:
+                                print(f"Failed to upload image {i + 1}. Status code: {upload_response.status_code}")
+
+                            image_index += 1
+
+                        except Exception as e:
+                            print(f"Error uploading image {i + 1}: {str(e)}")
+                    print()
+
+                    selected_users = random.sample(testusers, 6)
+                    room_id = room_data["roomId"]
+                    # 유저 6명이 각각 예약 6개씩 생성함. (과거 예약 3개, 미래 예약 3개)
+                    for user in selected_users:
+                        for _ in range(3):
+                            create_reservation(room_id, user['token'], datetime.now() + timedelta(days=random.randint(1, 90)))
+                            create_reservation(room_id, user['token'], datetime.now() - timedelta(days=random.randint(1, 90)))
+
+                        # 변수명은 과거 예약이지만, 가능한 날짜에 대해서 그냥 예약 만드는거임
+                        past_reservations = get_availabile_dates(room_id, datetime.now().year, datetime.now().month - 1)
+                        for date in past_reservations:
+                            create_past_reservation(room_id, user['token'], date, (datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d"))
+
+                        for reservation in past_reservations:
+                            create_review(reservation, user['token'])
+
+            except Exception as e:
+                print(f"Error creating room {room['roomName']}: {str(e)}")
+
 
 if __name__ == "__main__":
-    create_rooms()
+    #create_rooms()
+    test1()
+
 
