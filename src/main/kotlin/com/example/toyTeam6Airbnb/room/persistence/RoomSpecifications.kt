@@ -28,7 +28,7 @@ class RoomSpecifications {
 
         fun hasPriceBetween(minPrice: Double?, maxPrice: Double?): Specification<RoomEntity> =
             Specification { root, _, cb ->
-                val pricePath = root.get<Double>("total")
+                val pricePath = root.get<Price>("price").get<Double>("total")
                 when {
                     minPrice != null && maxPrice != null -> cb.between(pricePath, minPrice, maxPrice)
                     minPrice != null -> cb.ge(pricePath, minPrice)
