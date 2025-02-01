@@ -19,7 +19,7 @@ interface RoomRepository : JpaRepository<RoomEntity, Long>, JpaSpecificationExec
 
     fun countByHost(userEntity: UserEntity): Int
 
-    @Query("SELECT r FROM RoomEntity r WHERE r.host = :host")
+    @Query("SELECT r FROM RoomEntity r WHERE r.host.id = :hostId")
     fun findAllByHostId(hostId: Long, pageable: Pageable): Page<RoomEntity>
 
     @Query("SELECT r FROM RoomEntity r WHERE r.address.sido = :sido and r.address.sigungu = :sigungu ORDER BY r.ratingStatistics.averageRating DESC")
