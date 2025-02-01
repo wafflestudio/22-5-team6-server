@@ -269,7 +269,7 @@ class RoomServiceImpl(
 
         val mostReservedSigungu = sigunguReservationCounts.maxByOrNull { it.value }!!.key
 
-        val roomEntities = roomRepository.findTopRoomsBySigungu(mostReservedSigungu, Pageable.ofSize(3))
+        val roomEntities = roomRepository.findTopRoomsBySigungu(mostReservedSigungu, Pageable.ofSize(4))
         val likedRoomIds = getLikedRoomIds(viewerId, roomEntities)
 
         return roomEntities.map { roomEntity ->
