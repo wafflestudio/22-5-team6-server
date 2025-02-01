@@ -28,7 +28,7 @@ class RoomSpecifications {
 
         fun hasPriceBetween(minPrice: Double?, maxPrice: Double?): Specification<RoomEntity> =
             Specification { root, _, cb ->
-                val pricePath = root.get<Price>("price").get<Double>("total")
+                val pricePath = root.get<Double>("total")
                 when {
                     minPrice != null && maxPrice != null -> cb.between(pricePath, minPrice, maxPrice)
                     minPrice != null -> cb.ge(pricePath, minPrice)
@@ -100,10 +100,10 @@ class RoomSpecifications {
                     predicates.add(cb.equal(detailsJoin.get<Boolean>("tv"), tv))
                 }
                 it.bedRoom?.let { bedRoom ->
-                    predicates.add(cb.ge(detailsJoin.get<Int>("bedRoom"), bedRoom))
+                    predicates.add(cb.ge(detailsJoin.get<Int>("bedroom"), bedRoom))
                 }
                 it.bathRoom?.let { bathRoom ->
-                    predicates.add(cb.ge(detailsJoin.get<Int>("bathRoom"), bathRoom))
+                    predicates.add(cb.ge(detailsJoin.get<Int>("bathroom"), bathRoom))
                 }
                 it.bed?.let { bed ->
                     predicates.add(cb.ge(detailsJoin.get<Int>("bed"), bed))
