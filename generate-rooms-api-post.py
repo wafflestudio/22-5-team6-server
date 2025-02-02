@@ -601,9 +601,36 @@ def test1():
             except Exception as e:
                 print(f"Error creating room {room['roomName']}: {str(e)}")
 
+def test2():
+    username = "jby"
+    password = "1234"
+    num_rooms = 10
+
+    # Register the user
+    register_user(username, password, "Junby", "Hello, I'm Junby")
+
+    # Login the user
+    success, auth_token = login_user(username, password)
+    if not success:
+        print("Failed to login, exiting test2")
+        return
+
+    for room_id in range(1, num_rooms + 1):
+        # Create a past reservation
+        past_reservation_id = create_reservation(room_id, auth_token, -3)  # Past reservation within 3 months
+        if past_reservation_id:
+            print(f"Created past reservation {past_reservation_id} for room {room_id}")
+            # Leave a review for the past reservation
+            create_review(past_reservation_id, auth_token)
+
+        # Create a future reservation
+        future_reservation_id = create_reservation(room_id, auth_token, 3)  # Future reservation within 3 months
+        if future_reservation_id:
+            print(f"Created future reservation {future_reservation_id} for room {room_id}")
 
 if __name__ == "__main__":
     #create_rooms()
     test1()
+    test2()
 
 
