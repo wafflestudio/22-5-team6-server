@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface RoomLikeRepository : JpaRepository<RoomLikeEntity, Long> {
-    @Query("SELECT rl.room FROM RoomLikeEntity rl WHERE rl.user.id = :userId")
+    @Query("SELECT rl.room FROM RoomLikeEntity rl WHERE rl.user = :user")
     fun findRoomsLikedByUser(@Param("user") user: UserEntity, pageable: Pageable): Page<RoomEntity>
 
     fun findByUserIdAndRoomIdIn(userId: Long, roomIds: List<Long>): List<RoomLikeEntity>
